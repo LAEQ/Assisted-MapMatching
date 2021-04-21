@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication , Qt
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import *
 
@@ -32,6 +32,9 @@ from .resources import *
 from .first_dialog import firstDialog
 import os.path
 
+#Import my own class
+from .pathLayer import *
+from .networkLayer import *
 
 class first:
     """QGIS Plugin Implementation."""
@@ -60,6 +63,36 @@ class first:
             self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
 
+        #AJOUT
+        self.dlg = firstDialog()
+
+        #add help-document to the GUI
+        dir = os.path.dirname(__file__)
+        file = os.path.abspath(os.path.join(dir, '.', 'help.html'))
+        if os.path.exists(file):
+            with open(file) as helpf:
+                help = helpf.read()
+                self.dlg.textBrowser_help.insertHtml(help)
+                self.dlg.textBrowser_help.moveCursor(QTextCursor.Start)
+
+        #==================================================================================
+
+        #AJOUT PERSO
+        self.dlg.pushButtonExportLine.clicked.connect(self.load_element)
+        self.dlg.pushButtonReloadLayers.clicked.connect(self.fill_comboBox)
+        self.dlg.pushButtonMapMatching.clicked.connect(self.start_mapMatching)
+        self.dlg.pushButtonReselectPath.clicked.connect(self.test)
+
+        #change attributes elements when path layer comboBox is activated
+        self.dlg.comboBoxPathLayer.activated.connect(self.fill_attribute_comboBox)
+
+        #buggé à garder en mémoire
+        #root = QgsProject.instance().layerTreeRoot()
+        #root.visibilityChanged.connect(self.info)
+
+        #==================================================================================
+
+
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&first')
@@ -67,6 +100,14 @@ class first:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+
+        """ ligne 82: mise à jour comboBox quand selection de layer
+            def info(self,layerTreeNode):
+        self.fill_comboBox()
+        print("info" + layerTreeNode.name())"""
+
+    def test(self):
+        self.path_layer.print_layer()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -184,40 +225,134 @@ class first:
     def run(self):
         """Run method that performs all the real work"""
 
+        self.fill_comboBox()
+
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = firstDialog()
-
-            #AJOUT
-            self.dlg.pushshp.clicked.connect(self.fillComboBox)
-            self.dlg.pushinsee.clicked.connect(self.loadElement)
-            self.dlg.button_move.clicked.connect(self.move)
 
             
 
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
 
-    def loadElement(self):
+    def start_mapMatching(self):
+
+        layer1 = self.get_layer(self.dlg.comboBoxNetworkLayer.currentText())
+        layer2 = self.get_layer(self.dlg.comboBoxPathLayer.currentText())
+
+        if not self.check_layer_validity(layer1,layer2):
+            return
+        
+        #init classes
+        self.path_layer = PathLayer(layer2)
+        self.network_layer = NetworkLayer(layer1)
+        
+
+        #extract the part we need from the network layer (buffer...)
+
+        #correct the topological errors
+
+        #match the point to the extracted 
+
+
+        self.path_layer.print_layer()
+        #add to the screen the new point layer
+        QgsProject.instance().addMapLayer(self.path_layer.layer)
+
+
+    def check_layer_validity(self,layer1,layer2):
+
+        #We check the Distance Unit of the projection system: 0 = DistanceMeters, 6 = DistanceDegrees...
+        if(layer1.crs().mapUnits()!=0):
+            self.iface.messageBar().pushMessage('Error the Network layer doesn\'t use a cartesian projection system')
+            return False
+        if(layer2.crs().mapUnits()!=0):
+            self.iface.messageBar().pushMessage('Error the Path ayer doesn\'t use a cartesian projection system')
+            return False
+
+        #We check if the two layers use the same projection system
+        if(layer1.crs().authid() != layer2.crs().authid()):
+            self.iface.messageBar().pushMessage('Error the two selected layers has different projection system')
+            return False
+
+        return True
+
+    #Remplissage des comboBox
+        
+    def fill_comboBox(self):
+
+        #get all layers in the current QGIS project
+        layers = self.iface.mapCanvas().layers()
+
+        #remplis les comboBox
+        self.fill_layer_comboBox(layers, self.dlg.comboBoxNetworkLayer, 'LINESTRING')
+        self.fill_layer_comboBox(layers, self.dlg.comboBoxPathLayer, 'POINT')
+
+        self.fill_attribute_comboBox()
+
+        
+    def fill_layer_comboBox(self, layers, combobox, geom_type):
+        #first clear the combobox
+        combobox.clear()
+
+        #populate the combobox
+        for layer in layers:
+            #ignore raster layer, because just vector layers have a wkbType
+            if layer.type() == 0:
+                if (QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.Point and geom_type == 'POINT' or 
+                    QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.LineString and geom_type == 'LINESTRING'):
+
+                    combobox.addItem(layer.name())
+
+
+    def fill_attribute_comboBox(self):
+
+        #clear the combobox
+        self.dlg.comboBoxOID.clear()
+        self.dlg.comboBoxSpeed.clear()
+
+        #get the selected Path layer in the comboBox
+        layer = self.get_layer(self.dlg.comboBoxPathLayer.currentText())
+
+        #No layer activated
+        if(layer==None):
+            self.iface.messageBar().pushMessage('Error no layer charged in qgis')
+            return
+
+        for field in layer.fields():
+            if (field.typeName()=="Integer" or 
+                field.typeName()=="Integer64" or
+                field.typeName()=="int8" or 
+                field.typeName()=="integer"):
+                    self.dlg.comboBoxOID.addItem(field.name())
+            elif (field.typeName() == "Real" or
+                  field.typeName()=="double"):
+                    self.dlg.comboBoxSpeed.addItem(field.name())
+
+    def get_layer(self, layername):
+
+        layers = self.iface.mapCanvas().layers()
+
+        for layer in layers:
+            if layer.name() == layername:
+                return layer
+        return None
+
+    #charge un exemple dans qgis: pour faciliter le developpement
+    def load_element(self):
 
         QgsProject.instance().removeAllMapLayers()
 
 
-        layer = self.iface.addVectorLayer("/Users/jordy/OneDrive/Documents/Cours/Stage Montreal/Import QGIS/ID1_PA_2017-09-04_TRAJET04.shp", "", "ogr")
+        layer = self.iface.addVectorLayer("/Users/jordy/OneDrive/Documents/Cours/Stage Montreal/Import QGIS/trajetV4_reprojeté.shp", "", "ogr")
         if not layer:
             print("Layer failed to load!")
         layer.setName("De jolie points sur une map : V4")
 
-        layer = self.iface.addVectorLayer("/Users/jordy/OneDrive/Documents/Cours/Stage Montreal/Import QGIS/Paris_Layers.sdb", "", "ogr")
+        layer = self.iface.addVectorLayer("/Users/jordy/OneDrive/Documents/Cours/Stage Montreal/Import QGIS/Paris_reprojeté.shp", "", "ogr")
         if not layer:
             print("Layer failed to load!")
         layer.setName("Map de Paris")
@@ -231,97 +366,4 @@ class first:
 
         print(layer.sourceName())
 
-        #remplis les comboBox
-        self.fillLayerComboBox(self.iface,self.dlg.comboBox_layer, 'POINT')
-        self.fillLayerComboBox(self.iface,self.dlg.comboBox_line, 'LINESTRING')
-
-    def move(self):
-        PointLayer = self.getLayer(self.dlg.comboBox_layer.currentText())
-        
-        
-    def fillComboBox(self):
-
-        #remplis les comboBox
-        self.fillLayerComboBox(self.iface,self.dlg.comboBox_layer, 'POINT')
-        self.fillLayerComboBox(self.iface,self.dlg.comboBox_line, 'LINESTRING')
-
-        """layer = self.iface.activeLayer()
-        
-        fc = layer.featureCount()
-        for i in range(0, 1):
-            feat = layer.getFeature(i)
-            for field in layer.fields():
-                print(field.name() + ": " + str(feat[field.name()]))
-            print(" -- ")
-        
-        for field in layer.fields():
-            if(field.name() == "datetime"):
-                print(field)
-
-
-        
-        
-        print("hello world")"""
-
-
-        """
-        #Change la couleur du fond
-        self.iface.mapCanvas().setCanvasColor(Qt.black)
-        self.iface.mapCanvas().refresh()
-
-        #Change le texte dans lineshp
-        self.dlg.lineshp.setText("Hiiiiiie")
-
-        #affiche plein de truc jolie dans la console
-        qs = QSettings()
-
-        for k in sorted(qs.allKeys()):
-            print (k)
-
-        #fait disparaitre puis apparaitre le menu aide
-        menu = self.iface.helpMenu()
-        menubar = menu.parentWidget()
-        menubar.removeAction(menu.menuAction())
-
-        menubar.addAction(menu.menuAction())
-
-        #Parcours les couches:
-        for layer in QgsProject.instance().mapLayers().values():
-            if(layer.name() == "De jolie points sur une map : V4"):
-                print("wow")
-
-        #recupere donnée dans la couche de point
-        fc = layer.featureCount()
-        for i in range(0, 1):
-            feat = layer.getFeature(i)
-            for field in layer.fields():
-                print(field.name() + ": " + str(feat[field.name()]))
-            print(" -- ")
-        
-        for field in layer.fields():
-            if(field.name() == "datetime"):
-                print(field)
-        
-        """
-
-        
-    def fillLayerComboBox(self, iface, combobox, geom_type):
-        #first clear the combobox
-        combobox.clear()
-        
-        #get all layers in the current QGIS project
-        self.layers = []
-        self.layers = iface.mapCanvas().layers()
-        
-        #populate the combobox
-        for layer in self.layers:
-            #ignore raster layer, because just vector layers have a wkbType
-            if layer.type() == 0:
-                if (QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.Point and geom_type == 'POINT') or (QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.LineString and geom_type == 'LINESTRING'):
-                    combobox.addItem(layer.name())
-
-    def getLayer(self, layername):
-        for layer in self.layers:
-            if layer.name() == layername:
-                return layer
-        return None
+        self.fill_comboBox()
