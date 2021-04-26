@@ -14,11 +14,11 @@ __copyright__ = 'Copyright 2021, LAEQ'
 
 import unittest
 
-from qgis.PyQt.QtGui import QDialogButtonBox, QDialog
+from qgis.PyQt.QtWidgets import QDialogButtonBox, QDialog
 
 from map_matching_dialog import MapMatchingDialog
+from test.utilities import get_qgis_app
 
-from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 
@@ -47,6 +47,7 @@ class MapMatchingDialogTest(unittest.TestCase):
         button.click()
         result = self.dialog.result()
         self.assertEqual(result, QDialog.Rejected)
+
 
 if __name__ == "__main__":
     suite = unittest.makeSuite(MapMatchingDialogTest)

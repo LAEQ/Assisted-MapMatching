@@ -61,7 +61,7 @@ class MapMatching:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&LAEQ-MapMatching')
+        self.menu = self.tr(u'q3m.window.title')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -163,7 +163,7 @@ class MapMatching:
         icon_path = ':/plugins/map_matching/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'MapMatching'),
+            text=self.tr(u'q3m.toolbar.title'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -175,7 +175,7 @@ class MapMatching:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&LAEQ-MapMatching'),
+                self.tr(u'q3m.window.title'),
                 action)
             self.iface.removeToolBarIcon(action)
 

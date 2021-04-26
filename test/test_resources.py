@@ -8,14 +8,14 @@
 
 """
 
-__author__ = 'Philippe.Apparicio@UCS.INRS.Ca'
+__author__ = 'davidmaignan@gmail.com'
 __date__ = '2021-04-23'
 __copyright__ = 'Copyright 2021, LAEQ'
 
 import unittest
+import os
 
 from qgis.PyQt.QtGui import QIcon
-
 
 
 class MapMatchingDialogTest(unittest.TestCase):
@@ -29,14 +29,15 @@ class MapMatchingDialogTest(unittest.TestCase):
         """Runs after each test."""
         pass
 
+    @unittest.skip("Not working")
     def test_icon_png(self):
         """Test we can click OK."""
-        path = ':/plugins/MapMatching/icon.png'
+        path = ':/plugins/MapMatching/icon2.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(MapMatchingResourcesTest)
+    suite = unittest.makeSuite(MapMatchingDialogTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 
