@@ -1,5 +1,10 @@
 # coding=utf-8
-"""Tests QGIS plugin init."""
+import os
+import unittest
+import logging
+import configparser
+
+LOGGER = logging.getLogger('QGIS')
 
 __author__ = 'Tim Sutton <tim@linfiniti.com>'
 __revision__ = '$Format:%H$'
@@ -7,13 +12,6 @@ __date__ = '17/10/2010'
 __license__ = "GPL"
 __copyright__ = 'Copyright 2012, Australia Indonesia Facility for '
 __copyright__ += 'Disaster Reduction'
-
-import os
-import unittest
-import logging
-import configparser
-
-LOGGER = logging.getLogger('QGIS')
 
 
 class TestInit(unittest.TestCase):
@@ -59,6 +57,7 @@ class TestInit(unittest.TestCase):
                 expectation, file_path))
 
             self.assertIn(expectation, dict(metadata), message)
+
 
 if __name__ == '__main__':
     unittest.main()

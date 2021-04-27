@@ -1,21 +1,19 @@
 # coding=utf-8
 """Tests for QGIS functionality.
-
-
 .. note:: This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
      the Free Software Foundation; either version 2 of the License, or
      (at your option) any later version.
 
 """
-__author__ = 'tim@linfiniti.com'
-__date__ = '20/01/2011'
-__copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
-                 'Disaster Reduction')
-
 import os
 import unittest
 from test.utilities import get_qgis_app
+
+__author__ = 'tim@linfiniti.com, davidmaignan@gmail.com'
+__date__ = '20/01/2011'
+__copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
+                 'Disaster Reduction')
 
 from qgis.core import (
     QgsProviderRegistry,
@@ -29,7 +27,7 @@ QGIS_APP = get_qgis_app()
 class QGISTest(unittest.TestCase):
     """Test the QGIS Environment"""
 
-    def test_qgis_environment(self):
+    def test_qgis_environment(self) -> None:
         """QGIS environment has the expected providers"""
 
         r = QgsProviderRegistry.instance()
@@ -37,7 +35,7 @@ class QGISTest(unittest.TestCase):
         self.assertIn('ogr', r.providerList())
         self.assertIn('postgres', r.providerList())
 
-    def test_projection(self):
+    def test_projection(self) -> None:
         """Test that QGIS properly parses a wkt string.
         """
         crs = QgsCoordinateReferenceSystem()

@@ -7,16 +7,14 @@
      (at your option) any later version.
 
 """
+import os
+import unittest
 from test.utilities import get_qgis_app
+from qgis.PyQt.QtCore import QCoreApplication, QTranslator, QSettings
 
 __author__ = 'ismailsunni@yahoo.co.id'
 __date__ = '12/10/2011'
 __copyright__ = 'Copyright 2012, Australia Indonesia Facility for Disaster Reduction'
-import unittest
-import os
-
-from qgis.PyQt.QtCore import QCoreApplication, QTranslator, QSettings
-
 
 QGIS_APP = get_qgis_app()
 

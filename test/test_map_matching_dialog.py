@@ -7,15 +7,8 @@
      (at your option) any later version.
 
 """
-
-__author__ = 'Philippe.Apparicio@UCS.INRS.Ca'
-__date__ = '2021-04-23'
-__copyright__ = 'Copyright 2021, LAEQ'
-
 import unittest
-
 from qgis.PyQt.QtWidgets import QDialogButtonBox, QDialog
-
 from map_matching_dialog import MapMatchingDialog
 from test.utilities import get_qgis_app
 

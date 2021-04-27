@@ -1,21 +1,16 @@
 # coding=utf-8
 """Resources test.
-
 .. note:: This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
      the Free Software Foundation; either version 2 of the License, or
      (at your option) any later version.
-
 """
+import unittest
+from qgis.PyQt.QtGui import QIcon
 
 __author__ = 'davidmaignan@gmail.com'
 __date__ = '2021-04-23'
 __copyright__ = 'Copyright 2021, LAEQ'
-
-import unittest
-import os
-
-from qgis.PyQt.QtGui import QIcon
 
 
 class MapMatchingDialogTest(unittest.TestCase):
@@ -35,6 +30,7 @@ class MapMatchingDialogTest(unittest.TestCase):
         path = ':/plugins/MapMatching/icon2.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
+
 
 if __name__ == "__main__":
     suite = unittest.makeSuite(MapMatchingDialogTest)
