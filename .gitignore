@@ -133,3 +133,4 @@ dmypy.json
 
 # Qgis files
 *.gpkg-wal
+*.gpkg-shm
