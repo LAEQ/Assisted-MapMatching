@@ -8,6 +8,7 @@
 
 """
 import unittest
+from qgis.core import QgsVectorLayer
 from qgis.PyQt.QtWidgets import QDialogButtonBox, QDialog
 from map_matching_dialog import MapMatchingDialog
 from test.utilities import get_qgis_app
@@ -42,6 +43,18 @@ class MapMatchingDialogTest(unittest.TestCase):
         button.click()
         result = self.dialog.result()
         self.assertEqual(result, QDialog.Rejected)
+
+    def test_dialog_add_path(self):
+        layer = QgsVectorLayer("Point?crs=EPSG:4326", "layer name you like", "memory")
+        self.dialog.add_path(layer)
+        self.assertEqual(1, self.dialog.combo_path.count())
+        self.assertEqual(0, self.dialog.combo_network.count())
+
+    def test_dialog_add_network(self):
+        layer = QgsVectorLayer("Point?crs=EPSG:4326", "layer name you like", "memory")
+        self.dialog.add_network(layer)
+        self.assertEqual(0, self.dialog.combo_path.count())
+        self.assertEqual(1, self.dialog.combo_network.count())
 
 
 if __name__ == "__main__":

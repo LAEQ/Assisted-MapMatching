@@ -67,7 +67,7 @@
     <string>Path layer</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBoxNetworkLayer">
+  <widget class="QComboBox" name="combo_network">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -83,7 +83,7 @@
     </sizepolicy>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBoxPathLayer">
+  <widget class="QComboBox" name="combo_path">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -112,7 +112,7 @@
     <string>OID</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBoxOID">
+  <widget class="QComboBox" name="combo_oid">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -141,7 +141,7 @@
     <string>Speed</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBoxSpeed">
+  <widget class="QComboBox" name="combo_speed">
    <property name="geometry">
     <rect>
      <x>40</x>

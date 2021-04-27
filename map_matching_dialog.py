@@ -26,7 +26,8 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtWidgets import QLabel, QPushButton
+from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox
+from qgis.core import QgsVectorLayer
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -43,6 +44,16 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+    def clear(self):
+        self.combo_path.clear()
+        self.combo_network.clear()
+
+    def add_path(self, layer: QgsVectorLayer):
+        self.combo_path.addItem(layer.name())
+
+    def add_network(self, layer: QgsVectorLayer):
+        self.combo_network.addItem(layer.name())
 
     def __iter__(self):
         for attr, value in self.__dict__.iteritems():

@@ -22,6 +22,7 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.core import QgsProject
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
@@ -193,6 +194,8 @@ class MapMatching:
                 label = label.replace("_", ".").replace("btn", "q3m.window.btn")
                 widget.setText(self.tr(label))
 
+            self.dlg.btn_reload_layers.clicked.connect(self.load)
+
     def run(self):
         """Run method that performs all the real work"""
         # Create the dialog with elements (after translation) and keep reference
@@ -208,3 +211,16 @@ class MapMatching:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+    def load(self):
+        """Load sample datas"""
+        self.dlg.clear()
+
+        QgsProject.instance().removeAllMapLayers()
+        pts_pth = os.path.join(self.plugin_dir, "ressources", "datas", "points.gpkg")
+        layer = self.iface.addVectorLayer(pts_pth, "trace", "ogr")
+        self.dlg.add_path(layer)
+
+        network_path = os.path.join(self.plugin_dir, "ressources", "datas", "reseau.gpkg")
+        layer = self.iface.addVectorLayer(network_path, "reseau", "ogr")
+        self.dlg.add_network(layer)
