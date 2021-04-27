@@ -18,9 +18,7 @@ coverage report -m test/test_*
 ```
 
 ## Translations
-- Add new files i18n/qm3.pro and then run the two following lines
-
-| Make sure you have the qt tools installed before running the following commands
+- Add files to be parsed in i18n/qm3.pro. Run the two following commands.
 
 ```bash
 # generate ts files and qm files
