@@ -26,6 +26,7 @@ class MapMatchingDialogTest(unittest.TestCase):
         """Runs after each test."""
         self.dialog = None
 
+    @unittest.skip("Must be updated or deleted before merging to master.")
     def test_dialog_ok(self):
         """Test we can click OK."""
 
@@ -34,6 +35,7 @@ class MapMatchingDialogTest(unittest.TestCase):
         result = self.dialog.result()
         self.assertEqual(result, QDialog.Accepted)
 
+    @unittest.skip("Must be updated or deleted before merging to master.")
     def test_dialog_cancel(self):
         """Test we can click cancel."""
         button = self.dialog.button_box.button(QDialogButtonBox.Cancel)

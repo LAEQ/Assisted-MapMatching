@@ -66,6 +66,7 @@ class MapMatching:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        self.dlg = None
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -170,7 +171,6 @@ class MapMatching:
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -179,18 +179,28 @@ class MapMatching:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def init_ui(self) -> None:
+        """ Initialize window with translated messages"""
+        if self.first_start:
+            self.first_start = False
+            self.dlg = MapMatchingDialog()
+            self.dlg.setWindowTitle(self.tr("q3m.window.title"))
+            for label, widget in self.dlg.labels():
+                label = label.replace("label_", "q3m.window.label.")
+                widget.setText(self.tr(label))
+
+            for label, widget in self.dlg.buttons():
+                label = label.replace("_", ".").replace("btn", "q3m.window.btn")
+                widget.setText(self.tr(label))
 
     def run(self):
         """Run method that performs all the real work"""
-
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
-            self.first_start = False
-            self.dlg = MapMatchingDialog()
+        self.init_ui()
 
-        # show the dialog
         self.dlg.show()
+
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
