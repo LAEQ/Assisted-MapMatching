@@ -18,15 +18,13 @@ coverage report -m test/test_*
 ```
 
 ## Translations
-- Add new files i18n/qm3.pro and then run the two following lines
-
-| Make sure you have the qt tools installed before running the following commands
+Don't forget to add new files to be parsed in i18n/qm3.pro. Run the two following commands.
 
 ```bash
 # generate ts files and qm files
 cd i18n
 pylupdate5 q3m.pro
-lrelease-qt5 MapMatching_en.ts MapMatching_fr.ts
+lrelease-qt5 MapMatching_en.ts MapMatching_fr.ts ...
 ```
 
 
