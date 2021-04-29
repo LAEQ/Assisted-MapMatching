@@ -75,6 +75,9 @@ class MapMatching:
         self.dlg = None
         self.manager = LayerManager()
 
+        # @todo Investigate diff between instance and iface mapLayers
+        # QgsProject.instance().mapLayers()
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -191,6 +194,9 @@ class MapMatching:
         if self.first_start:
             self.first_start = False
             self.dlg = MapMatchingDialog()
+            self.dlg.set_manager(self.manager)
+
+            # Translations
             self.dlg.setWindowTitle(self.tr("q3m.window.title"))
             for label, widget in self.dlg.labels():
                 label = label.replace("label_", "q3m.window.label.")
@@ -200,24 +206,21 @@ class MapMatching:
                 label = label.replace("_", ".").replace("btn", "q3m.window.btn")
                 widget.setText(self.tr(label))
 
-            # @todo: Note sure it's the best place to add listeners
+            # Listeners
             self.dlg.btn_reload_layers.clicked.connect(self.load)
 
-            self.manager.set_layers(self.iface.mapCanvas().layers())
-            self.dlg.set_manager(self.manager)
+            # Add listener for layer deletion / dragging, ...
+            # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
+            # QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
 
-            QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
-            QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
-
-        # @todo: Add layers to dialog combos
-
+        self.manager.set_layers(self.iface.mapCanvas().layers())
+        self.dlg.update()
 
     def will_removed(self, node, _from, _to) -> None:
-        self.manager.remove_layer(_from)
+        pass
 
     def has_removed(self, node, _from: int, _to: int) -> None:
-        if self.dlg.isVisible():
-            self.dlg.update()
+        pass
 
     def run(self):
         """Run method that performs all the real work"""

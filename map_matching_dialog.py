@@ -55,10 +55,10 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def set_manager(self, manager) -> None:
         self.manager = manager
-        # paths = self.manager.path_layers()
-        # self.combo_path.addItems([path.name() for path in paths])
-        # networks = self.manager.network_layers()
-        # self.combo_network.addItems([network.name() for network in networks])
+        paths = self.manager.path_layers()
+        self.combo_path.addItems([path.name() for path in paths])
+        networks = self.manager.network_layers()
+        self.combo_network.addItems([network.name() for network in networks])
 
     def update(self):
         self.clear()
@@ -70,6 +70,8 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
     def clear(self):
         self.combo_path.clear()
         self.combo_network.clear()
+        self.combo_oid.clear()
+        self.combo_speed.clear()
 
     def add_path(self, layer: QgsVectorLayer):
         self.combo_path.addItem(layer.name())

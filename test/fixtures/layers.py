@@ -11,6 +11,10 @@ class LayerFixtures:
         path = os.path.join(self.cur_dir, "points_1.gpkg")
         return QgsVectorLayer(path, os.path.basename(path), "ogr")
 
+    def points_fields_1(self):
+        layer = self.points_1()
+        return layer.fields()
+
     def points_2(self):
         path = os.path.join(self.cur_dir, "points_2.gpkg")
         return QgsVectorLayer(path, os.path.basename(path), "ogr")
@@ -78,4 +82,10 @@ class LayerFixtures:
         return [
             self.points_1(),
             self.points_2(),
+        ]
+
+    def networks(self):
+        return [
+            self.network_1(),
+            self.network_2(),
         ]

@@ -32,7 +32,10 @@ class LayerManager:
         self.layers.append(layer)
 
     def path_attributes(self, index: int) -> List[QgsField]:
-        return self.path_layers()[index].fields()
+        try:
+            return self.path_layers()[index].fields()
+        except Exception:
+            return []
 
     @classmethod
     def is_path_layer(cls, layer: QgsVectorLayer) -> bool:

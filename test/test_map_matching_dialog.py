@@ -12,7 +12,6 @@ from random import randint
 from unittest.mock import MagicMock
 
 from qgis.core import QgsVectorLayer, QgsField
-
 from qgis.PyQt.QtWidgets import QDialogButtonBox, QDialog
 from qgis.PyQt.QtCore import QVariant
 from map_matching_dialog import MapMatchingDialog
@@ -46,6 +45,29 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.assertEqual(2, self.dialog.combo_path.count())
         self.assertEqual(1, self.dialog.combo_network.count())
 
+    def test_clear(self):
+        magic_points = self.fixtures.points()
+        magic_network = [self.fixtures.network_1()]
+        self.manager.path_layers = MagicMock(return_value=magic_points)
+        self.manager.network_layers = MagicMock(return_value=magic_network)
+        self.dialog.update()
+        self.dialog.clear()
+        self.assertEqual(0, self.dialog.combo_path.count())
+        self.assertEqual(0, self.dialog.combo_network.count())
+        self.assertEqual(0, self.dialog.combo_oid.count())
+        self.assertEqual(0, self.dialog.combo_speed.count())
+
+    def test_path_changed(self):
+        magic_points = self.fixtures.points()
+        magic_network = self.fixtures.networks()
+        magic_fields = self.fixtures.points_fields_1()
+        self.manager.path_layers = MagicMock(return_value=magic_points)
+        self.manager.network_layers = MagicMock(return_value=magic_network)
+        self.manager.path_attributes = MagicMock(return_value=magic_fields)
+        self.dialog.update()
+        self.dialog.combo_path.setCurrentIndex(1)
+        self.assertEqual(len(magic_fields), self.dialog.combo_oid.count())
+        # self.assertEqual()
 
     # def test_dialog_add_path(self):
     #     layer = QgsVectorLayer("Point?crs=EPSG:4326", "layer name you like", "memory")
