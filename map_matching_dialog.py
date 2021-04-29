@@ -23,13 +23,16 @@
 """
 
 import os
-
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsVectorLayer, QgsFields
+from typing import List
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
+# from model.layer_manager import LayerManager
+# from .model.layer_manager import LayerManager
+
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'map_matching_dialog_base.ui'))
 
@@ -45,6 +48,25 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
+        self.manager = None
+
+        """Listeners"""
+        self.combo_path.currentIndexChanged.connect(self.on_path_changed)
+
+    def set_manager(self, manager) -> None:
+        self.manager = manager
+        # paths = self.manager.path_layers()
+        # self.combo_path.addItems([path.name() for path in paths])
+        # networks = self.manager.network_layers()
+        # self.combo_network.addItems([network.name() for network in networks])
+
+    def update(self):
+        self.clear()
+        paths = self.manager.path_layers()
+        self.combo_path.addItems([path.name() for path in paths])
+        networks = self.manager.network_layers()
+        self.combo_network.addItems([network.name() for network in networks])
+
     def clear(self):
         self.combo_path.clear()
         self.combo_network.clear()
@@ -55,10 +77,24 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
     def add_network(self, layer: QgsVectorLayer):
         self.combo_network.addItem(layer.name())
 
+    def remove_layer(self, layer) -> None:
+        pass
+
+    """Listeners"""
+    def on_path_changed(self):
+        self.combo_oid.clear()
+        self.combo_speed.clear()
+
+        index = self.combo_path.currentIndex()
+        fields = self.manager.path_attributes(index)
+        self.combo_oid.addItems([field.name() for field in fields])
+        self.combo_speed.addItems([field.name() for field in fields])
+
     def __iter__(self):
         for attr, value in self.__dict__.iteritems():
             yield attr, value
 
+    """Getters"""
     def labels(self):
         return filter(lambda elem: isinstance(elem[1], QLabel), self.__dict__.items())
 

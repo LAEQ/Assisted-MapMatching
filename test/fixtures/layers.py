@@ -1,0 +1,81 @@
+import os
+from qgis.core import QgsVectorLayer, QgsField
+from qgis.PyQt.QtCore import QVariant
+
+
+class LayerFixtures:
+    def __init__(self):
+        self.cur_dir = os.path.dirname(__file__)
+
+    def points_1(self):
+        path = os.path.join(self.cur_dir, "points_1.gpkg")
+        return QgsVectorLayer(path, os.path.basename(path), "ogr")
+
+    def points_2(self):
+        path = os.path.join(self.cur_dir, "points_2.gpkg")
+        return QgsVectorLayer(path, os.path.basename(path), "ogr")
+
+    def network_1(self):
+        path = os.path.join(self.cur_dir, "network_1.gpkg")
+        return QgsVectorLayer(path, os.path.basename(path), "ogr")
+
+    def network_2(self):
+        path = os.path.join(self.cur_dir, "network_2.gpkg")
+        return QgsVectorLayer(path, os.path.basename(path), "ogr")
+
+    def points_and_networks(self):
+        return [
+            self.points_1(),
+            self.points_2(),
+            self.network_1(),
+            self.network_2(),
+        ]
+
+    # def generate_vector_path_4_fields():
+    #     layer = QgsVectorLayer("Marker?crs=EPSG:4326", "layer_1", "memory")
+    #     pr = layer.dataProvider()  # need to create a data provider
+    #     fields = [QgsField("id", QVariant.Int),
+    #               QgsField("name", QVariant.String),
+    #               QgsField("oid ", QVariant.Int),
+    #               QgsField("speed", QVariant.Double)
+    #               ]
+    #     pr.addAttributes(fields)
+    #     layer.updateFields()
+    #
+    #     return layer
+
+    # def generate_vector_path_8_fields():
+    #     layer = QgsVectorLayer("Marker?crs=EPSG:4326", "layer_1", "memory")
+    #     pr = layer.dataProvider()  # need to create a data provider
+    #     fields = [QgsField("id", QVariant.Int),
+    #               QgsField("name", QVariant.String),
+    #               QgsField("oid ", QVariant.Int),
+    #               QgsField("speed", QVariant.Double),
+    #               QgsField("altitude", QVariant.Double),
+    #               QgsField("lat", QVariant.Double),
+    #               QgsField("lng", QVariant.Double),
+    #               QgsField("time", QVariant.Int)
+    #               ]
+    #     pr.addAttributes(fields)
+    #     layer.updateFields()
+    #
+    #     return layer
+    #
+    #
+    # def generate_network_4_fields():
+    #     layer = QgsVectorLayer("LINESTRING?crs=EPSG:4326", "layer_1", "memory")
+    #     pr = layer.dataProvider()  # need to create a data provider
+    #     fields = [QgsField("id", QVariant.Int),
+    #               QgsField("name", QVariant.String),
+    #               QgsField("oid ", QVariant.Int),
+    #               QgsField("speed", QVariant.Double)
+    #               ]
+    #     pr.addAttributes(fields)
+    #     layer.updateFields()
+    #
+    #     return layer
+    def points(self):
+        return [
+            self.points_1(),
+            self.points_2(),
+        ]

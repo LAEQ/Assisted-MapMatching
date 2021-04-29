@@ -21,12 +21,17 @@
  *                                                                         *
  ***************************************************************************/
 """
+from random import random
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.core import QgsProject
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsWkbTypes
 
 # Initialize Qt resources from file resources.py
+# from .model.layer_manager import LayerManager
+from .model.layer_manager import LayerManager
 from .resources import *
 # Import the code for the dialog
 from .map_matching_dialog import MapMatchingDialog
@@ -68,6 +73,7 @@ class MapMatching:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         self.dlg = None
+        self.manager = LayerManager()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -194,7 +200,24 @@ class MapMatching:
                 label = label.replace("_", ".").replace("btn", "q3m.window.btn")
                 widget.setText(self.tr(label))
 
+            # @todo: Note sure it's the best place to add listeners
             self.dlg.btn_reload_layers.clicked.connect(self.load)
+
+            self.manager.set_layers(self.iface.mapCanvas().layers())
+            self.dlg.set_manager(self.manager)
+
+            QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
+            QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
+
+        # @todo: Add layers to dialog combos
+
+
+    def will_removed(self, node, _from, _to) -> None:
+        self.manager.remove_layer(_from)
+
+    def has_removed(self, node, _from: int, _to: int) -> None:
+        if self.dlg.isVisible():
+            self.dlg.update()
 
     def run(self):
         """Run method that performs all the real work"""
@@ -214,13 +237,16 @@ class MapMatching:
 
     def load(self):
         """Load sample datas"""
-        self.dlg.clear()
 
-        QgsProject.instance().removeAllMapLayers()
         pts_pth = os.path.join(self.plugin_dir, "ressources", "datas", "points.gpkg")
-        layer = self.iface.addVectorLayer(pts_pth, "trace", "ogr")
-        self.dlg.add_path(layer)
+        layer = self.iface.addVectorLayer(pts_pth, "trace_{:.5f}".format(random()), "ogr")
+        self.manager.add_layer(layer)
 
         network_path = os.path.join(self.plugin_dir, "ressources", "datas", "reseau.gpkg")
-        layer = self.iface.addVectorLayer(network_path, "reseau", "ogr")
-        self.dlg.add_network(layer)
+        layer = self.iface.addVectorLayer(network_path, "reseau_{:.5f}".format(random()), "ogr")
+        self.manager.add_layer(layer)
+
+        self.dlg.update()
+
+        # print(layer.wkbType())
+        # print("Geometry type: %s" % QgsWkbTypes.displayString(int(layer.wkbType())))
