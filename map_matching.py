@@ -9,7 +9,7 @@
         begin                : 2021-04-23
         git sha              : $Format:%H$
         copyright            : (C) 2021 by LAEQ
-        email                : Philippe.Apparicio@UCS.INRS.Ca
+        email                : Philippe.Apparicio@UCS.INRS.ca
  ***************************************************************************/
 
 /***************************************************************************
@@ -21,6 +21,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os.path
 from random import random
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
@@ -30,12 +31,14 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsWkbTypes
 
 # Initialize Qt resources from file resources.py
-# from .model.layer_manager import LayerManager
-from .model.layer_manager import LayerManager
 from .resources import *
 # Import the code for the dialog
 from .map_matching_dialog import MapMatchingDialog
-import os.path
+
+from .model.layer_manager import LayerManager
+from .model.layer import Layers
+from .model.network import NetworkLayer
+from .model.path import PathLayer
 
 
 class MapMatching:
@@ -93,18 +96,17 @@ class MapMatching:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('MapMatching', message)
 
-
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -208,6 +210,7 @@ class MapMatching:
 
             # Listeners
             self.dlg.btn_reload_layers.clicked.connect(self.load)
+            self.dlg.btn_map_matching.clicked.connect(self.start_map_matching)
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
@@ -229,10 +232,7 @@ class MapMatching:
         self.init_ui()
 
         self.dlg.show()
-
-        # Run the dialog event loop
         result = self.dlg.exec_()
-        # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
@@ -251,5 +251,15 @@ class MapMatching:
 
         self.dlg.update()
 
-        # print(layer.wkbType())
-        # print("Geometry type: %s" % QgsWkbTypes.displayString(int(layer.wkbType())))
+    def start_map_matching(self):
+        """Start the process of mapMatching after verifying the validity of the comboBox data."""
+
+        network_layer = self.manager.network_layers()[0]
+        path_layer = self.manager.path_layers()[0]
+        buffer = 10
+
+        network_layer = NetworkLayer(network_layer)
+        path_layer = PathLayer(path_layer)
+
+        layer = Layers(path_layer, network_layer)
+        layer.reduce_network_layer(buffer)

@@ -104,3 +104,9 @@ class TestLayerManager(unittest.TestCase):
     def test_path_attributes_index_out_range(self):
         fields = self.manager.path_attributes(1)
         self.assertEqual(0, len(fields))
+
+
+if __name__ == "__main__":
+    suite = unittest.makeSuite(TestLayerManager)
+    runner = unittest.TextTestRunner(verbosity=2)
+    runner.run(suite)
