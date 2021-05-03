@@ -9,7 +9,7 @@
         begin                : 2021-04-23
         git sha              : $Format:%H$
         copyright            : (C) 2021 by LAEQ
-        email                : Philippe.Apparicio@UCS.INRS.Ca
+        email                : Philippe.Apparicio@UCS.INRS.ca
  ***************************************************************************/
 
 /***************************************************************************
@@ -21,15 +21,24 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os.path
+from random import random
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.core import QgsProject
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsWkbTypes
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .map_matching_dialog import MapMatchingDialog
-import os.path
+
+from .model.layer_manager import LayerManager
+from .model.layer import Layers
+from .model.network import NetworkLayer
+from .model.path import PathLayer
 
 
 class MapMatching:
@@ -66,6 +75,11 @@ class MapMatching:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        self.dlg = None
+        self.manager = LayerManager()
+
+        # @todo Investigate diff between instance and iface mapLayers
+        # QgsProject.instance().mapLayers()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -82,18 +96,17 @@ class MapMatching:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('MapMatching', message)
 
-
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -170,7 +183,6 @@ class MapMatching:
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -179,22 +191,75 @@ class MapMatching:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def init_ui(self) -> None:
+        """ Initialize window with translated messages"""
+        if self.first_start:
+            self.first_start = False
+            self.dlg = MapMatchingDialog()
+            self.dlg.set_manager(self.manager)
+
+            # Translations
+            self.dlg.setWindowTitle(self.tr("q3m.window.title"))
+            for label, widget in self.dlg.labels():
+                label = label.replace("label_", "q3m.window.label.")
+                widget.setText(self.tr(label))
+
+            for label, widget in self.dlg.buttons():
+                label = label.replace("_", ".").replace("btn", "q3m.window.btn")
+                widget.setText(self.tr(label))
+
+            # Listeners
+            self.dlg.btn_reload_layers.clicked.connect(self.load)
+            self.dlg.btn_map_matching.clicked.connect(self.start_map_matching)
+
+            # Add listener for layer deletion / dragging, ...
+            # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
+            # QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
+
+        self.manager.set_layers(self.iface.mapCanvas().layers())
+        self.dlg.update()
+
+    def will_removed(self, node, _from, _to) -> None:
+        pass
+
+    def has_removed(self, node, _from: int, _to: int) -> None:
+        pass
 
     def run(self):
         """Run method that performs all the real work"""
-
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
-            self.first_start = False
-            self.dlg = MapMatchingDialog()
+        self.init_ui()
 
-        # show the dialog
         self.dlg.show()
-        # Run the dialog event loop
         result = self.dlg.exec_()
-        # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+    def load(self):
+        """Load sample datas"""
+
+        pts_pth = os.path.join(self.plugin_dir, "ressources", "datas", "points.gpkg")
+        layer = self.iface.addVectorLayer(pts_pth, "trace_{:.5f}".format(random()), "ogr")
+        self.manager.add_layer(layer)
+
+        network_path = os.path.join(self.plugin_dir, "ressources", "datas", "reseau.gpkg")
+        layer = self.iface.addVectorLayer(network_path, "reseau_{:.5f}".format(random()), "ogr")
+        self.manager.add_layer(layer)
+
+        self.dlg.update()
+
+    def start_map_matching(self):
+        """Start the process of mapMatching after verifying the validity of the comboBox data."""
+
+        network_layer = self.manager.network_layers()[0]
+        path_layer = self.manager.path_layers()[0]
+        buffer = 10
+
+        network_layer = NetworkLayer(network_layer)
+        path_layer = PathLayer(path_layer)
+
+        layer = Layers(path_layer, network_layer)
+        layer.reduce_network_layer(buffer)

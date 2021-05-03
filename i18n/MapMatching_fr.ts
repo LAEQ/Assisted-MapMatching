@@ -3,22 +3,77 @@
 <context>
     <name>MapMatching</name>
     <message>
-        <location filename="../map_matching.py" line="166"/>
-        <source>q3m.toolbar.title</source>
-        <translation type="unfinished"></translation>
+        <location filename="../map_matching.py" line="177"/>
+        <source>q3m.window.title</source>
+        <translation>LAEQ-CorrélationCartographique</translation>
     </message>
     <message>
-        <location filename="../map_matching.py" line="179"/>
-        <source>q3m.window.title</source>
-        <translation type="unfinished"></translation>
+        <location filename="../map_matching.py" line="164"/>
+        <source>q3m.toolbar.title</source>
+        <translation>CorrélationCartographique</translation>
+    </message>
+        <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.label.subtitle</source>
+        <translation>Description à venir</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.label.network</source>
+        <translation>Network Layer</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.label.path</source>
+        <translation>Path Layer</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.label.oid</source>
+        <translation>OID</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.label.speed</source>
+        <translation>Speed</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.label.buffer_range</source>
+        <translation>Buffer rance [m]</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.btn.reload.layers</source>
+        <translation>Reload</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.btn.map.matching</source>
+        <translation>PreMatching</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.btn.reselect.path</source>
+        <translation>Reselect path</translation>
+    </message>
+    <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.btn.apply.path.change</source>
+        <translation>Apply modification to path</translation>
+    </message>
+        <message>
+        <location filename="../test/map_matching.py" />
+        <source>q3m.window.btn.export.line</source>
+        <translation>Export polyline</translation>
     </message>
 </context>
 <context>
     <name>UnitTest</name>
     <message>
-        <location filename="../test/test_translations.py" line="47"/>
+        <location filename="../test/test_translations.py" line="45"/>
         <source>q3m.window.title</source>
-        <translation>Mock titre fenetre</translation>
+        <translation>Mock window title</translation>
     </message>
 </context>
 </TS>
