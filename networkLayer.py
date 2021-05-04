@@ -3,7 +3,11 @@ from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 
 from .topology import *
-from shapely import wkt
+
+
+from .mapMatching import mapMatching
+
+from .layerTraductor import *
 
 """
 This class take care of the network layer
@@ -18,6 +22,8 @@ class NetworkLayer:
 
     def __init__(self, _layer):
         self.initial_layer = _layer
+        self.layer = self.initial_layer #dans un premier temps
+        self.possible_path = None #selected path in mapMatching.py
 
 
     def select_intersection_trajectory(self,buffer):
@@ -33,117 +39,130 @@ class NetworkLayer:
 
         test = processing.run("qgis:selectbylocation", {'INPUT': self.initial_layer, 'PREDICATE': 0, 'INTERSECT' : buffer , 'METHOD' : 0})
         
-        self.reduced_layer = self.initial_layer.materialize(QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
+        reduced_layer = self.initial_layer.materialize(QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
         self.initial_layer.removeSelection()
 
+        QgsProject.instance().layerTreeRoot().findLayer(self.initial_layer.id()).setItemVisibilityChecked(False)
+
+        self.layer = reduced_layer
+        self.layer.setName("Reduced network")
+
         #Temporary line to show the progression
-        QgsProject.instance().addMapLayer(self.reduced_layer)
-        print("Reduced layer: ")
+        #QgsProject.instance().addMapLayer(self.layer)
+        
+        
+        #print("Reduced layer: ")
         
 
-    def correct_topology(self):
+    def correct_topology(self, call_close_call = False, progression = None):
         """Correct the topology of the layer."""
 
-        
-        shapely_dict = self.__from_vector_layer_to_list_of_dict(self.reduced_layer)
+        if(progression is not None):
+            progression.emit(5)
 
+        shapely_dict = layerTraductor.from_vector_layer_to_list_of_dict(self.layer)
+
+        #if(progression is not None):
+            #progression.emit(10)
+        
         #We truncate all the points value 
         corrected_list = simplify_coordinates(shapely_dict,3)
+
+        #if(progression is not None):
+            #progression.emit(20)
 
         #We split the loops  (i.e: roundabouts)
         corrected_list = cut_loops(corrected_list)
 
+        #if(progression is not None):
+            #progression.emit(40)
+
         #We take care of the intersection
         corrected_list = deal_with_danglenodes(corrected_list)
+
         corrected_list = deal_with_intersections(corrected_list)
 
+        if(progression is not None):
+            progression.emit(1)
+
+        #NB: La ligne ci dessous prend un temps monstre
         #We connect roads wich extremities are close to each other
-        corrected_list = deal_with_closecall(corrected_list)
+        if(call_close_call):
+            corrected_list = deal_with_closecall(corrected_list,progression)
 
+        #if(progression is not None):
+            #progression.emit(80)
 
-        self.reduced_layer = self.__from_list_of_dict_to_layer(corrected_list)
+        
+        lay = layerTraductor.from_list_of_dict_to_layer(corrected_list,self.layer)
+
+        #if(progression is not None):
+            #progression.emit(90)
+
+        QgsProject.instance().removeMapLayer(self.layer)
+
+        self.layer = lay
 
         #Temporary line : Ajout de la couche à l'application
-        QgsProject.instance().addMapLayer(self.reduced_layer)
-
-
-    def __from_vector_layer_to_list_of_dict(self,layer):
-        """Transform the input layer into a format readable for shapely
-
-        Input:
-        layer -- A QgsVectorLayer
-
-        Output:
-        final_list -- A list composed of the dictionnary version of each feature plus a pair ['geometry']
-        i.e: 
-        final_list = [ 
-            {'fid': 1 , 'speed': 3.14 , 'geometry' : wktGeometry}, 
-            { 'fid': 2 , ...}, 
-            ... 
-        ]
- 
-        """
-
-        final_list = []
-        temp = layer.fields().names()
-
-        for f in layer.getFeatures():
-            temporary_dictionary = {}
-
-            for attr in temp:
-
-                temporary_dictionary[attr] = f[attr]
-
-            temporary_dictionary["geometry"] = wkt.loads(f.geometry().asWkt())
-
-            final_list.append(temporary_dictionary)
-
-        return final_list
-
-
-    def __from_list_of_dict_to_layer(self,feat_list):
-        """Transform a list into a QgsVectorLayer (memory) based on this vectorLayer model (self.initial_layer) 
-
-        Input:
-        feat_list -- A list composed of dictionnary (1 dictionnary = 1 feature) with at least a 'geometry' parameter in each 
-
-        Output:
-        mem_layer -- A QgsVectorLayer filled with the elements in feat_list
+        QgsProject.instance().addMapLayer(self.layer)
         
-        """
 
-        epsg = self.initial_layer.crs().postgisSrid()
+    def find_path(self, matching, progression = None): 
+        
+        matching.find_best_path_in_network()
 
-        mem_layer = QgsVectorLayer("Linestring?crs=EPSG:" + str(epsg),
-                                    "temp",
-                                    "memory")
+        self.possible_path = matching.tag_id
 
-        pr = mem_layer.dataProvider()
-        layer_fields = self.initial_layer.fields()
-        pr.addAttributes(layer_fields)
+        self.select_possible_path()
 
-        mem_layer.updateFields()
 
-        for obj in feat_list:
-            f= QgsFeature()
-            geom = QgsGeometry().fromWkt(obj["geometry"].wkt)
-            f.setGeometry(geom)
+    def add_attribute_to_layers(self, attribute_name = 'joID'):
 
-            attributes_list = []
+        #self.layer = self.initial_layer
 
-            for attr in layer_fields.names():
-                attributes_list.append(obj[attr])
+        provider = self.layer.dataProvider()
 
-            f.setAttributes(attributes_list)
-            pr.addFeature(f)
+        provider.addAttributes([QgsField(attribute_name,QVariant.Int)])
 
-        mem_layer.updateExtents()
+        self.layer.updateFields()
 
-        return mem_layer
+        test = len(self.layer.fields().names())-1
 
+        self.layer.startEditing()
+        i=0
+        for f in self.layer.getFeatures():
+            tesid = f.id()
+            attr_value={test:i}
+            provider.changeAttributeValues({tesid:attr_value})
+            i+=1
+        self.layer.commitChanges()
 
 
         
+        
+
+    def select_possible_path(self):
+        if(self.possible_path) == None:
+            print("error : path not created yet")
+            return
+
+        self.layer.selectByExpression('"joID" in (' +','.join(self.possible_path)+ ')' )
+
+
+
+
+    def change_possible_path(self):
+        self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
+
+
+    def create_vector_from_path(self):
+
+        layer = processing.run("native:saveselectedfeatures", {'INPUT': self.layer, 'OUTPUT': 'memory:'})['OUTPUT']
+        layer.setName("path for matching")
+
+        return layer
+
+
 
 
 

@@ -16,4 +16,14 @@
     <p>This dropDown list show all the feature of type <strong>Real/double</strong> of the Path layer selected. It represent the speed at wich the measurement was taken</p>
     <h3>Buffer range :</h3>
     <p>This slider represent the maximum distance to find line on the network for each trajectory point. The bigget this value is, the longest the computing time </p>
+    <h3>The plugin isn't working:</h3>
+
+    <p>Here is a few tips that could be the reason why the plugin doesn't work: <br><br>
+      Your layers aren't conform to the plugin standards:
+      <dd>- Check that your two layers are active (checked) or they won't be detected </dd><br>
+      <dd>- Check your two layers geometry's type are LineString for one and Point for the other </dd><br>
+      <dd>- Check that your two layers are in the same projection system (SCR) and that they are both in meter (cartesian) </dd><br>
+      <dd>- Check that your path layer (Point) has an OID field and a speed field (if not uncheck the box next to the comboBox) </dd><br>
+      <dd>- Try reloading if you corrected the precedent error and nothing appeared </dd><br>
+    </p>
 </body>

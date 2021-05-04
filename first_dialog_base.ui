@@ -117,7 +117,7 @@
     <rect>
      <x>40</x>
      <y>160</y>
-     <width>341</width>
+     <width>311</width>
      <height>21</height>
     </rect>
    </property>
@@ -146,7 +146,7 @@
     <rect>
      <x>40</x>
      <y>210</y>
-     <width>341</width>
+     <width>311</width>
      <height>21</height>
     </rect>
    </property>
@@ -160,9 +160,9 @@
   <widget class="QSpinBox" name="spinBoxBufferRange">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>40</x>
      <y>270</y>
-     <width>211</width>
+     <width>141</width>
      <height>22</height>
     </rect>
    </property>
@@ -174,11 +174,14 @@
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonMapMatching">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>270</y>
-     <width>121</width>
+     <x>200</x>
+     <y>320</y>
+     <width>151</width>
      <height>23</height>
     </rect>
    </property>
@@ -187,10 +190,13 @@
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonReselectPath">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>320</y>
+     <x>60</x>
+     <y>360</y>
      <width>281</width>
      <height>31</height>
     </rect>
@@ -200,10 +206,13 @@
    </property>
   </widget>
   <widget class="QPushButton" name="pushButtonApplyPathChange">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>390</y>
+     <x>30</x>
+     <y>410</y>
      <width>341</width>
      <height>41</height>
     </rect>
@@ -216,7 +225,7 @@
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>470</y>
+     <y>500</y>
      <width>251</width>
      <height>23</height>
     </rect>
@@ -228,7 +237,7 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>40</x>
      <y>250</y>
      <width>111</width>
      <height>16</height>
@@ -269,7 +278,7 @@
      <x>400</x>
      <y>40</y>
      <width>256</width>
-     <height>452</height>
+     <height>471</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -283,6 +292,104 @@
    </property>
    <property name="openExternalLinks">
     <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_OID">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>160</y>
+     <width>16</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="sizeIncrement">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_Speed">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>210</y>
+     <width>16</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonReduceNetwork">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>270</y>
+     <width>151</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Reduce the network</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonCorrectTopology">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>320</y>
+     <width>141</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Correct the topology</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonReset">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>460</y>
+     <width>101</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Reset</string>
    </property>
   </widget>
  </widget>

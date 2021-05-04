@@ -82,8 +82,8 @@ class PathLayer:
                     number_of_iteration =0
 
                     #We calculate the average position in the group
-                    for feat_id in feat_temp:
-                        f = self.initiasl_layer.getFeature(feat_id +1)  #+1 because IDs start at 0 but the attribute table start at 1
+                    for feat_id in temporary_feats:
+                        f = self.initial_layer.getFeature(feat_id +1)  #+1 because IDs start at 0 but the attribute table start at 1
                         geom = f.geometry()
 
                         average_x += geom.asPoint().x()
@@ -106,56 +106,32 @@ class PathLayer:
 
             #QgsProject.instance().addMapLayer(self.layer)
 
-                
+    def adjust_point_on_map(self,matching):
 
-
-
-
-
-
-#=========================================================================================================================
-#                                                         Perso
-#=========================================================================================================================
-    def move_layer(self):
-
-        print("Start move layer")
+        newpts,newdistances = matching.snap_points_along_line(speedField = "speed", speedlim=1.5 , minpts = 5 , maxpts = float("inf"))
 
         i = 0
+
         for f in self.layer.getFeatures():
-                geom = f.geometry()
-                geo = QgsGeometry.fromPointXY(QgsPointXY(geom.asPoint().x(), geom.asPoint().y()-10))
-                self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
+            geom = f.geometry()
+            geo = QgsGeometry.fromPointXY(QgsPointXY(newpts[i].x, newpts[i].y))
+            self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
+            i += 1
 
-        print("End move layer")
-
-        #important pour afficher le changement à l'écran
-        self.layer.triggerRepaint()
-
-    def start_point_matching():
-        pass
+        QgsProject.instance().addMapLayer(self.layer)
 
 
+    def reset_path(self):
+        self.initial_layer.selectAll()
+        self.layer = processing.run("native:saveselectedfeatures", {'INPUT': self.initial_layer, 'OUTPUT': 'memory:'})['OUTPUT']
+        self.layer.setName("Points Matché 2")
+        self.initial_layer.removeSelection()
 
-"""
-UTILE POUR APRES:
-layer.selectedFeatures() : donne les points selectionné
-layer.getFeatures() : renvoie tous les points
-layer.selectedFeatureIds() : renvoie les ids des points selectionné
+        
+            
+            
+        
 
-create memory layer from several points:
 
-from qgis.core import QgsFeatureRequest
 
-memory_layer = layer.materialize(QgsFeatureRequest().setFilterFids(layer.selectedFeatureIds()))
-QgsProject.instance().addMapLayer(memory_layer)
-
-Point de type : QgsFeature
-Layer de type QGSVectorLayer
-
-Ajoute 10 en y a tt les points du layer:
-for f in self.layer.getFeatures():
-    geom = f.geometry()
-    geo = QgsGeometry.fromPointXY(QgsPointXY(geom.asPoint().x(), geom.asPoint().y()+10))
-    self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
-
-"""
+                

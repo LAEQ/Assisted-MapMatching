@@ -23,8 +23,10 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication , Qt
 from qgis.PyQt.QtGui import QIcon, QTextCursor
-from qgis.PyQt.QtWidgets import QAction, QPushButton
+from qgis.PyQt.QtWidgets import QAction, QPushButton, QProgressBar, QPushButton, QCheckBox
 from qgis.core import *
+import copy
+
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -34,6 +36,7 @@ import os.path
 
 #import personnal class
 from .layers import *
+from .worker import *
 
 class first:
     """QGIS Plugin Implementation."""
@@ -81,12 +84,23 @@ class first:
         #AJOUT PERSO: connection boutton penser à en faire une fonction ?
         self.dlg.pushButtonExportLine.clicked.connect(self.load_element)
         self.dlg.pushButtonReloadLayers.clicked.connect(self.fill_comboBox)
+
+        self.dlg.pushButtonReduceNetwork.clicked.connect(self.reduce_network_layer)
+        self.dlg.pushButtonCorrectTopology.clicked.connect(self.correct_topology)
         self.dlg.pushButtonMapMatching.clicked.connect(self.start_mapMatching)
-        self.dlg.pushButtonReselectPath.clicked.connect(self.test)
+        self.dlg.pushButtonReselectPath.clicked.connect(self.on_click_reSelect_path)
+        self.dlg.pushButtonApplyPathChange.clicked.connect(self.on_click_apply_modification)
+        self.dlg.pushButtonReset.clicked.connect(self.test)
+
+        #self.dlg.pushButtonMapMatching.setEnabled(True)
+        #self.dlg.pushButtonCorrectTopology.setEnabled(True)
+        
+
 
         #change attributes elements when path layer comboBox is activated
         self.dlg.comboBoxPathLayer.activated.connect(self.fill_attribute_comboBox)
 
+        self.layers = None
         #buggé à garder en mémoire
         #root = QgsProject.instance().layerTreeRoot()
         #root.visibilityChanged.connect(self.info)
@@ -101,8 +115,6 @@ class first:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
-
-
 
         """ ligne 82: mise à jour comboBox quand selection de layer
             def info(self,layerTreeNode):
@@ -244,21 +256,167 @@ class first:
     #                                       Mon code
     #==============================================================================================================================
 
-    def start_mapMatching(self):
-        """Start the process of mapMatching after verifying the validity of the comboBox data."""
+
+    #===============================================================================#
+    #===========================Threading part======================================#
+    #===============================================================================#
+
+    #phase test: plusieurs bugs: bug selection layer, Penser à voir si implémentable dans layers
+    def startWorker(self, layers, work_to_do):
+        """Start and set up a thread to do heavy work in background, workerFinished will be trigger after the thread end
+        
+        Input:
+        layers     -- An object of class Layers
+        work_to_do -- A string representing the work to be done
+                      3 possible values for now: reduce_network_layer, 
+                                                 correct_topology,
+                                                 matching
+        """
+        
+        self.disable_all_buttons()
+
+        # create a new worker instance
+        worker = Worker(layers)
+
+        # configure the QgsMessageBar
+        messageBar = self.iface.messageBar().createMessage('Heavy work in the background: ' + work_to_do, )
+        progressBar = QProgressBar()
+        progressBar.setAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        
+        cancelButton = QPushButton()
+        cancelButton.setText('Cancel')
+        cancelButton.clicked.connect(worker.kill)
+
+        messageBar.layout().addWidget(progressBar)
+        messageBar.layout().addWidget(cancelButton)
+        self.iface.messageBar().pushWidget(messageBar, Qgis.Info)
+        self.messageBar = messageBar
+
+        # start the worker in a new thread
+        thread = QtCore.QThread(worker)
+        worker.moveToThread(thread)
+        worker.finished.connect(self.workerFinished)
+        worker.error.connect(self.workerError)
+        worker.progress.connect(progressBar.setValue)
+
+        if(work_to_do == "reduce_network_layer"):
+            worker.add_range(self.dlg.spinBoxBufferRange.value())
+            thread.started.connect(worker.run_reduce_network_layer)
+        elif(work_to_do == "correct_topology"):
+            thread.started.connect(worker.run_correct_topology)
+        elif(work_to_do == "matching"):
+            thread.started.connect(worker.run_map_matching)
+
+        thread.start()
+        self.thread = thread
+        self.worker = worker
+
+    def workerFinished(self, ret):
+        """Start once a thread from startWorker is finished: Clean the thread and apply the result."""
+
+        
+
+        # clean up the worker and thread
+        self.thread.quit()
+        self.thread.wait()
+        self.thread.deleteLater()
+        self.worker.deleteLater()
+        # remove widget from message bar
+
+        self.iface.messageBar().popWidget(self.messageBar)
+        if ret is not None:
+            # report the result
+
+            work_to_do = ret
+            
+            self.iface.messageBar().pushMessage("work done, " + work_to_do)
+
+            if(work_to_do == "reduce_network_layer"):
+                QgsProject.instance().addMapLayer(self.layers.network_layer.layer)
+                self.dlg.pushButtonCorrectTopology.setEnabled(True)
+
+            elif(work_to_do == "correct_topology" ):
+                QgsProject.instance().addMapLayer(self.layers.network_layer.layer)
+                self.dlg.pushButtonMapMatching.setEnabled(True)
+
+            elif(work_to_do == "matching"):
+                self.dlg.pushButtonReselectPath.setEnabled(True)
+
+        else:
+            # notify the user that something went wrong
+            self.iface.messageBar().pushMessage('Something went wrong! See the message log for more information.', level=Qgis.Critical, duration=3)
+        
+        print("end thread")
+    
+
+    def workerError(self, e, exception_string):
+        print("Error: " + 'Worker thread raised an exception: ')
+        print("------------------------------------------------------ \n")
+        print(exception_string)
+        print("------------------------------------------------------")
+        #QgsMessageLog.logMessage('Worker thread raised an exception:\n'.format(exception_string), level=Qgis.Critical)
+
+
+    #===============================================================================#
+    #===========================action function part================================#
+    #===============================================================================#
+
+
+    def reduce_network_layer(self):
+        if self.create_layers_class()!= -1 :
+            #self.startWorker(self.layers,"reduce_network_layer")
+            self.layers.reduce_network_layer(self.dlg.spinBoxBufferRange.value())
+            QgsProject.instance().addMapLayer(self.layers.network_layer.layer)
+            self.dlg.pushButtonCorrectTopology.setEnabled(True)
+            self.dlg.pushButtonReduceNetwork.setEnabled(False)
+
+    def correct_topology(self):
+        if self.create_layers_class() != -1:
+            #self.startWorker(self.layers,"correct_topology")
+            if self.dlg.checkBox_Speed.isChecked():
+                self.layers.reduce_Path_layer(self.dlg.comboBoxSpeed.currentText())
+            self.layers.correct_network_layer_topology()
+            self.dlg.pushButtonMapMatching.setEnabled(True)
+            self.dlg.pushButtonCorrectTopology.setEnabled(False)
+
+    def start_mapMatching(self): 
+
+        if self.create_layers_class() != -1:
+            #self.startWorker(self.layers,"matching")
+            #network_layer = self.get_layer(self.dlg.comboBoxNetworkLayer.currentText())
+
+            #
+
+            self.layers.match() #network_layer
+            self.dlg.pushButtonReselectPath.setEnabled(True)
+            self.dlg.pushButtonApplyPathChange.setEnabled(True)
+
+    def on_click_reSelect_path(self):
+        self.layers.reSelect_path()
+
+    def on_click_apply_modification(self):
+        self.layers.apply_modification()
+
+
+    #===============================================================================#
+    #===========================layer utility part==================================#
+    #===============================================================================#
+
+
+    def create_layers_class(self):
+        if(self.layers != None):
+            return 0
 
         network_layer = self.get_layer(self.dlg.comboBoxNetworkLayer.currentText())
         path_layer = self.get_layer(self.dlg.comboBoxPathLayer.currentText())
 
         if not self.check_layer_validity(network_layer,path_layer):
-            return
-    
+            return -1
+
         self.layers = Layers(path_layer,network_layer)
+        return 1
 
-        self.layers.reduce_network_layer(self.dlg.spinBoxBufferRange.value())
-
-        #self.layers.reduce_Path_layer(self.dlg.comboBoxSpeed.currentText())
-
+    
 
     def check_layer_validity(self,network_layer,path_layer):
         """Verify if the two layers respect the specification.
@@ -292,7 +450,7 @@ class first:
             self.iface.messageBar().pushMessage("Error", 'Error the Network layer doesn\'t use a cartesian projection system',level=Qgis.Critical)
             return False
         if(path_layer.crs().mapUnits()!=0):
-            self.iface.messageBar().pushMessage("Error", 'Error the Path ayer doesn\'t use a cartesian projection system',level=Qgis.Critical)
+            self.iface.messageBar().pushMessage("Error", 'Error the Path layer doesn\'t use a cartesian projection system',level=Qgis.Critical)
             return False
 
         #We check if the two layers use the same projection system
@@ -302,6 +460,29 @@ class first:
             return False
 
         return True
+
+
+    def get_layer(self, layer_name):
+        """Return the QgsVectorLayer with the name layer_name."""
+
+        layers = self.iface.mapCanvas().layers()
+
+        for layer in layers:
+            if layer.name() == layer_name:
+                return layer
+        return None
+
+    #===============================================================================#
+    #================================GUI part=======================================#
+    #===============================================================================#
+
+    def disable_all_buttons(self):
+        self.dlg.pushButtonReduceNetwork.setEnabled(False)
+        self.dlg.pushButtonCorrectTopology.setEnabled(False)
+        self.dlg.pushButtonMapMatching.setEnabled(False)
+        self.dlg.pushButtonReselectPath.setEnabled(False)     
+        self.dlg.pushButtonApplyPathChange.setEnabled(False)
+
 
     def create_message_error(self,message,button_message,level):
         widget = self.iface.messageBar().createMessage("Error",message)
@@ -325,8 +506,13 @@ class first:
         layers = self.iface.mapCanvas().layers()
 
         #fill the comboBox
-        self.fill_layer_comboBox(layers, self.dlg.comboBoxNetworkLayer, 'LINESTRING')
-        self.fill_layer_comboBox(layers, self.dlg.comboBoxPathLayer, 'POINT')
+        cb1 = self.fill_layer_comboBox(layers, self.dlg.comboBoxNetworkLayer, 'LINESTRING')
+        cb2 = self.fill_layer_comboBox(layers, self.dlg.comboBoxPathLayer, 'POINT')
+
+        if(cb1 != 0 and cb2 != 0 ):
+            self.dlg.pushButtonReduceNetwork.setEnabled(True)
+        else:
+            self.dlg.pushButtonReduceNetwork.setEnabled(False)
 
         self.fill_attribute_comboBox()
 
@@ -344,6 +530,7 @@ class first:
         #first clear the comboBox
         comboBox.clear()
 
+        i=0
         #populate the comboBox
         for layer in layers:
             #ignore raster layer, because just vector layers have a wkbType
@@ -352,6 +539,17 @@ class first:
                     QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.LineString and geom_type == 'LINESTRING'):
 
                     comboBox.addItem(layer.name())
+                    i+=1
+
+        return i
+
+    def empty_oid_comboBox(self):
+        self.dlg.comboBoxOID.clear()
+        self.empty_oid_comboBox = True
+
+    def empty_speed_comboBox(self):
+        self.dlg.comboBoxSpeed.clear()
+        self.empty__comboBox
 
 
     def fill_attribute_comboBox(self):
@@ -379,15 +577,11 @@ class first:
                   field.typeName()=="double"):
                     self.dlg.comboBoxSpeed.addItem(field.name())
 
-    def get_layer(self, layer_name):
-        """Return the QgsVectorLayer with the name layer_name."""
 
-        layers = self.iface.mapCanvas().layers()
+    #===============================================================================#
+    #=============Code Perso pour faciliter le dev==================================#
+    #===============================================================================#
 
-        for layer in layers:
-            if layer.name() == layer_name:
-                return layer
-        return None
 
     #Fonction temporaire et personnel
     #charge un exemple en un clique dans qgis: pour faciliter le developpement
@@ -399,7 +593,7 @@ class first:
         layer = self.iface.addVectorLayer("/Users/jordy/OneDrive/Documents/Cours/Stage Montreal/Import QGIS/trajetV4_reprojeté.shp", "", "ogr")
         if not layer:
             print("Layer failed to load!")
-        layer.setName("De jolie points sur une map : V4")
+        layer.setName("Path layer: V4")
 
         layer = self.iface.addVectorLayer("/Users/jordy/OneDrive/Documents/Cours/Stage Montreal/Import QGIS/mapParis.gpkg", "", "ogr")
         if not layer:
@@ -407,7 +601,7 @@ class first:
         layer.setName("Map de Paris")
 
         for layer in QgsProject.instance().mapLayers().values():
-            if(layer.name() != "De jolie points sur une map : V4" and layer.name() != "Map de Paris"):
+            if(layer.name() != "Path layer: V4" and layer.name() != "Map de Paris"):
                 print(type(layer))
                 node = QgsProject.instance().layerTreeRoot().findLayer(layer)
                 if node:
@@ -420,10 +614,12 @@ class first:
 
     #Fonction temporaire pour faciliter les tests sans avoir à passer par de nombreuses fonctions
     def test(self):
-        """network_layer = self.get_layer(self.dlg.comboBoxNetworkLayer.currentText())
-        path_layer = self.get_layer(self.dlg.comboBoxPathLayer.currentText())
-
-        self.layers = Layers(path_layer,network_layer)
-        """
+        #reset
+        print("func")
+        self.disable_all_buttons()
+        self.dlg.pushButtonReduceNetwork.setEnabled(True)
+        self.layers = None
         
-        self.layers.correct_network_layer_topology()
+
+
+
