@@ -26,7 +26,7 @@ from random import random
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.core import QgsProject
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsWkbTypes
 
@@ -35,10 +35,11 @@ from .resources import *
 # Import the code for the dialog
 from .map_matching_dialog import MapMatchingDialog
 
-from .model.layer_manager import LayerManager
+from .model.ui.layer_manager import LayerManager
 from .model.layer import Layers
 from .model.network import NetworkLayer
 from .model.path import PathLayer
+from .model.ui.settings import Settings
 
 
 class MapMatching:
@@ -58,6 +59,7 @@ class MapMatching:
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
+
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
@@ -71,6 +73,7 @@ class MapMatching:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'q3m.window.title')
+
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -94,6 +97,7 @@ class MapMatching:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+
         return QCoreApplication.translate('MapMatching', message)
 
     def add_action(
@@ -198,6 +202,8 @@ class MapMatching:
             self.dlg = MapMatchingDialog()
             self.dlg.set_manager(self.manager)
 
+            self.settings = Settings(self.dlg)
+
             # Translations
             self.dlg.setWindowTitle(self.tr("q3m.window.title"))
             for label, widget in self.dlg.labels():
@@ -208,13 +214,44 @@ class MapMatching:
                 label = label.replace("_", ".").replace("btn", "q3m.window.btn")
                 widget.setText(self.tr(label))
 
+            for name, tab in self.dlg.tab():
+
+                label = tab.tabText(0)
+                label = label.replace("_", ".").replace("tab", "q3m.window.tab")
+                tab.setTabText(0,self.tr(label))
+
+                label = tab.tabText(1)
+                label = label.replace("_", ".").replace("tab", "q3m.window.tab")
+                tab.setTabText(1,self.tr(label))
+
+            """
+            dir = os.path.dirname(__file__)
+            file = os.path.abspath(os.path.join(dir, './ressources/documentation/', 'help_en.html'))
+            file2 = os.path.abspath(os.path.join(dir,'./ressources/documentation/', 'help_settings_en.html'))
+            if os.path.exists(file):
+                with open(file2) as help2:
+                    help = help2.read()
+                    self.dlg.textBrowser_settings.insertHtml(help)
+                    self.dlg.textBrowser_settings.moveCursor(QTextCursor.Start)
+
+                with open(file) as helpf:
+                    help = helpf.read()
+                    self.dlg.textBrowser_help.insertHtml(help)
+                    self.dlg.textBrowser_help.moveCursor(QTextCursor.Start)
+            """
+
             # Listeners
-            self.dlg.btn_reload_layers.clicked.connect(self.load)
-            self.dlg.btn_map_matching.clicked.connect(self.start_map_matching)
+            self.dlg.btn_reload_layers.clicked.connect(self.reloads)
+            self.dlg.btn_map_matching.clicked.connect(self.on_click_pre_matching)
+            self.dlg.btn_reduce_network.clicked.connect(self.on_click_reduce_network)
+            self.dlg.btn_correct_topology.clicked.connect(self.on_click_correct_topology)
+            self.dlg.btn_export_line.clicked.connect(self.load)
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
             # QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
+            
+
 
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update()
@@ -238,8 +275,15 @@ class MapMatching:
             # substitute with your code.
             pass
 
+    def reloads(self):
+        self.dlg.clear()
+        self.manager.set_layers(self.iface.mapCanvas().layers())
+        self.dlg.update()
+
     def load(self):
         """Load sample datas"""
+        QgsProject.instance().removeAllMapLayers()
+        self.dlg.remove_all_layers()
 
         pts_pth = os.path.join(self.plugin_dir, "ressources", "datas", "points.gpkg")
         layer = self.iface.addVectorLayer(pts_pth, "trace_{:.5f}".format(random()), "ogr")
@@ -251,7 +295,7 @@ class MapMatching:
 
         self.dlg.update()
 
-    def start_map_matching(self):
+    def on_click_pre_matching(self):
         """Start the process of mapMatching after verifying the validity of the comboBox data."""
 
         network_layer = self.manager.network_layers()[0]
@@ -263,3 +307,53 @@ class MapMatching:
 
         layer = Layers(path_layer, network_layer)
         layer.reduce_network_layer(buffer)
+
+    def on_click_reduce_network(self):
+
+        val = self.settings.get_settings()
+
+        network_layer = self.manager.find_layer(val["combo_network"])
+        path_layer = self.manager.find_layer(val["combo_path"])
+
+        buffer = val["spin_buffer_range"]
+
+        if not LayerManager.are_valid(path_layer, network_layer):
+            print("error layer not valids")
+            return
+
+        network_layer = NetworkLayer(network_layer)
+        path_layer = PathLayer(path_layer)
+
+
+        layer = Layers(path_layer, network_layer)
+
+        network = layer.reduce_network_layer(buffer)
+
+        self.manager.add_layer(network)
+
+        self.manager.deselect_layer(val["combo_network"])
+
+        self.dlg.update()
+
+        self.dlg.combo_network.setCurrentIndex(self.dlg.combo_network.findText(network.sourceName()))
+
+    def on_click_correct_topology(self):
+
+        val = self.settings.get_settings()
+
+        network_layer = self.manager.find_layer(val["combo_network"])
+        path_layer = self.manager.find_layer(val["combo_path"])
+
+        if not LayerManager.are_valid(path_layer, network_layer):
+            print("error layer not valids")
+            return
+
+        network_layer = NetworkLayer(network_layer)
+        path_layer = PathLayer(path_layer)
+
+        layer = Layers(path_layer, network_layer)
+
+        network = layer.correct_network_layer_topology( val["spin_close_call"], 
+                                                        val["spin_intersection"])
+
+        self.manager.add_layer(network)

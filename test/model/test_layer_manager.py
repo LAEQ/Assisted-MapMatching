@@ -105,6 +105,20 @@ class TestLayerManager(unittest.TestCase):
         fields = self.manager.path_attributes(1)
         self.assertEqual(0, len(fields))
 
+    def test_find_layer(self):
+        layers = self.fixtures.points_and_networks()
+        self.manager.set_layers(layers)
+
+        layer = self.manager.find_layer("points_1.gpkg")
+        self.assertEqual("points_1.gpkg",layer.name())
+
+    def test_find_layer_error(self):
+        layers = self.fixtures.points_and_networks()
+        self.manager.set_layers(layers)
+
+        layer = self.manager.find_layer("test")
+        self.assertEqual(None,layer)
+
 
 if __name__ == "__main__":
     suite = unittest.makeSuite(TestLayerManager)

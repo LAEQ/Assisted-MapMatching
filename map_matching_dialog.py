@@ -25,7 +25,7 @@
 import os
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox
+from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget
 from qgis.core import QgsVectorLayer, QgsFields
 from typing import List
 
@@ -81,6 +81,10 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def remove_layer(self, layer) -> None:
         pass
+    
+    def remove_all_layers(self) -> None:
+        self.manager.set_layers([])
+        self.clear()
 
     """Listeners"""
     def on_path_changed(self):
@@ -89,8 +93,12 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         index = self.combo_path.currentIndex()
         fields = self.manager.path_attributes(index)
-        self.combo_oid.addItems([field.name() for field in fields])
-        self.combo_speed.addItems([field.name() for field in fields])
+        self.combo_oid.addItems([field.name() for field in fields if (  field.typeName() == "Integer" or 
+                                                                        field.typeName()=="Integer64" or
+                                                                        field.typeName()=="int8" or 
+                                                                        field.typeName()=="integer")])
+        self.combo_speed.addItems([field.name() for field in fields if (  field.typeName() == "Real" or 
+                                                                            field.typeName()=="double")])
 
     def __iter__(self):
         for attr, value in self.__dict__.iteritems():
@@ -102,3 +110,6 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def buttons(self):
         return filter(lambda elem: isinstance(elem[1], QPushButton), self.__dict__.items())
+
+    def tab(self):
+        return filter(lambda elem: isinstance(elem[1], QTabWidget), self.__dict__.items())

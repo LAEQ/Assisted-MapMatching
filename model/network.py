@@ -5,6 +5,10 @@ from qgis.PyQt.QtCore import QVariant
 # from .topology import *
 from shapely import wkt
 
+from .utils.layerTraductor import *
+
+from .topology import *
+
 """
 This class take care of the network layer
 It has 2 objects:
@@ -17,8 +21,10 @@ class NetworkLayer:
 
     def __init__(self, _layer):
         self.initial_layer = _layer
+        self.layer = self.initial_layer
 
-    def select_intersection_trajectory(self, buffer):
+
+    def select_intersection_trajectory(self, buffer) -> QgsVectorLayer:
         """Reduce the network layer features by only keeping the line intersecting the buffer
 
         Input:
@@ -32,18 +38,25 @@ class NetworkLayer:
         test = processing.run("qgis:selectbylocation",
                               {'INPUT': self.initial_layer, 'PREDICATE': 0, 'INTERSECT': buffer, 'METHOD': 0})
 
-        self.reduced_layer = self.initial_layer.materialize(
+        reduced_layer = self.initial_layer.materialize(
             QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
         self.initial_layer.removeSelection()
 
-        # Temporary line to show the progression
-        QgsProject.instance().addMapLayer(self.reduced_layer)
-        print("Reduced layer: ")
+        #Deselect the precedent network
+        #QgsProject.instance().layerTreeRoot().findLayer(self.initial_layer.id()).setItemVisibilityChecked(False)
 
-    def correct_topology(self):
+        
+        reduced_layer.setName("Reduced network")
+        self.layer = reduced_layer
+
+        return reduced_layer
+        #QgsProject.instance().addMapLayer(self.reduced_layer)
+
+
+    def correct_topology(self, close_call_tol, inter_dangle_tol):
         """Correct the topology of the layer."""
 
-        shapely_dict = self.__from_vector_layer_to_list_of_dict(self.reduced_layer)
+        shapely_dict = layerTraductor.from_vector_layer_to_list_of_dict(self.layer)
 
         # We truncate all the points value
         corrected_list = simplify_coordinates(shapely_dict, 3)
@@ -52,110 +65,17 @@ class NetworkLayer:
         corrected_list = cut_loops(corrected_list)
 
         # We take care of the intersection
-        corrected_list = deal_with_danglenodes(corrected_list)
-        corrected_list = deal_with_intersections(corrected_list)
+        corrected_list = deal_with_danglenodes(corrected_list, inter_dangle_tol)
+        corrected_list = deal_with_intersections(corrected_list, inter_dangle_tol)
 
         # We connect roads wich extremities are close to each other
-        corrected_list = deal_with_closecall(corrected_list)
+        corrected_list = deal_with_closecall(corrected_list, close_call_tol)
 
-        self.reduced_layer = self.__from_list_of_dict_to_layer(corrected_list)
+        layer = layerTraductor.from_list_of_dict_to_layer(corrected_list, self.layer, "LineString", "corrected layer")
 
-        # Temporary line : Ajout de la couche à l'application
-        QgsProject.instance().addMapLayer(self.reduced_layer)
+        return layer
 
-    def __from_vector_layer_to_list_of_dict(self, layer):
-        """Transform the input layer into a format readable for shapely
 
-        Input:
-        layer -- A QgsVectorLayer
-
-        Output:
-        final_list -- A list composed of the dictionnary version of each feature plus a pair ['geometry']
-        i.e:
-        final_list = [
-            {'fid': 1 , 'speed': 3.14 , 'geometry' : wktGeometry},
-            { 'fid': 2 , ...},
-            ...
-        ]
-
-        """
-
-        final_list = []
-        temp = layer.fields().names()
-
-        for f in layer.getFeatures():
-            temporary_dictionary = {}
-
-            for attr in temp:
-                temporary_dictionary[attr] = f[attr]
-
-            temporary_dictionary["geometry"] = wkt.loads(f.geometry().asWkt())
-
-            final_list.append(temporary_dictionary)
-
-        return final_list
-
-    def __from_list_of_dict_to_layer(self, feat_list):
-        """Transform a list into a QgsVectorLayer (memory) based on this vectorLayer model (self.initial_layer)
-
-        Input:
-        feat_list -- A list composed of dictionnary (1 dictionnary = 1 feature) with at least a 'geometry' parameter in each
-
-        Output:
-        mem_layer -- A QgsVectorLayer filled with the elements in feat_list
-
-        """
-
-        epsg = self.initial_layer.crs().postgisSrid()
-
-        mem_layer = QgsVectorLayer("Linestring?crs=EPSG:" + str(epsg),
-                                   "temp",
-                                   "memory")
-
-        pr = mem_layer.dataProvider()
-        layer_fields = self.initial_layer.fields()
-        pr.addAttributes(layer_fields)
-
-        mem_layer.updateFields()
-
-        for obj in feat_list:
-            f = QgsFeature()
-            geom = QgsGeometry().fromWkt(obj["geometry"].wkt)
-            f.setGeometry(geom)
-
-            attributes_list = []
-
-            for attr in layer_fields.names():
-                attributes_list.append(obj[attr])
-
-            f.setAttributes(attributes_list)
-            pr.addFeature(f)
-
-        mem_layer.updateExtents()
-
-        return mem_layer
-
-        # ====================================================
-        # Perso
-
-        # self.reduced_layer.removeSelection()
-
-        """
-        i =0
-        for f in self.reduced_layer.getFeatures():
-            if i == 0:
-                print(f.id())
-                self.reduced_layer.select(f.id())
-                i+=1
-                geom = f.geometry()
-                #print(geom)
-
-        for f in self.reduced_layer.getSelectedFeatures():
-            print(f.id())"""
-
-        # Créé un nouveau layer et l'ajoute
-        # memory_layer = self.initial_layer.materialize(QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
-        # QgsProject.instance().addMapLayer(memory_layer)
 
 
 
