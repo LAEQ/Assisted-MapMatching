@@ -13,23 +13,31 @@ from .geometry import *
 class mapMatching:
 
 
-    def __init__(self, _network_layer, _path_layer, _layer = None ,progression = None):
+    def __init__(self, _network_layer, _path_layer, _layer = None, _OID = "OID" ,progression = None):
 
         self.network_layer = _network_layer
         self.path_layer = _path_layer
         self.new_layer = _layer
+        self.OID = _OID
 
         #print(network_layer)
         #print(path_layer)
 
         #QgsProject.instance().addMapLayer(new_layer)
 
+    def setParameters(self, _searching_radius, _sigma):
+        self.searching_radius = _searching_radius
+        self.sigma = _sigma
+
 
     def find_best_path_in_network(self):
 
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
         pointlayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
-        
+
+
+        pointlayer = layerTraductor.order_list_of_dict(pointlayer,self.OID)
+
         # lecture d'un ensemble de ligne 
         graph,linedict = build_graph(linelayer)
 
@@ -41,11 +49,11 @@ class mapMatching:
 
 
         ## parametres generaux
-        distInit = 45
-        sigma = 5
+        dist = self.searching_radius
+        sigma = self.sigma
         print("Line Selecting -------------------------------------------------")
         #calculer le meilleur chemin
-        matcher = DistanceMatcher(mymap, max_dist_init=distInit, max_dist=distInit, obs_noise=sigma, obs_noise_ne=sigma*2,
+        matcher = DistanceMatcher(mymap, max_dist_init=dist, max_dist=dist, obs_noise=sigma, obs_noise_ne=sigma*2,
                               non_emitting_states=True,only_edges=True)
         states, _ = matcher.match(pts)
         print("END Selection -------------------------------------------------")
@@ -54,6 +62,7 @@ class mapMatching:
         actualstate = None
         selected_lines = []
         for state in states : 
+            #print(state)
             if state != actualstate : 
                 actualstate = state #state["oid"]
                 selected_lines.append(linedict[state])
@@ -62,17 +71,27 @@ class mapMatching:
 
         self.tag_id = [str(feat['joID']) for feat in self.new_layer.getFeatures()]
 
+
+
         #conserver/ selectionner les lignes dans un nouveau vect?
 
 
     # polyline is a simple linestring
     def snap_points_along_line(self, speedField, speedlim=1.5 ,minpts = 5 , maxpts = float("inf")) : 
+        
 
         #to dict
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.new_layer)
         pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
 
-        polyline = build_polyline(linelayer, pointslayer, 15)
+        pointslayer = layerTraductor.order_list_of_dict(pointslayer,self.OID)
+
+        if len(linelayer) == 0:
+            print("Can't match on empty line: don't forget to select the layer")
+            return -1 
+        #print(len(linelayer))
+
+        polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
         print("Finished build polyline")
         rev_polyline = reverse_line(polyline)
         length_polyline = polyline.length
@@ -138,7 +157,7 @@ class mapMatching:
                 newdistances+=[accdist for i in range(len(pointset))]
 
         print("END FONCTION")
-        return newpts,newdistances
+        return newpts #,newdistances
 
 
     #min pts : nombre minimum de points pour former un aggregat
@@ -197,6 +216,85 @@ class mapMatching:
             newlisted.append([situation,pts])
 
         return newlisted
+
+
+    def snap_point_to_closest(self):
+        #to dict
+        linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.new_layer)
+        pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
+
+        pointslayer = layerTraductor.order_list_of_dict(pointslayer,self.OID)
+
+
+        if len(linelayer) == 0:
+            print("Can't match on empty line: don't forget to select the layer")
+            return (-1) 
+
+
+        polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
+        print("Finished build polyline for closest")
+
+        for feat in pointslayer :
+
+            point = polyline.interpolate(polyline.project(Point(feat["geometry"].x,feat["geometry"].y)))
+
+            feat["geometry"] = point
+
+        
+
+        return layerTraductor.from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point to closest")
+
+
+    def snap_point_by_distance(self):
+        linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.new_layer)
+        pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
+
+        print(self.OID)
+        pointslayer = layerTraductor.order_list_of_dict(pointslayer, self.OID)
+
+
+        if len(linelayer) == 0:
+            print("Can't match on empty line: don't forget to select the layer")
+            return (-1) 
+
+        #Step 1: Build the polyline
+        polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
+        print("Finished build polyline for distance")
+
+        # Step 2: stocker dans un tableau la distance entre chaque points de points_layer
+        dist_list = []
+        length = 0
+        for i in range(len(pointslayer)-1):
+            dist = pointslayer[i]["geometry"].distance(pointslayer[i+1]["geometry"])
+            length += dist
+            dist_list.append(dist)
+        
+        #Step 3 : obtenir le ratio entre longueur max des points et polyline
+        ratio = polyline.length / length
+
+        #Step 4: Snap les points suivant en fonction de la distance * ratio
+        point = polyline.interpolate(polyline.project(Point(pointslayer[0]["geometry"].x,pointslayer[0]["geometry"].y)))
+        pointslayer[0]["geometry"] = point
+        
+        distance = 0
+        for i in range(len(pointslayer)-1):
+            distance += dist_list[i] * ratio
+            point = polyline.interpolate(distance)
+            pointslayer[i+1]["geometry"] = point
+
+        return layerTraductor.from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point by distance")
+            
+
+
+
+        """
+        Step 1: stocker dans un tableau la distance entre chaque points de points_layer
+        Step 2: obtenir le ratio entre longueur max des points et polyline
+        Step 3: Snap le premier point au closest
+        Step 4: Snap les points suivant en fonction de la distance * ratio
+
+        Sur que le premier = premier + dans l'ordre
+        """
 
 
     

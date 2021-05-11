@@ -1,5 +1,7 @@
 from shapely import wkt
+from shapely.geometry import shape
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
+import json
 
 class layerTraductor:
 
@@ -31,15 +33,17 @@ class layerTraductor:
             for attr in temp:
 
                 temporary_dictionary[attr] = f[attr]
+            
+            tempa = f.geometry().asJson()
 
-            temporary_dictionary["geometry"] = wkt.loads(f.geometry().asWkt())
+            temporary_dictionary["geometry"] = shape(json.loads(tempa))
 
             final_list.append(temporary_dictionary)
 
         return final_list
 
     @staticmethod
-    def from_list_of_dict_to_layer(feat_list,layer_patern):
+    def from_list_of_dict_to_layer(feat_list,layer_patern,type_layer = "Linestring",name = "new layer"):
         """Transform a list into a QgsVectorLayer (memory) based on this vectorLayer model (self.initial_layer) 
 
         Input:
@@ -52,9 +56,9 @@ class layerTraductor:
 
         epsg = layer_patern.crs().postgisSrid()
 
-        mem_layer = QgsVectorLayer("Linestring?crs=EPSG:" + str(epsg),
-                                    "Reduced and corrected network",
-                                    "memory")
+        typ = type_layer+"?crs=EPSG:"+ str(epsg)
+
+        mem_layer = QgsVectorLayer(typ,name,"memory")
 
         pr = mem_layer.dataProvider()
         layer_fields = layer_patern.fields()
@@ -78,3 +82,8 @@ class layerTraductor:
         mem_layer.updateExtents()
 
         return mem_layer
+
+    @staticmethod
+    def order_list_of_dict(feat_list,column_name = "OID"):
+        """Sort a list according to it's OID column"""
+        return sorted(feat_list,key= lambda obj: obj[column_name])

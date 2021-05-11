@@ -54,13 +54,15 @@ class NetworkLayer:
         #print("Reduced layer: ")
         
 
-    def correct_topology(self, call_close_call = False, progression = None):
+    def correct_topology(self, close_call_tolerance = 0.3, inter_dangle_tolerance= 0.01 , progression = None):
         """Correct the topology of the layer."""
 
         if(progression is not None):
             progression.emit(5)
 
         shapely_dict = layerTraductor.from_vector_layer_to_list_of_dict(self.layer)
+
+
 
         #if(progression is not None):
             #progression.emit(10)
@@ -78,23 +80,22 @@ class NetworkLayer:
             #progression.emit(40)
 
         #We take care of the intersection
-        corrected_list = deal_with_danglenodes(corrected_list)
+        corrected_list = deal_with_danglenodes(corrected_list,inter_dangle_tolerance)
 
-        corrected_list = deal_with_intersections(corrected_list)
+        corrected_list = deal_with_intersections(corrected_list, inter_dangle_tolerance)
 
         if(progression is not None):
             progression.emit(1)
 
         #NB: La ligne ci dessous prend un temps monstre
         #We connect roads wich extremities are close to each other
-        if(call_close_call):
-            corrected_list = deal_with_closecall(corrected_list,progression)
+        corrected_list = deal_with_closecall(corrected_list, tolerance = close_call_tolerance, progression = progression)
 
         #if(progression is not None):
             #progression.emit(80)
 
         
-        lay = layerTraductor.from_list_of_dict_to_layer(corrected_list,self.layer)
+        lay = layerTraductor.from_list_of_dict_to_layer(corrected_list,self.layer,"LineString","corrected layer")
 
         #if(progression is not None):
             #progression.emit(90)
@@ -108,6 +109,11 @@ class NetworkLayer:
         
 
     def find_path(self, matching, progression = None): 
+        """Find a possible route 
+        
+        Input: 
+        matching :  -- An object of class MapMatching 
+        """
         
         matching.find_best_path_in_network()
 
@@ -117,6 +123,11 @@ class NetworkLayer:
 
 
     def add_attribute_to_layers(self, attribute_name = 'joID'):
+        """ Create a new column to the network_layer indexed from 0 to the number of feature in the layer  
+        
+        Input:
+        attribute_name : -- A string that represent the name of the new column
+        """
 
         #self.layer = self.initial_layer
 
@@ -142,6 +153,8 @@ class NetworkLayer:
         
 
     def select_possible_path(self):
+        """ Select in the network_layer the path recorded at the last matching """
+
         if(self.possible_path) == None:
             print("error : path not created yet")
             return
@@ -151,43 +164,20 @@ class NetworkLayer:
 
 
 
-    def change_possible_path(self):
+    def change_possible_path(self): #penser à mettre un warning si layer vide de selection
+        """ Change the path recorded """
+
         self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
 
 
     def create_vector_from_path(self):
+        """Create a QgsVectorLayer from the selected features """
 
         layer = processing.run("native:saveselectedfeatures", {'INPUT': self.layer, 'OUTPUT': 'memory:'})['OUTPUT']
         layer.setName("path for matching")
 
         return layer
 
-
-
-
-
-
-        #====================================================
-        # Perso
-        
-        # self.reduced_layer.removeSelection()
-        
-        """
-        i =0
-        for f in self.reduced_layer.getFeatures():
-            if i == 0:
-                print(f.id())
-                self.reduced_layer.select(f.id())
-                i+=1
-                geom = f.geometry()
-                #print(geom)
-
-        for f in self.reduced_layer.getSelectedFeatures():
-            print(f.id())"""
-
-        #Créé un nouveau layer et l'ajoute
-        #memory_layer = self.initial_layer.materialize(QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
-        #QgsProject.instance().addMapLayer(memory_layer)
 
         
 

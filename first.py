@@ -27,6 +27,9 @@ from qgis.PyQt.QtWidgets import QAction, QPushButton, QProgressBar, QPushButton,
 from qgis.core import *
 import copy
 
+from .layerTraductor import *
+import random
+
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -73,11 +76,20 @@ class first:
         #add help-document to the GUI
         dir = os.path.dirname(__file__)
         file = os.path.abspath(os.path.join(dir, '.', 'help.html'))
+        file2 = os.path.abspath(os.path.join(dir,'.', 'help_settings.html'))
         if os.path.exists(file):
+            with open(file2) as help2:
+                help = help2.read()
+                self.dlg.textBrowser_settings.insertHtml(help)
+                self.dlg.textBrowser_settings.moveCursor(QTextCursor.Start)
+
             with open(file) as helpf:
                 help = helpf.read()
                 self.dlg.textBrowser_help.insertHtml(help)
                 self.dlg.textBrowser_help.moveCursor(QTextCursor.Start)
+
+
+                
 
         
 
@@ -90,12 +102,15 @@ class first:
         self.dlg.pushButtonMapMatching.clicked.connect(self.start_mapMatching)
         self.dlg.pushButtonReselectPath.clicked.connect(self.on_click_reSelect_path)
         self.dlg.pushButtonApplyPathChange.clicked.connect(self.on_click_apply_modification)
-        self.dlg.pushButtonReset.clicked.connect(self.test)
+        self.dlg.pushButtonReset.clicked.connect(self.reset) 
 
         #self.dlg.pushButtonMapMatching.setEnabled(True)
         #self.dlg.pushButtonCorrectTopology.setEnabled(True)
-        
 
+        self.dlg.comboBoxAlgoMatching.addItem("Matching with Speed")
+        self.dlg.comboBoxAlgoMatching.addItem("Matching closest")
+        self.dlg.comboBoxAlgoMatching.addItem("Matching by distance")
+        
 
         #change attributes elements when path layer comboBox is activated
         self.dlg.comboBoxPathLayer.activated.connect(self.fill_attribute_comboBox)
@@ -363,39 +378,97 @@ class first:
 
 
     def reduce_network_layer(self):
-        if self.create_layers_class()!= -1 :
+        if self.__create_layers_class()!= -1 :
             #self.startWorker(self.layers,"reduce_network_layer")
-            self.layers.reduce_network_layer(self.dlg.spinBoxBufferRange.value())
+
+            settings = self.recup_settings()
+
+            self.layers.reduce_network_layer(settings["spinBoxBufferRange"])
+
             QgsProject.instance().addMapLayer(self.layers.network_layer.layer)
+
             self.dlg.pushButtonCorrectTopology.setEnabled(True)
             self.dlg.pushButtonReduceNetwork.setEnabled(False)
 
+
     def correct_topology(self):
-        if self.create_layers_class() != -1:
+        if self.__create_layers_class() != -1:
             #self.startWorker(self.layers,"correct_topology")
-            if self.dlg.checkBox_Speed.isChecked():
-                self.layers.reduce_Path_layer(self.dlg.comboBoxSpeed.currentText())
-            self.layers.correct_network_layer_topology()
+
+            settings = self.recup_settings()
+
+            if settings["checkBox_Speed"] :
+                self.layers.reduce_Path_layer(settings["comboBoxSpeed"], settings["spinBoxStopSpeed"])
+            self.layers.correct_network_layer_topology(settings["spinBoxCloseCall"],settings["spinBoxIntersection"])
             self.dlg.pushButtonMapMatching.setEnabled(True)
             self.dlg.pushButtonCorrectTopology.setEnabled(False)
 
+
     def start_mapMatching(self): 
 
-        if self.create_layers_class() != -1:
+        if self.__create_layers_class() != -1:
             #self.startWorker(self.layers,"matching")
-            #network_layer = self.get_layer(self.dlg.comboBoxNetworkLayer.currentText())
 
-            #
+            settings = self.recup_settings()
 
-            self.layers.match() #network_layer
+            #we prepare the network layer
+            self.layers.network_layer.add_attribute_to_layers()
+
+            #We create the matching class
+            matching = mapMatching(self.layers.network_layer.layer,self.layers.path_layer.layer, _OID= settings["comboBoxOID"])
+            matching.setParameters(settings["spinBoxSearchingRadius"], settings["spinBoxSigma"])
+
+            #We call the matching function
+            if settings["comboBoxAlgoMatching"] == "Matching with Speed":
+                if(settings["checkBox_Speed"] == False):
+                    print("error")
+                    return
+
+                self.layers.reduce_Path_layer(settings["comboBoxSpeed"],settings["spinBoxStopSpeed"])
+                self.layers.match_speed(matching, settings["comboBoxSpeed"])
+
+            elif settings["comboBoxAlgoMatching"] == "Matching closest":
+                self.layers.match_closest(matching)
+
+            elif settings["comboBoxAlgoMatching"] == "Matching by distance":
+                self.layers.match_by_distance(matching)
+
+            self.dlg.pushButtonMapMatching.setEnabled(False)
             self.dlg.pushButtonReselectPath.setEnabled(True)
             self.dlg.pushButtonApplyPathChange.setEnabled(True)
+
 
     def on_click_reSelect_path(self):
         self.layers.reSelect_path()
 
+
     def on_click_apply_modification(self):
-        self.layers.apply_modification()
+        
+        settings = self.recup_settings()
+
+        if settings["comboBoxAlgoMatching"] == "Matching with Speed" :
+            if settings["checkBox_Speed"] == False:
+                print("error speed not checked and use speed matching")
+                return
+
+            self.layers.reduce_Path_layer(  settings["comboBoxSpeed"],
+                                            settings["spinBoxStopSpeed"])
+
+            self.layers.apply_modification( settings["comboBoxAlgoMatching"], 
+                                            search_rad = settings["spinBoxSearchingRadius"],
+                                            sigma = settings["spinBoxSigma"],
+                                            speed_column_name= settings["comboBoxSpeed"], 
+                                            OID=  settings["comboBoxOID"])
+
+        else:
+            self.layers.apply_modification(settings["comboBoxAlgoMatching"],
+                                                    search_rad = settings["spinBoxSearchingRadius"],
+                                                    sigma = settings["spinBoxSigma"],
+                                                    OID= settings["comboBoxOID"])
+
+        
+
+        
 
 
     #===============================================================================#
@@ -403,14 +476,16 @@ class first:
     #===============================================================================#
 
 
-    def create_layers_class(self):
+    def __create_layers_class(self):
         if(self.layers != None):
             return 0
 
-        network_layer = self.get_layer(self.dlg.comboBoxNetworkLayer.currentText())
-        path_layer = self.get_layer(self.dlg.comboBoxPathLayer.currentText())
+        settings = self.recup_settings()
 
-        if not self.check_layer_validity(network_layer,path_layer):
+        network_layer = self.get_layer(settings["comboBoxNetworkLayer"])
+        path_layer = self.get_layer(settings["comboBoxPathLayer"])
+
+        if not self.__check_layer_validity(network_layer,path_layer):
             return -1
 
         self.layers = Layers(path_layer,network_layer)
@@ -418,7 +493,7 @@ class first:
 
     
 
-    def check_layer_validity(self,network_layer,path_layer):
+    def __check_layer_validity(self,network_layer,path_layer):
         """Verify if the two layers respect the specification.
 
 
@@ -436,13 +511,13 @@ class first:
             self.create_message_error("No network layer detected, makes sure the layer is active in the layer tab  : Refresh?",
                                       "Refresh",
                                       Qgis.Critical)
-            return
+            return False
 
         if(path_layer == None):
             self.create_message_error("No Path layer detected, makes sure the layer is active in the layer tab : Refresh?",
                                       "Refresh",
                                       Qgis.Critical)
-            return
+            return False
 
 
         #We check the Distance Unit of the projection system: 0 = DistanceMeters, 6 = DistanceDegrees...
@@ -613,12 +688,46 @@ class first:
 
 
     #Fonction temporaire pour faciliter les tests sans avoir à passer par de nombreuses fonctions
-    def test(self):
+    def reset(self):
         #reset
         print("func")
         self.disable_all_buttons()
         self.dlg.pushButtonReduceNetwork.setEnabled(True)
         self.layers = None
+
+    def test(self):
+        self.layers.network_layer.add_attribute_to_layers()
+        matching = mapMatching(self.layers.network_layer.layer,self.layers.path_layer.layer, _OID= self.dlg.comboBoxOID.currentText())
+        matching.find_best_path_in_network()
+        self.layers.network_layer.possible_path = matching.tag_id
+        self.layers.reSelect_path()
+
+    def recup_settings(self):
+        dico = {}
+
+        dico["comboBoxNetworkLayer"] = self.dlg.comboBoxNetworkLayer.currentText()
+        dico["comboBoxPathLayer"] = self.dlg.comboBoxPathLayer.currentText()
+
+        dico["spinBoxBufferRange"] = self.dlg.spinBoxBufferRange.value()
+
+        dico["checkBox_Speed"] = self.dlg.checkBox_Speed.isChecked()
+        dico["spinBoxStopSpeed"] = self.dlg.spinBoxStopSpeed.value()
+        dico["comboBoxSpeed"] = self.dlg.comboBoxSpeed.currentText()
+
+        dico["spinBoxCloseCall"] = self.dlg.spinBoxCloseCall.value()
+        dico["spinBoxIntersection"] = self.dlg.spinBoxIntersection.value()
+
+        dico["spinBoxSearchingRadius"] = self.dlg.spinBoxSearchingRadius.value()
+        dico["spinBoxSigma"] = self.dlg.spinBoxSigma.value()
+
+        dico["comboBoxOID"] = self.dlg.comboBoxOID.currentText()
+
+        dico["comboBoxAlgoMatching"] = self.dlg.comboBoxAlgoMatching.currentText()
+
+
+        return dico
+
+        
         
 
 

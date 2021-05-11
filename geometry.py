@@ -6,28 +6,34 @@ import numpy as np
 from .leuvenmapmatching.map.inmem import InMemMap
 from .leuvenmapmatching.matcher.distance import DistanceMatcher
 
+from .dbscan import dbscan2
+
 
 
 #############################################################################
 ## Fonction d'indexation spatiale
 #############################################################################
 
-# Permet de creer un index spatial pyqtree
-# a partir d'une liste de geometrie
-# ceci ferait surement l'objet d'une classe particuliere
-## NB : la methode bounds de shapely retourne ceci : minx, miny, maxx, maxy
+
 def build_sp_index(geometries) : 
-    # obtenir la bbox complete de toutes les geometries
+    """ Create a spatial index pyqtree
+
+    Input: 
+    geometries:   --A list of shapely geometries
+
+    Output:
+    sp_index      -- An object of class pyqtree.Index
+    """
 
     maxX = max([geom.bounds[2] for geom in geometries])
     minX = max([geom.bounds[0] for geom in geometries])
     maxY = max([geom.bounds[3] for geom in geometries])
     minY = max([geom.bounds[1] for geom in geometries])
     
-    # creer l'index (vide au depart)
+
     sp_index = Index((minX,minY,maxX,maxY))
     
-    # inserer chaque geometries
+
     for geom in geometries : 
         sp_index.insert(geom,geom.bounds)
     
@@ -37,6 +43,17 @@ def build_sp_index(geometries) :
 ## permet de recuperer dans un index spatial la geometry
 ## la plus proche d'une autre en entree dans un certain rayon
 def NearestGeometry(geom,sp_index,search_dist) : 
+    """Return the closest entity in a radius.
+    
+    Input:
+    geom:       -- A shapely geometry
+    sp_index    -- An object of class pyqtree.Index
+    search_dist -- A double 
+
+    Output:
+    The closest entity to geom in search_dist radius
+    """
+
     candidates = sp_index.intersect(geom.buffer(search_dist).bounds)
     distances = [(candidate, candidate.distance(geom)) for candidate in candidates]
     distances.sort(key=lambda x:x[1])
@@ -44,9 +61,20 @@ def NearestGeometry(geom,sp_index,search_dist) :
 
 
 def mean_point(points, digit) : 
+    """Return a point with the average position of every points in points
+
+    Input:
+    points:  -- A list of shapely.geometry.point.Point
+    digit:   -- A double to controll the truncation
+
+    Output:
+    A Point of type : shapely.geometry.point.Point
+    
+    """
     mx = truncate(sum([pt.x for pt in points]) / len(points),digit)
     my = truncate(sum([pt.y for pt in points]) / len(points),digit)
     return shapely.geometry.Point(mx,my)
+
 
 #############################################################################
 ##Fonctions simples de manipulation de geometries
@@ -54,44 +82,54 @@ def mean_point(points, digit) :
 
 def truncate(f, n):
     '''Truncates/pads a float f to n decimal places without rounding'''
+
     s = '{}'.format(f)
     if 'e' in s or 'E' in s:
         return '{0:.{1}f}'.format(f, n)
     i, p, d = s.partition('.')
     return float('.'.join([i, (d+'0'*n)[:n]]))
 
-## input : shapely.geometry.LineString, integer
-## output : shapely.geometry.LineString dont les coordonnees ont ete troncaturees
+
 def truncate_coords(line,digit) : 
+    """Truncates a shapely.geometry.LineString with a precision of digit."""
+
     coords = list(line.coords)
     newpts = [(truncate(c[0],digit),truncate(c[1],digit)) for c in coords]
     return shapely.geometry.LineString(newpts)
 
-## input : shapely.geometry.Point, integer
-## output : shapely.geometry.Point dont les coordonnees ont ete troncaturees
+
 def truncate_coords_pts(point,digit) : 
+    """Truncate a shapely.geometry.Point with a precision of digit"""
+
     return shapely.geometry.Point(truncate(point.x,digit),truncate(point.y,digit))
 
-## input : shapely.geometry.LineString
-## output : shapely.geometry.LineString dont l'ordre des vertex a ete inverse
+
 def reverse_line(line) : 
+    """Reverse the order of the vertices in the line"""
+
     coords = list(line.coords)
     coords.reverse()
     return shapely.geometry.LineString(coords)
 
-## input : shapely.geometry.LineString
-## output : tuple(shapely.geometry.Point,shapely.geometry.Point)
-## respectivement le premier et le dernier point d'une LineString
+
 def get_extremites(line) : 
+    """Return a tuple with the extemities of the line"""
     coords = list(line.coords)
     p1 = shapely.geometry.Point(coords[0])
     p2 = shapely.geometry.Point(coords[-1]) 
     return (p1,p2)
 
-## input : shapely.geometry.LineString, list of shapely.geometry.Point
-## output : list of shapely.geometry.LineString
-## un ensemble de LineString obtenu apres decoupage de l'input au niveau des points
+
 def cut_line(line, points):
+    """ Cut a line at given points
+
+    Input:
+    line:   -- A shapely.geometry.LineString object
+    points  -- A list of shapely.geometry.Point object
+
+    Output:
+    lines : -- A list of LineString
+    """
 
     # First coords of line
     coords = list(line.coords)
@@ -139,10 +177,17 @@ def cut_line(line, points):
     return lines
 
 
-## input : shapely.geometry.LineString, shapely.geometry.Point,shapely.geometry.Point
-## output : shapely.geometry.LineString
-## une LineString obteneu apres decoupage de l'input entre deux points
 def cut_line_between(line,p1,p2) : 
+    """Cut a line between two points
+    
+    Input:
+    line:   -- A shapely.geometry.LineString object
+    p1      -- A shapely.geometry.Point object
+    p2      -- A shapely.geometry.Point object
+    Output:
+    A new shapely.geometry.LineString Object 
+
+    """
     d1a = line.project(p1)
     d2a = line.project(p2)
     rev_line = reverse_line(line)
@@ -162,12 +207,20 @@ def cut_line_between(line,p1,p2) :
     allpts = [shapely.geometry.Point(xy) for xy in line.coords]
     okpts = [pt for pt in allpts if line.project(pt)>d1 and line.project(pt)<d2]
     okpts = [start]+okpts+[end]
+
     return shapely.geometry.LineString(okpts)
 
-# input : une shapely LineString
-# output : une liste de shapely LineString
-# decoupe la linestring originale a chacun de ses noeuds
+
 def to_simple_lines(line) : 
+    """Divide a multi LineString into several single LineString
+    
+    Input:
+    line       -- A shapely.geometry.LineString object
+
+    Output:
+    new_lines  -- A list of shapely.geometry.LineString object
+    """
+
     new_lines = []
     coords = list(line.coords)
     for i in range(len(coords)-1) : 
@@ -175,9 +228,17 @@ def to_simple_lines(line) :
     return new_lines
 
 
-# input : deux shapely linestring dont au moins une extremite se touche
-# output une linestring etant la concatenation des deux
 def connect_lines(l1,l2) : 
+    """Merge two lineString if at least one of their extremities are connected together
+    
+    Input:
+    l1:     -- A shapely.geometry.LineString object
+    l2      -- A shapely.geometry.LineString object
+
+    Output:
+    A shapely.geometry.LineString object obtained by merging the two lines
+    """
+
     s1,e1 = get_extremites(l1)
     s2,e2 = get_extremites(l2)
     if s2.distance(e1)<e2.distance(e1) : 
@@ -195,9 +256,16 @@ def connect_lines(l1,l2) :
 # output : une liste de shapely LineString
 # decoupe la linestring originale selon une distance definie
 def to_lixels(line,distance) : 
+    """Cut a line every distance cm
+
+    Input:
+    line:     -- A shapely.geometry.LineString object
+    distance: -- A double
+
+    Output:
+    segments  -- A shapely.geometry.LineString object
     """
-    Fonction permettant de lixeliser un geodataframe de lignes
-    """
+
     #creation de tous les points sur la ligne
     totdist=0
     length = line.length
@@ -208,91 +276,33 @@ def to_lixels(line,distance) :
     segments = cut_line(line,pts)
     return segments
 
-
-## input : shapely.geometry.Points, list of shapely.geometry.Points, integer, float
-## output : list of shapely.geometry.Points (consolidated)
-## the output is a list of the points arrond the original one
-def pontential_neighbours(point,other_points,maxiter,tol) : 
-    i=0
-    actuals = [point]
-    passedpts = []
-    sp_index = build_sp_index(other_points)
-
-    while i < maxiter : 
-        newactuals = []
-        for pt in actuals : 
-            if sum([pt.equals(passed) for passed in passedpts])==0 :
-                passedpts.append(pt)
-                candidates = sp_index.intersect(pt.buffer(tol).bounds)
-                for pt2 in candidates : 
-                    if sum([pt2.equals(passed) for passed in passedpts]) == 0:
-                        newactuals.append(pt2)
-        if len(newactuals)==0 : 
-            break
-        actuals = newactuals
-        i+=1
-    return passedpts
-
-
 ## input : list of shapely.geometry.Points, float, digits
 ## output : list of shapely.geometry.Points (consolidated)
-def consolidate(points,tol=0.1,digits=3, progression = None) :
+def consolidate(points,tol=0.3, progression = None) :
+    """ Merge every points in a list of points that are close to each other in a radius of 0.3
+
+    Input:
+    points:     -- A list of shapely.geometry.Point
+    tol:        -- A double representing the radius of research
+    digits      -- An int representing the precision of the truncation
+    
+    Output:
+    new_pts:    -- A list of shapely.geometry.Point consolidated
     """
-    input: 
-    liste de points: avec des points proches de distance < tol entre eux
-    chaque points: - de tol de lui : utiliser bounding box
-    map : points visité
+
+    Xs = np.array([pt.x for pt in points])
+    Ys = np.array([pt.y for pt in points])
+    XY = np.column_stack([Xs, Ys])
+    scanner = dbscan2(XY, tol, 1)
+    scanner.fit()
+    labels = scanner.df[:,2]
+    new_pts = []
+    for label in np.unique(labels) : 
+        subpts = XY[labels == label]
+        new_pts.append(shapely.geometry.Point(np.mean(subpts, axis = 0)))
+    return new_pts
 
 
-    output: liste de points [shapelypts,...]
-
-    """
-    indexing = collections.defaultdict(lambda : None)
-    newpoints = []
-
-    #points_list = points.copy()
-
-    print("Start")
-
-    for i in range(len(points)):
-        if((indexing[(points[i].x,points[i].y)] is not None)):
-            #print(str(i) + ": ALREADY USED BEFORE")
-            continue
-        
-        ma_list = []
-
-        ma_list = consolidate_worker(points,tol,indexing,ma_list,i)
-                
-        for point in ma_list:
-            indexing[(point.x,point.y)] = True
-
-        if len(ma_list) > 1:
-            newpoints.append(mean_point(ma_list,digits))
-        else:
-            newpoints.append(points[i])
-
-    print("END")
-
-    return newpoints
-
-def consolidate_worker(points,tol,indexing,ma_list,position):
-    point = points[position]
-
-    return_list = ma_list
-    return_list.append(point)
-
-    #del points[position]
-
-    for i in range(len(points)):
-        if((indexing[(points[i].x,points[i].y)] is not None) or (points[i] in return_list) or (points[i].distance(point) > tol)):
-            #print(str(i) + ": ALREADY USED BEFORE")
-            continue
-
-        return_list = consolidate_worker(points,tol,indexing,return_list,i)
-        
-
-    return return_list
-                
         
         
 ## input : shapely.geometry.LineString,
@@ -303,6 +313,14 @@ def consolidate_worker(points,tol,indexing,ma_list,position):
 ## si on decoupe un rond point en deux lignes, chacune de ces lignes
 ## doit heriter des attributes du round point (table attributaire)
 def SplitLoop(line) : 
+    """Cut a lin if it's a loop in two
+    
+    Input:
+    line:   -- A shapely.geometry.LineString object
+
+    Output:
+    segments:   -- A list of shapely.geometry.LineString 
+    """
 
     start,end = get_extremites(line)
     if start.distance(end)<0.001 : 
@@ -337,7 +355,7 @@ def SplitLoop(line) :
 # sur lesquelles ce serait necessaire : les lignes pour lesquels
 # le debut ne coincide pas avec la prochaine.
 # valeur recommandee pour tol actuellement : 15
-def build_polyline(linelayer, pointlayer, tol) : 
+def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) : 
     #---------------------------------------------------------------------------------
     # step 1 : creer un ensemble de lignes simples et decoupee selon une distance = tol
     #---------------------------------------------------------------------------------
@@ -358,11 +376,10 @@ def build_polyline(linelayer, pointlayer, tol) :
     ##step2 : construire le chemin
     pts = [(pt["geometry"].x,pt["geometry"].y) for pt in pointlayer]
     
-    distInit = 45
-    sigma = 5
+    searching_radius = 45
     
     #calculer le meilleur chemin
-    matcher = DistanceMatcher(mymap, max_dist_init=distInit, max_dist=distInit, obs_noise=sigma, obs_noise_ne=sigma*2,
+    matcher = DistanceMatcher(mymap, max_dist_init=searching_radius, max_dist=searching_radius, obs_noise=sigma, obs_noise_ne=sigma*2,
                           non_emitting_states=True,only_edges=True)
     states, _ = matcher.match(pts)
     actualstate = None
@@ -376,6 +393,10 @@ def build_polyline(linelayer, pointlayer, tol) :
     #---------------------------------------------------------------------------------
     # step 3 : Generer une longue polyligne a partir de tous les segments retenus
     #---------------------------------------------------------------------------------
+
+    if(len(selected_lines)) <= 1:
+        print("Error not enough selected line")
+        return
     lines = selected_lines
     l2 = lines.pop(0)
 
