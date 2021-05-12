@@ -26,6 +26,19 @@ class LayerManager:
         except Exception:
             pass
 
+    def remove_layer(self, name: string) ->None:
+        try:
+            for layer in self.layers:
+                if(layer.sourceName() == name):
+                    QgsProject.instance().removeMapLayer(self.find_layer(name))
+                    del layer
+                    return
+        except Exception:
+            print("Couldn't delete this vector")
+
+        print("Didn't found the layer in the list")
+            
+
     def deselect_layer(self, name: string) ->None: #modif
         QgsProject.instance().layerTreeRoot().findLayer(self.find_layer(name).id()).setItemVisibilityChecked(False)
 

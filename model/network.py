@@ -49,7 +49,7 @@ class NetworkLayer:
         reduced_layer.setName("Reduced network")
         self.layer = reduced_layer
 
-        return reduced_layer
+
         #QgsProject.instance().addMapLayer(self.reduced_layer)
 
 
@@ -71,11 +71,69 @@ class NetworkLayer:
         # We connect roads wich extremities are close to each other
         corrected_list = deal_with_closecall(corrected_list, close_call_tol)
 
-        layer = layerTraductor.from_list_of_dict_to_layer(corrected_list, self.layer, "LineString", "corrected layer")
+        self.layer = layerTraductor.from_list_of_dict_to_layer(corrected_list, self.layer, "LineString", "corrected layer")
+
+
+    def add_attribute_to_layers(self, attribute_name = 'joID'):
+        """ Create a new column to the network_layer indexed from 0 to the number of feature in the layer  
+
+        Input:
+        attribute_name : -- A string that represent the name of the new column
+        """
+
+        #self.layer = self.initial_layer
+
+        provider = self.layer.dataProvider()
+
+        provider.addAttributes([QgsField(attribute_name,QVariant.Int)])
+
+        self.layer.updateFields()
+
+        test = len(self.layer.fields().names())-1
+
+        self.layer.startEditing()
+        i=0
+        for f in self.layer.getFeatures():
+            tesid = f.id()
+            attr_value={test:i}
+            provider.changeAttributeValues({tesid:attr_value})
+            i+=1
+        self.layer.commitChanges()
+
+
+    def find_path(self, matcheur): 
+        """Find a possible route 
+        
+        Input: 
+        matcheur :  -- An object of class Matcheur 
+        """
+        
+        matcheur.find_best_path_in_network()
+
+        self.possible_path = matcheur.tag_id
+
+        self.select_possible_path()
+
+    
+    def select_possible_path(self):
+        """ Select in the network_layer the path recorded at the last matching """
+
+        if(self.possible_path) == None:
+            print("error : path not created yet")
+            return
+
+        self.layer.selectByExpression('"joID" in (' +','.join(self.possible_path)+ ')' )
+
+
+    def change_possible_path(self): #penser à mettre un warning si layer vide de selection
+        """ Change the path recorded """
+
+        self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
+
+    def create_vector_from_path(self):
+        """Create a QgsVectorLayer from the selected features """
+
+        layer = processing.run("native:saveselectedfeatures", {'INPUT': self.layer, 'OUTPUT': 'memory:'})['OUTPUT']
+        layer.setName("path for matching")
 
         return layer
-
-
-
-
-

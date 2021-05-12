@@ -40,6 +40,7 @@ from .model.layer import Layers
 from .model.network import NetworkLayer
 from .model.path import PathLayer
 from .model.ui.settings import Settings
+from .model.matcheur import Matcheur
 
 
 class MapMatching:
@@ -242,10 +243,22 @@ class MapMatching:
 
             # Listeners
             self.dlg.btn_reload_layers.clicked.connect(self.reloads)
-            self.dlg.btn_map_matching.clicked.connect(self.on_click_pre_matching)
+            
             self.dlg.btn_reduce_network.clicked.connect(self.on_click_reduce_network)
             self.dlg.btn_correct_topology.clicked.connect(self.on_click_correct_topology)
+            
+            self.dlg.btn_map_matching.clicked.connect(self.on_click_pre_matching)
+            
+            self.dlg.btn_reselect_path.clicked.connect(self.on_click_reSelect_path)
+            self.dlg.btn_apply_path_change.clicked.connect(self.on_click_apply_modification)
+            
             self.dlg.btn_export_line.clicked.connect(self.load)
+            self.dlg.btn_reset.clicked.connect(self.reset)
+
+            # Enabled buttons
+            self.dlg.change_button_state(1)
+
+
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
@@ -255,6 +268,8 @@ class MapMatching:
 
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update()
+        self.dlg.fill_matching_box()
+        
 
     def will_removed(self, node, _from, _to) -> None:
         pass
@@ -295,18 +310,15 @@ class MapMatching:
 
         self.dlg.update()
 
-    def on_click_pre_matching(self):
-        """Start the process of mapMatching after verifying the validity of the comboBox data."""
+    def reset(self):
+        self.dlg.change_button_state(1)
+        
 
-        network_layer = self.manager.network_layers()[0]
-        path_layer = self.manager.path_layers()[0]
-        buffer = 10
 
-        network_layer = NetworkLayer(network_layer)
-        path_layer = PathLayer(path_layer)
-
-        layer = Layers(path_layer, network_layer)
-        layer.reduce_network_layer(buffer)
+    #=============================================================================#
+    #==============================Processing part================================#
+    #=============================================================================#
+    
 
     def on_click_reduce_network(self):
 
@@ -325,9 +337,11 @@ class MapMatching:
         path_layer = PathLayer(path_layer)
 
 
-        layer = Layers(path_layer, network_layer)
+        self.layers = Layers(path_layer, network_layer)
 
-        network = layer.reduce_network_layer(buffer)
+        self.layers.reduce_network_layer(buffer)
+
+        network = self.layers.network_layer.layer
 
         self.manager.add_layer(network)
 
@@ -337,23 +351,94 @@ class MapMatching:
 
         self.dlg.combo_network.setCurrentIndex(self.dlg.combo_network.findText(network.sourceName()))
 
+        self.dlg.change_button_state(2)
+
     def on_click_correct_topology(self):
+
+        if self.layers == None:
+            print("Error, no layer created")
+            return -1
 
         val = self.settings.get_settings()
 
-        network_layer = self.manager.find_layer(val["combo_network"])
-        path_layer = self.manager.find_layer(val["combo_path"])
-
-        if not LayerManager.are_valid(path_layer, network_layer):
-            print("error layer not valids")
-            return
-
-        network_layer = NetworkLayer(network_layer)
-        path_layer = PathLayer(path_layer)
-
-        layer = Layers(path_layer, network_layer)
-
-        network = layer.correct_network_layer_topology( val["spin_close_call"], 
-                                                        val["spin_intersection"])
+        self.layers.correct_network_layer_topology( val["spin_close_call"], 
+                                                    val["spin_intersection"])
+        network = self.layers.network_layer.layer
 
         self.manager.add_layer(network)
+
+        self.manager.remove_layer("Reduced network")
+
+        self.dlg.change_button_state(3)
+
+    def on_click_pre_matching(self):
+        """Start the process of mapMatching after verifying the validity of the comboBox data."""
+        
+        settings = self.settings.get_settings()
+
+        self.layers.network_layer.add_attribute_to_layers()
+
+        matcheur = Matcheur(self.layers.network_layer.layer, 
+                            self.layers.path_layer.layer, 
+                            _OID = settings["combo_oid"])
+        
+        matcheur.setParameters( settings["spin_searching_radius"],
+                                settings["spin_sigma"])
+        path = None
+
+        if settings["combo_algo_matching"] == "Matching with Speed":
+            if(settings["check_speed"] == False):
+                print("error speed disactivated and speed matching started")
+                return
+            
+            self.layers.reduce_Path_layer(  settings["combo_speed"],
+                                            settings["spin_stop_speed"])
+                                            
+            self.layers.match_speed(matcheur, settings["combo_speed"])
+
+            
+
+        elif settings["combo_algo_matching"] == "Matching closest":
+            self.layers.match_closest(matcheur)
+
+        elif settings["combo_algo_matching"] == "Matching by distance":
+            self.layers.match_by_distance(matcheur)
+
+        path = self.layers.path_layer.layer
+        self.manager.add_layer(path)
+
+        self.dlg.change_button_state(4)
+
+    def on_click_reSelect_path(self):
+        self.layers.reSelect_path()
+
+
+    def on_click_apply_modification(self):
+        
+        settings = self.settings.get_settings()
+
+        matcheur = Matcheur(None, 
+                            self.layers.path_layer.layer, 
+                            _OID = settings["combo_oid"])
+
+        matcheur.setParameters( settings["spin_searching_radius"],
+                                settings["spin_sigma"])
+
+        if settings["combo_algo_matching"] == "Matching with Speed" :
+            if settings["check_speed"] == False:
+                print("error speed not checked and use speed matching")
+                return
+
+            self.layers.reduce_Path_layer(  settings["combo_speed"],
+                                            settings["spin_stop_speed"])
+
+            self.layers.apply_modification( settings["combo_algo_matching"],
+                                            matcheur,
+                                            speed_column_name= settings["combo_speed"])
+
+        else:
+            self.layers.apply_modification( settings["combo_algo_matching"],
+                                            matcheur)
+
+        path = self.layers.path_layer.layer
+        self.manager.add_layer(path)

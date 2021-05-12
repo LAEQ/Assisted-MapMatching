@@ -28,6 +28,7 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget
 from qgis.core import QgsVectorLayer, QgsFields
 from typing import List
+from .model.ui.button_manager import Button_manager
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 # from model.layer_manager import LayerManager
@@ -49,6 +50,7 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.setupUi(self)
 
         self.manager = None
+        self.buttonManager = Button_manager(self)
 
         """Listeners"""
         self.combo_path.currentIndexChanged.connect(self.on_path_changed)
@@ -59,6 +61,9 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.combo_path.addItems([path.name() for path in paths])
         networks = self.manager.network_layers()
         self.combo_network.addItems([network.name() for network in networks])
+
+    #def set_buttons_manager(self, but_manager) -> None:
+        #self.buttonManger = Button_manager(self)
 
     def update(self):
         self.clear()
@@ -85,6 +90,49 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
     def remove_all_layers(self) -> None:
         self.manager.set_layers([])
         self.clear()
+        
+    def change_button_state(self, state: int):
+        """Change the buttons state
+        
+        Input:
+        state -- The state of the plugin: 
+                0 = Everything locked
+                1 = Input phase
+                2 = Correcting phase
+                3 = Matching phase
+                4 = Modification phase
+                5 = Import phase
+        """
+        if self.buttonManager == None:
+            print("Error: no button manager created")
+            return -1
+
+        if state == 0 :
+            self.buttonManager.disable_all_buttons()
+        elif state == 1:
+            self.buttonManager.set_input_state_buttons()
+        elif state == 2:
+            self.buttonManager.set_topology_state_buttons()
+        elif state == 3: 
+            self.buttonManager.set_pre_matching_state_buttons()
+        elif state == 4:
+            self.buttonManager.set_modification_state_buttons()
+        elif state == 5:
+            self.buttonManager.set_import_state()
+
+    def fill_matching_box(self):
+        self.combo_algo_matching.addItem("Matching with Speed")
+        self.combo_algo_matching.addItem("Matching closest")
+        self.combo_algo_matching.addItem("Matching by distance")
+
+    def update_matching_box(self):
+        if self.check_speed.isChecked():
+            index = self.combo_algo_matching.findText("Matching with Speed")
+            self.combo_algo_matching.setCurrentIndex(index)
+        else:
+            index = self.combo_algo_matching.findText("Matching by distance")
+            self.combo_algo_matching.setCurrentIndex(index)
+
 
     """Listeners"""
     def on_path_changed(self):
