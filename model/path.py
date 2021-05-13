@@ -142,7 +142,7 @@ class PathLayer:
             self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
             i += 1
 
-        self.layer.setName("matched point by speed ")
+        self.layer.setName("matched point by speed")
 
         #QgsProject.instance().addMapLayer(self.layer)
 

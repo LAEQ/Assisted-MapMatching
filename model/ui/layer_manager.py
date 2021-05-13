@@ -31,7 +31,7 @@ class LayerManager:
             for layer in self.layers:
                 if(layer.sourceName() == name):
                     QgsProject.instance().removeMapLayer(self.find_layer(name))
-                    del layer
+                    self.layers.remove(layer)
                     return
         except Exception:
             print("Couldn't delete this vector")
@@ -42,8 +42,18 @@ class LayerManager:
     def deselect_layer(self, name: string) ->None: #modif
         QgsProject.instance().layerTreeRoot().findLayer(self.find_layer(name).id()).setItemVisibilityChecked(False)
 
+
     def path_layers(self) -> List[QgsVectorLayer]:
         return [layer for layer in self.layers if LayerManager.is_path_layer(layer)]
+
+    def matched_layers(self) -> List[QgsVectorLayer]:
+        for layer in self.layers:
+            print(layer.sourceName())
+        return [layer for layer in self.layers if   LayerManager.is_path_layer(layer) and 
+                                                    (layer.sourceName() == "matched point by distance" or
+                                                    layer.sourceName() == "matched point by speed" or
+                                                    layer.sourceName() == "matched point to closest")]
+
 
     def network_layers(self) -> List[QgsVectorLayer]:
         return [layer for layer in self.layers if LayerManager.is_network_layer(layer)]
@@ -67,6 +77,7 @@ class LayerManager:
 
     @classmethod
     def is_path_layer(cls, layer: QgsVectorLayer) -> bool:
+        #print(layer.sourceName())
         return QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.Point
 
     @classmethod

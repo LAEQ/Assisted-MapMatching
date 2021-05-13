@@ -225,7 +225,16 @@ class MapMatching:
                 label = label.replace("_", ".").replace("tab", "q3m.window.tab")
                 tab.setTabText(1,self.tr(label))
 
-            """
+            for label, widget in self.dlg.groupBox():
+                label = label.replace("_", ".").replace("group", "q3m.window.group")
+                widget.setTitle(self.tr(label))
+
+            for label, widget in self.dlg.checkBox():
+                if label != "check_speed":
+                    label = label.replace("_", ".").replace("check", "q3m.window.check")
+                    widget.setText(self.tr(label))
+
+            #Voir si on peut pas faire mieux
             dir = os.path.dirname(__file__)
             file = os.path.abspath(os.path.join(dir, './ressources/documentation/', 'help_en.html'))
             file2 = os.path.abspath(os.path.join(dir,'./ressources/documentation/', 'help_settings_en.html'))
@@ -239,7 +248,7 @@ class MapMatching:
                     help = helpf.read()
                     self.dlg.textBrowser_help.insertHtml(help)
                     self.dlg.textBrowser_help.moveCursor(QTextCursor.Start)
-            """
+            
 
             # Listeners
             self.dlg.btn_reload_layers.clicked.connect(self.reloads)
@@ -252,13 +261,13 @@ class MapMatching:
             self.dlg.btn_reselect_path.clicked.connect(self.on_click_reSelect_path)
             self.dlg.btn_apply_path_change.clicked.connect(self.on_click_apply_modification)
             
-            self.dlg.btn_export_line.clicked.connect(self.load)
+            self.dlg.btn_export_polyline.clicked.connect(self.load)
             self.dlg.btn_reset.clicked.connect(self.reset)
 
             # Enabled buttons
             self.dlg.change_button_state(1)
 
-
+            self.dlg.check_speed.clicked.connect(self.dlg.update_matching_box)
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
@@ -268,7 +277,7 @@ class MapMatching:
 
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update()
-        self.dlg.fill_matching_box()
+        self.dlg.fill_fixed_box()
         
 
     def will_removed(self, node, _from, _to) -> None:
@@ -408,6 +417,7 @@ class MapMatching:
         self.manager.add_layer(path)
 
         self.dlg.change_button_state(4)
+        self.dlg.update_matched_path_box()
 
     def on_click_reSelect_path(self):
         self.layers.reSelect_path()
@@ -442,3 +452,5 @@ class MapMatching:
 
         path = self.layers.path_layer.layer
         self.manager.add_layer(path)
+
+        self.dlg.update_matched_path_box()

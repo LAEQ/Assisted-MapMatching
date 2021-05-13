@@ -25,7 +25,7 @@
 import os
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget
+from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget, QGroupBox, QCheckBox
 from qgis.core import QgsVectorLayer, QgsFields
 from typing import List
 from .model.ui.button_manager import Button_manager
@@ -120,18 +120,29 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         elif state == 5:
             self.buttonManager.set_import_state()
 
-    def fill_matching_box(self):
+    def fill_fixed_box(self):
         self.combo_algo_matching.addItem("Matching with Speed")
         self.combo_algo_matching.addItem("Matching closest")
         self.combo_algo_matching.addItem("Matching by distance")
+        self.combo_format.addItem("GeoPackage")
+        self.combo_format.addItem("ESRI Shapefile")
 
     def update_matching_box(self):
         if self.check_speed.isChecked():
+            self.combo_algo_matching.addItem("Matching with Speed")
             index = self.combo_algo_matching.findText("Matching with Speed")
             self.combo_algo_matching.setCurrentIndex(index)
         else:
+            index = self.combo_algo_matching.findText("Matching with Speed")
+            self.combo_algo_matching.removeItem(index)
+
             index = self.combo_algo_matching.findText("Matching by distance")
             self.combo_algo_matching.setCurrentIndex(index)
+    
+    def update_matched_path_box(self):
+        self.combo_matched_track.clear()
+        layers = self.manager.matched_layers()
+        self.combo_matched_track.addItems([layer.name() for layer in layers])
 
 
     """Listeners"""
@@ -161,3 +172,9 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def tab(self):
         return filter(lambda elem: isinstance(elem[1], QTabWidget), self.__dict__.items())
+
+    def groupBox(self):
+        return filter(lambda elem: isinstance(elem[1], QGroupBox), self.__dict__.items())
+    
+    def checkBox(self):
+        return filter(lambda elem: isinstance(elem[1], QCheckBox), self.__dict__.items())

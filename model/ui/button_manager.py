@@ -38,8 +38,8 @@ class Button_manager():
         self.dlg.btn_reduce_network.setEnabled(True)
 
     def set_topology_state_buttons(self):
-        self.disable_all_buttons()
 
+        self.set_input_state_buttons()
         self.dlg.btn_correct_topology.setEnabled(True)
 
     def set_pre_matching_state_buttons(self):
