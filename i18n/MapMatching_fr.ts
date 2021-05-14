@@ -31,6 +31,11 @@
         <source>q3m.window.tab.settings</source>
         <translation >Paramètres</translation>
     </message>
+    <message>
+        <location filename="../map_matching.py" line="179"/>
+        <source>file_explorer_name</source>
+        <translation >Enregistrer la couche comme</translation>
+    </message>
 
     <!-- Input group -->
 

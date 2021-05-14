@@ -51,6 +51,7 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.manager = None
         self.buttonManager = Button_manager(self)
+        self.fill_fixed_box()
 
         """Listeners"""
         self.combo_path.currentIndexChanged.connect(self.on_path_changed)
@@ -66,11 +67,35 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         #self.buttonManger = Button_manager(self)
 
     def update(self):
+        self.save_selected()
         self.clear()
         paths = self.manager.path_layers()
         self.combo_path.addItems([path.name() for path in paths])
         networks = self.manager.network_layers()
         self.combo_network.addItems([network.name() for network in networks])
+        
+        self.reselect_saved()
+        self.update_matched_path_box()
+        
+
+    def save_selected(self):
+        network = self.combo_network.currentText()
+        path = self.combo_path.currentText()
+        OID = self.combo_oid.currentText()
+        speed = self.combo_speed.currentText()
+        self.manager.save(path,network,OID,speed)
+
+    def reselect_saved(self):
+        print(self.manager.selected_path)
+        if  self.manager.selected_path != "" and self.manager.selected_path != self.combo_path.currentText():
+            self.combo_path.setCurrentIndex(self.combo_path.findText(self.manager.selected_path))
+        if  self.manager.selected_path != "" and self.manager.selected_network != self.combo_network.currentText():
+            self.combo_network.setCurrentIndex(self.combo_network.findText(self.manager.selected_network))
+        if  self.manager.OID != "" and self.manager.OID != self.combo_oid.currentText():
+            self.combo_oid.setCurrentIndex(self.combo_oid.findText(self.manager.OID))
+        if  self.manager.speed != "" and self.manager.speed != self.combo_speed.currentText():
+            self.combo_speed.setCurrentIndex(self.combo_speed.findText(self.manager.speed))
+
 
     def clear(self):
         self.combo_path.clear()
@@ -124,7 +149,7 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.combo_algo_matching.addItem("Matching with Speed")
         self.combo_algo_matching.addItem("Matching closest")
         self.combo_algo_matching.addItem("Matching by distance")
-        self.combo_format.addItem("GeoPackage")
+        self.combo_format.addItem("GPKG")
         self.combo_format.addItem("ESRI Shapefile")
 
     def update_matching_box(self):

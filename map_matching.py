@@ -25,9 +25,9 @@ import os.path
 from random import random
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsVectorFileWriter
 from qgis.PyQt.QtGui import QIcon, QTextCursor
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction , QFileDialog
 from qgis.core import QgsWkbTypes
 
 # Initialize Qt resources from file resources.py
@@ -41,6 +41,7 @@ from .model.network import NetworkLayer
 from .model.path import PathLayer
 from .model.ui.settings import Settings
 from .model.matcheur import Matcheur
+
 
 
 class MapMatching:
@@ -260,9 +261,12 @@ class MapMatching:
             
             self.dlg.btn_reselect_path.clicked.connect(self.on_click_reSelect_path)
             self.dlg.btn_apply_path_change.clicked.connect(self.on_click_apply_modification)
+
+            self.dlg.btn_export_matched_track.clicked.connect(self.on_click_export_matched_track)
             
-            self.dlg.btn_export_polyline.clicked.connect(self.load)
-            self.dlg.btn_reset.clicked.connect(self.reset)
+            self.dlg.btn_export_polyline.clicked.connect(self.export_polyline) #self.load
+            self.dlg.btn_reset.clicked.connect(self.load) #reset
+            self.dlg.btn_export_project.clicked.connect(self.export_project)
 
             # Enabled buttons
             self.dlg.change_button_state(1)
@@ -277,7 +281,6 @@ class MapMatching:
 
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update()
-        self.dlg.fill_fixed_box()
         
 
     def will_removed(self, node, _from, _to) -> None:
@@ -358,7 +361,7 @@ class MapMatching:
 
         self.dlg.update()
 
-        self.dlg.combo_network.setCurrentIndex(self.dlg.combo_network.findText(network.sourceName()))
+        #self.dlg.combo_network.setCurrentIndex(self.dlg.combo_network.findText(network.sourceName()))
 
         self.dlg.change_button_state(2)
 
@@ -454,3 +457,86 @@ class MapMatching:
         self.manager.add_layer(path)
 
         self.dlg.update_matched_path_box()
+
+    def on_click_export_matched_track(self):
+        if self.dlg.combo_matched_track.currentText() == "":
+            print("Error : no matched layer detected")
+            return
+        name = QFileDialog.getSaveFileName(self.dlg,"export : " + self.dlg.combo_matched_track.currentText())
+        layer = self.manager.find_layer(self.dlg.combo_matched_track.currentText())
+        
+        settings = self.settings.get_settings()
+
+        QgsVectorFileWriter.writeAsVectorFormat(layer,name[0],"utf-8",layer.crs(),settings["combo_format"])
+        
+
+    #EXPORT PART: TO COMMENT AND REVIEW (export polyline is bugged)
+
+    def search_dir(self):
+        name = QFileDialog.getSaveFileName(self.dlg,self.tr("file_explorer_name"))
+        self.dlg.line_file_name.setText(name[0])
+        pass
+
+    
+    def export_polyline(self):
+        #penser à faire passer l'oid et corriger le bug de concaténation
+
+        poly = self.layers.get_polyline()
+        if poly == -1:
+            print("Error no polyline generated yet")
+            return
+        
+        #temporaire#########################
+        QgsProject.instance().addMapLayer(poly)
+        ####################################
+
+        name = QFileDialog.getSaveFileName(self.dlg,"Save polyline as: ")
+        QgsVectorFileWriter.writeAsVectorFormat(poly,name[0],"utf-8",poly.crs(),"GPKG")
+
+    def export_project(self):
+
+        name = QFileDialog.getSaveFileName(self.dlg,"export : " + self.dlg.combo_matched_track.currentText())
+
+        settings = self.settings.get_settings()
+
+        exported_layers = []
+
+        if settings["check_initial_path"] == True:
+            exported_layers.append(self.layers.path_layer.initial_layer)
+
+        if settings["check_polyline"] == True:
+            poly = self.layers.get_polyline()
+            if poly == -1:
+                print("Error in export project no polyline generated yet")
+                return
+            exported_layers.append(poly)
+
+        if settings["check_corrected_network"] == True:
+            exported_layers.append(self.layers.network_layer.layer)
+        if settings["check_matched_path"] == True:
+            layers = self.manager.matched_layers()
+            if len(layers) == 0:
+                print("Error in export project: No matched layer found")
+            for layer in layers:
+                exported_layers.append(layer)
+            
+
+        #setup
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = settings["combo_format"]
+        options.layerName = exported_layers[0].name()
+        context = QgsProject.instance().transformContext()
+
+        #create file and write one layer inside
+        QgsVectorFileWriter.writeAsVectorFormatV2(exported_layers[0],name[0],context,options)
+
+        #Change option to append news vector to the file
+        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        i=0
+        for layer in exported_layers:
+            if i == 0:
+                i+=1
+                continue
+
+            options.layerName = layer.name()
+            QgsVectorFileWriter.writeAsVectorFormatV2(layer,name[0],context,options)

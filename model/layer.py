@@ -1,6 +1,6 @@
 # from .pathLayer import *
 # from .networkLayer import *
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsVectorLayer, QgsProject
 
 class Layers:
 
@@ -80,3 +80,13 @@ class Layers:
 
         elif type_of_matching == "Matching by distance":
             self.path_layer.distance_point_matching(matcheur)
+
+    def get_polyline(self):
+        if self.network_layer.select_possible_path() == -1:
+            return -1
+        
+        layer = self.network_layer.create_vector_from_path()
+
+        layer = self.network_layer.concatenate_line(layer,"fid")
+
+        return layer

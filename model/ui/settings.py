@@ -26,6 +26,12 @@ class Settings:
         self.settings["spin_searching_radius"] = self.dlg.spin_searching_radius.value()
         self.settings["spin_sigma"] = self.dlg.spin_sigma.value()
 
+        self.settings["combo_format"] = self.dlg.combo_format.currentText()
+        self.settings["check_initial_path"] = self.dlg.check_initial_path.isChecked()
+        self.settings["check_polyline"] = self.dlg.check_polyline.isChecked()
+        self.settings["check_corrected_network"] = self.dlg.check_corrected_network.isChecked()
+        self.settings["check_matched_path"] = self.dlg.check_matched_path.isChecked()
+
     def get_settings(self):
         self.update_settings()
         return self.settings

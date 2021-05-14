@@ -12,6 +12,14 @@ class LayerManager:
         self.layers = []
         self.selected_path = None
         self.selected_network = None
+        self.OID = None
+        self.speed = None
+
+    def save(self, path: string, network : string, OID : string, speed : string) -> None:
+        self.selected_path = path
+        self.selected_network = network
+        self.OID = OID
+        self.speed = speed
 
     def set_layers(self, layers: List[QgsVectorLayer]) -> None:
         self.layers = layers

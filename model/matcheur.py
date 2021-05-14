@@ -36,7 +36,7 @@ class Matcheur:
 
 
     def find_best_path_in_network(self):
-
+        
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
         pointlayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
 
@@ -45,6 +45,7 @@ class Matcheur:
 
         # lecture d'un ensemble de ligne 
         graph,linedict = build_graph(linelayer)
+
 
         mymap = InMemMap("mymap", graph=graph, use_latlon=False)
         ##step2 : construire le chemin
@@ -74,7 +75,6 @@ class Matcheur:
         
         #The road tha algorithm think the user took
         self.network_layer = layerTraductor.from_list_of_dict_to_layer(selected_lines,self.network_layer)
-
         self.tag_id = [str(feat['joID']) for feat in self.network_layer.getFeatures()]
 
 

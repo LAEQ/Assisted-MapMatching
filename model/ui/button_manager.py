@@ -30,8 +30,6 @@ class Button_manager():
         self.dlg.combo_network.setEnabled(True)
         self.dlg.combo_path.setEnabled(True)
         self.dlg.combo_oid.setEnabled(True)
-        self.dlg.combo_speed.setEnabled(True)
-        self.dlg.check_speed.setEnabled(True)
         self.dlg.btn_reload_layers.setEnabled(True)
 
         self.dlg.spin_buffer_range.setEnabled(True)

@@ -8,6 +8,7 @@ from shapely import wkt
 from .utils.layerTraductor import *
 
 from .topology import *
+from .utils.geometry import connect_lines
 
 """
 This class take care of the network layer
@@ -120,7 +121,7 @@ class NetworkLayer:
 
         if(self.possible_path) == None:
             print("error : path not created yet")
-            return
+            return -1
 
         self.layer.selectByExpression('"joID" in (' +','.join(self.possible_path)+ ')' )
 
@@ -137,3 +138,47 @@ class NetworkLayer:
         layer.setName("path for matching")
 
         return layer
+
+    def concatenate_line(self,layer,oid_column_name):
+        l = layerTraductor.from_vector_layer_to_list_of_dict(layer)
+        l = layerTraductor.order_list_of_dict(l,oid_column_name)
+
+        new_list = []
+
+        start = False
+
+        index = 0
+
+        for i in range (len(l)-1):
+            if l[i][oid_column_name] == l[i+1][oid_column_name]:
+                if(start == False):
+                    index = i
+                start = True
+            else:
+                if start == True:
+                    new_feat = l[index]
+
+
+                    for j in range (index,i+1): #+1
+
+                        new_feat["geometry"] = connect_lines(new_feat["geometry"],l[j]["geometry"])
+
+                    new_list.append(new_feat)
+                    start = False
+
+                else:
+                    print(l[i]["fid"])
+                    new_list.append(l[i])
+
+        if start == True:
+            new_feat = l[index]
+
+            for j in range (index+1,len(l)): #+1
+                new_feat["geometry"] = connect_lines(new_feat,l[j]["geometry"])
+
+            start = False
+            new_list.append(new_feat)
+        else:
+            new_list.append(l[-1])
+
+        return layerTraductor.from_list_of_dict_to_layer(new_list,self.layer)

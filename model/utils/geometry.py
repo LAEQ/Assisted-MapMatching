@@ -1,4 +1,5 @@
 import shapely
+from shapely import ops
 from shapely.geometry import Point
 from ..import_.pyqtree import *
 import collections
@@ -212,7 +213,7 @@ def cut_line_between(line,p1,p2) :
 
 
 def to_simple_lines(line) : 
-    """Divide a multi LineString into several single LineString
+    """Divide a polyLineString into several single LineString
     
     Input:
     line       -- A shapely.geometry.LineString object
@@ -420,7 +421,25 @@ def build_graph(linelayer) :
     allnodes = collections.defaultdict(lambda : None)
     linedict = {}
     #Etape 1 : recuperer tous les noeuds
-    for feat in  linelayer: 
+    linelayer2 = []
+
+    for feat in linelayer:
+        """p1,p2 = get_extremites(feat["geometry"])
+        if feat["geometry"].length != 0:
+            ratio =  p1.distance(p2) / feat["geometry"].length
+            if ratio >= 0.9:
+                linelayer2.append(feat)
+        
+            else:"""
+        lines = to_simple_lines(feat["geometry"])
+        for line in lines:
+            dupp = feat.copy()
+            dupp["geometry"] = line
+            linelayer2.append(dupp)
+        
+
+
+    for feat in  linelayer2: 
         line = feat["geometry"]
         start,end = get_extremites(line)
         #les extremites de la lignes sont des points
