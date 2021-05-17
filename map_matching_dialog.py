@@ -54,105 +54,36 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.fill_fixed_box()
 
         """Listeners"""
-        self.combo_path.currentIndexChanged.connect(self.on_path_changed)
+        self.combo_path.currentIndexChanged.connect(self.update_attributes_box)
 
     def set_manager(self, manager) -> None:
         self.manager = manager
-        paths = self.manager.path_layers()
+        paths = self.manager.get_path_layers()
         self.combo_path.addItems([path.name() for path in paths])
-        networks = self.manager.network_layers()
+        networks = self.manager.get_network_layers()
         self.combo_network.addItems([network.name() for network in networks])
 
     #def set_buttons_manager(self, but_manager) -> None:
         #self.buttonManger = Button_manager(self)
 
-    def update(self):
-        self.save_selected()
-        self.clear()
-        paths = self.manager.path_layers()
+    def update_layer_box(self) -> None:
+
+        self.save_state()
+        self.clear_combo()
+        paths = self.manager.get_path_layers()
         self.combo_path.addItems([path.name() for path in paths])
-        networks = self.manager.network_layers()
+        networks = self.manager.get_network_layers()
         self.combo_network.addItems([network.name() for network in networks])
         
-        self.reselect_saved()
+        self.restore_state()
         self.update_matched_path_box()
-        
 
-    def save_selected(self):
-        network = self.combo_network.currentText()
-        path = self.combo_path.currentText()
-        OID = self.combo_oid.currentText()
-        speed = self.combo_speed.currentText()
-        self.manager.save(path,network,OID,speed)
-
-    def reselect_saved(self):
-        print(self.manager.selected_path)
-        if  self.manager.selected_path != "" and self.manager.selected_path != self.combo_path.currentText():
-            self.combo_path.setCurrentIndex(self.combo_path.findText(self.manager.selected_path))
-        if  self.manager.selected_path != "" and self.manager.selected_network != self.combo_network.currentText():
-            self.combo_network.setCurrentIndex(self.combo_network.findText(self.manager.selected_network))
-        if  self.manager.OID != "" and self.manager.OID != self.combo_oid.currentText():
-            self.combo_oid.setCurrentIndex(self.combo_oid.findText(self.manager.OID))
-        if  self.manager.speed != "" and self.manager.speed != self.combo_speed.currentText():
-            self.combo_speed.setCurrentIndex(self.combo_speed.findText(self.manager.speed))
-
-
-    def clear(self):
-        self.combo_path.clear()
-        self.combo_network.clear()
-        self.combo_oid.clear()
-        self.combo_speed.clear()
-
-    def add_path(self, layer: QgsVectorLayer):
-        self.combo_path.addItem(layer.name())
-
-    def add_network(self, layer: QgsVectorLayer):
-        self.combo_network.addItem(layer.name())
-
-    def remove_layer(self, layer) -> None:
-        pass
-    
-    def remove_all_layers(self) -> None:
-        self.manager.set_layers([])
-        self.clear()
-        
-    def change_button_state(self, state: int):
-        """Change the buttons state
-        
-        Input:
-        state -- The state of the plugin: 
-                0 = Everything locked
-                1 = Input phase
-                2 = Correcting phase
-                3 = Matching phase
-                4 = Modification phase
-                5 = Import phase
-        """
-        if self.buttonManager == None:
-            print("Error: no button manager created")
-            return -1
-
-        if state == 0 :
-            self.buttonManager.disable_all_buttons()
-        elif state == 1:
-            self.buttonManager.set_input_state_buttons()
-        elif state == 2:
-            self.buttonManager.set_topology_state_buttons()
-        elif state == 3: 
-            self.buttonManager.set_pre_matching_state_buttons()
-        elif state == 4:
-            self.buttonManager.set_modification_state_buttons()
-        elif state == 5:
-            self.buttonManager.set_import_state()
-
-    def fill_fixed_box(self):
-        self.combo_algo_matching.addItem("Matching with Speed")
-        self.combo_algo_matching.addItem("Matching closest")
-        self.combo_algo_matching.addItem("Matching by distance")
-        self.combo_format.addItem("GPKG")
-        self.combo_format.addItem("ESRI Shapefile")
 
     def update_matching_box(self):
+        """ Set the value of the comboBox related to the type of algorithm to use 
+            for the matching depending on the state of the speed checkBox.
+        """
+
         if self.check_speed.isChecked():
             self.combo_algo_matching.addItem("Matching with Speed")
             index = self.combo_algo_matching.findText("Matching with Speed")
@@ -164,25 +95,122 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
             index = self.combo_algo_matching.findText("Matching by distance")
             self.combo_algo_matching.setCurrentIndex(index)
     
+
     def update_matched_path_box(self):
+        """Update the choices in the comboBox : Matched track"""
+
         self.combo_matched_track.clear()
-        layers = self.manager.matched_layers()
+        layers = self.manager.get_matched_layers()
         self.combo_matched_track.addItems([layer.name() for layer in layers])
 
 
-    """Listeners"""
-    def on_path_changed(self):
+    def update_attributes_box(self):
+        """ Listener : modify the value of the oid and speed field 
+            depending on the path layer choosen 
+        """
+
         self.combo_oid.clear()
         self.combo_speed.clear()
 
         index = self.combo_path.currentIndex()
-        fields = self.manager.path_attributes(index)
+        fields = self.manager.get_path_attributes(index)
         self.combo_oid.addItems([field.name() for field in fields if (  field.typeName() == "Integer" or 
                                                                         field.typeName()=="Integer64" or
                                                                         field.typeName()=="int8" or 
                                                                         field.typeName()=="integer")])
         self.combo_speed.addItems([field.name() for field in fields if (  field.typeName() == "Real" or 
                                                                             field.typeName()=="double")])
+
+
+    """def add_path(self, layer: QgsVectorLayer) -> None:
+        self.combo_path.addItem(layer.name())
+
+    def add_network(self, layer: QgsVectorLayer) -> None:
+        self.combo_network.addItem(layer.name())
+
+
+    def remove_layer(self, layer) -> None:
+        pass
+    """
+    
+
+    #temporaire: sert à load les fichiers test plus rapidement
+    def remove_all_layers(self) -> None:
+        self.manager.set_layers([])
+        self.clear_combo()
+        
+
+    def change_button_state(self, state: int) -> None:
+        """Change the buttons state
+        
+        Input:
+        state -- The state of the plugin: 
+                0 = Everything locked
+                1 = Input phase
+                2 = Correcting phase
+                3 = Matching phase
+                4 = Modification phase
+                5 = Import phase
+        """
+
+        if self.buttonManager == None:
+            print("Error: no button manager created")
+            return -1
+
+
+        if state == 1:
+            self.buttonManager.set_input_state_buttons()
+        elif state == 2:
+            self.buttonManager.set_topology_state_buttons()
+        elif state == 3: 
+            self.buttonManager.set_pre_matching_state_buttons()
+        elif state == 4:
+            self.buttonManager.set_modification_state_buttons()
+        elif state == 5:
+            self.buttonManager.set_import_state()
+
+
+    def save_state(self) -> None:
+        """Store the current values of the fields in the interface"""
+
+        network = self.combo_network.currentText()
+        path = self.combo_path.currentText()
+        OID = self.combo_oid.currentText()
+        speed = self.combo_speed.currentText()
+        self.manager.save(path,network,OID,speed)
+
+
+    def restore_state(self) -> None:
+        """Restore the interface with the value stocked """
+
+        if  self.manager.selected_path != "" and self.manager.selected_path != self.combo_path.currentText():
+            self.combo_path.setCurrentIndex(self.combo_path.findText(self.manager.selected_path))
+        if  self.manager.selected_path != "" and self.manager.selected_network != self.combo_network.currentText():
+            self.combo_network.setCurrentIndex(self.combo_network.findText(self.manager.selected_network))
+        if  self.manager.OID != "" and self.manager.OID != self.combo_oid.currentText():
+            self.combo_oid.setCurrentIndex(self.combo_oid.findText(self.manager.OID))
+        if  self.manager.speed != "" and self.manager.speed != self.combo_speed.currentText():
+            self.combo_speed.setCurrentIndex(self.combo_speed.findText(self.manager.speed))
+
+
+    def clear_combo(self) -> None:
+        """Clear every combobox of the input section"""
+
+        self.combo_path.clear()
+        self.combo_network.clear()
+        self.combo_oid.clear()
+        self.combo_speed.clear()
+
+
+    def fill_fixed_box(self) -> None:
+        """Fill boxes with values that won't be changed during the whole process"""
+
+        self.combo_algo_matching.addItem("Matching with Speed")
+        self.combo_algo_matching.addItem("Matching closest")
+        self.combo_algo_matching.addItem("Matching by distance")
+        self.combo_format.addItem("GPKG")
+        self.combo_format.addItem("ESRI Shapefile")
+
 
     def __iter__(self):
         for attr, value in self.__dict__.iteritems():

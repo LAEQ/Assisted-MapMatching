@@ -5,6 +5,7 @@ class Settings:
         self.dlg = _dlg
         self.settings = {}
 
+
     def update_settings(self) -> None:
 
         self.settings["combo_network"] = self.dlg.combo_network.currentText()
@@ -32,11 +33,6 @@ class Settings:
         self.settings["check_corrected_network"] = self.dlg.check_corrected_network.isChecked()
         self.settings["check_matched_path"] = self.dlg.check_matched_path.isChecked()
 
-    def get_settings(self):
+    def get_settings(self) -> dict:
         self.update_settings()
         return self.settings
-
-        
-    #Verifier s'il y a eu des différences avec état précédent
-
-    #Exemple: Changement au niveau des algos de matching, d'un layer renseigné en parametre...

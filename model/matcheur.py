@@ -20,6 +20,8 @@ class Matcheur:
 
         self.OID = _OID
 
+        self.polyline = None
+
         #print(network_layer)
         #print(path_layer)
 
@@ -97,6 +99,7 @@ class Matcheur:
         #print(len(linelayer))
 
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
+        self.polyline = polyline
         print("Finished build polyline")
         rev_polyline = reverse_line(polyline)
         length_polyline = polyline.length
@@ -161,6 +164,7 @@ class Matcheur:
                 newpts+=[centersnap for i in range(len(pointset))]
                 newdistances+=[accdist for i in range(len(pointset))]
 
+        
         print("END FONCTION")
         return newpts #,newdistances
 
@@ -237,6 +241,7 @@ class Matcheur:
 
 
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
+        self.polyline = polyline
         print("Finished build polyline for closest")
 
         for feat in pointslayer :
@@ -263,6 +268,7 @@ class Matcheur:
 
         #Step 1: Build the polyline
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
+        self.polyline = polyline
         print("Finished build polyline for distance")
 
         # Step 2: stocker dans un tableau la distance entre chaque points de points_layer

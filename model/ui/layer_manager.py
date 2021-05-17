@@ -15,18 +15,24 @@ class LayerManager:
         self.OID = None
         self.speed = None
 
+
     def save(self, path: string, network : string, OID : string, speed : string) -> None:
+        """Store values for later restoration or uses"""
+
         self.selected_path = path
         self.selected_network = network
         self.OID = OID
         self.speed = speed
 
+
     def set_layers(self, layers: List[QgsVectorLayer]) -> None:
         self.layers = layers
+
 
     def add_layer(self, layer: QgsVectorLayer) -> None: #modif
         self.layers.append(layer)
         QgsProject.instance().addMapLayer(layer)
+
 
     def remove_layer(self, _from: int) -> None:
         try:
@@ -34,7 +40,9 @@ class LayerManager:
         except Exception:
             pass
 
+
     def remove_layer(self, name: string) ->None:
+        """Delete a layer on Qgis and in the programm that has the same name"""
         try:
             for layer in self.layers:
                 if(layer.sourceName() == name):
@@ -51,10 +59,11 @@ class LayerManager:
         QgsProject.instance().layerTreeRoot().findLayer(self.find_layer(name).id()).setItemVisibilityChecked(False)
 
 
-    def path_layers(self) -> List[QgsVectorLayer]:
+    def get_path_layers(self) -> List[QgsVectorLayer]:
         return [layer for layer in self.layers if LayerManager.is_path_layer(layer)]
 
-    def matched_layers(self) -> List[QgsVectorLayer]:
+
+    def get_matched_layers(self) -> List[QgsVectorLayer]:
         for layer in self.layers:
             print(layer.sourceName())
         return [layer for layer in self.layers if   LayerManager.is_path_layer(layer) and 
@@ -63,18 +72,21 @@ class LayerManager:
                                                     layer.sourceName() == "matched point to closest")]
 
 
-    def network_layers(self) -> List[QgsVectorLayer]:
+    def get_network_layers(self) -> List[QgsVectorLayer]:
         return [layer for layer in self.layers if LayerManager.is_network_layer(layer)]
+
 
     def load_layer(self, path: str) -> None:
         layer = QgsVectorLayer(path, os.path.basename(path), "ogr")
         self.layers.append(layer)
 
-    def path_attributes(self, index: int) -> List[QgsField]:
+
+    def get_path_attributes(self, index: int) -> List[QgsField]:
         try:
-            return self.path_layers()[index].fields()
+            return self.get_path_layers()[index].fields()
         except Exception:
             return []
+
 
     def find_layer(self, name: string) -> QgsVectorLayer:
         for layer in self.layers:
@@ -88,13 +100,16 @@ class LayerManager:
         #print(layer.sourceName())
         return QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.Point
 
+
     @classmethod
     def is_network_layer(cls, layer: QgsVectorLayer) -> bool:
         return QgsWkbTypes.flatType(layer.wkbType()) == QgsWkbTypes.LineString
 
+
     @classmethod
     def is_valid(cls, layer: QgsVectorLayer) -> bool:
         return (cls.is_path_layer(layer) or cls.is_network_layer) and layer.isValid()
+
 
     @classmethod
     def are_valid(cls, path: QgsVectorLayer, network: QgsVectorLayer) ->bool:
