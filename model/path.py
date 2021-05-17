@@ -1,7 +1,9 @@
+from .matcheur import Matcheur
 from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
-
+import string
+from typing import List
 
 class PathLayer:
 
@@ -14,11 +16,12 @@ class PathLayer:
         self.layer.setName("Points Matché")
         _layer.removeSelection()
 
-    def create_buffer(self, range):
+
+    def create_buffer(self, range: int) -> QgsVectorLayer:
         """Create a buffer around every features of the path_layer.
 
         Input:
-        range -- The radius of the buffer around a point
+        range       -- The radius of the buffer around a point
         """
 
         if range <= 0 :
@@ -48,11 +51,10 @@ class PathLayer:
 
         prov.addFeatures(feats)
 
-        # ajoute à QGIS
-        # QgsProject.instance().addMapLayer(mem_layer)
-        self.buffer = mem_layer
+        return mem_layer
 
-    def merge_stationary_point(self,speed_column_name, speed_limit = 0.1):
+
+    def merge_stationary_point(self,speed_column_name: string, speed_limit : float = 0.1):
         """Merge at center every group of points which speed is lower than speed_limit.
 
         Input: 
@@ -84,7 +86,6 @@ class PathLayer:
                     #We empty the group and wait for the next one to form
                     temporary_feats = []
 
-        #
 
         if(start_grouping):
             self.merge_coordinate_points(temporary_feats)
@@ -92,7 +93,7 @@ class PathLayer:
         #♥QgsProject.instance().addMapLayer(self.layer)
 
     
-    def merge_coordinate_points(self,features):
+    def merge_coordinate_points(self,features: List[int]):
         """Merge a list of points at their average center"""
 
         average_x = 0
@@ -122,7 +123,7 @@ class PathLayer:
             geo = QgsGeometry.fromPointXY(QgsPointXY(average_x, average_y))
             self.layer.dataProvider().changeGeometryValues({ feat_id : geo })
 
-    def speed_point_matching(self,matcheur, speed_column_name = "speed"):
+    def speed_point_matching(self,matcheur : Matcheur, speed_column_name : string = "speed" , speed_limit : float = 1.5):
         """ Match the point in the path layer to a line by taking into account the speed
         
         Input:
@@ -130,7 +131,7 @@ class PathLayer:
         speed_column_name   -- a String which contain the name of the speed column in the selected layer
         """
 
-        newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim=1.5 , minpts = 5 , maxpts = float("inf"))
+        newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim= speed_limit , minpts = 5 , maxpts = float("inf"))
         if newpts == -1:
             print("Error in matcheur.snap_points_along_line")
             return 
@@ -146,7 +147,7 @@ class PathLayer:
 
         #QgsProject.instance().addMapLayer(self.layer)
 
-    def closest_point_matching(self, matcheur):
+    def closest_point_matching(self, matcheur: Matcheur):
         """ Match the point in the path layer to the closest point on a line
         
         Input:
@@ -163,7 +164,7 @@ class PathLayer:
 
         #QgsProject.instance().addMapLayer(self.layer)
 
-    def distance_point_matching(self, matcheur):
+    def distance_point_matching(self, matcheur: Matcheur):
         """ Match the point in the path layer to a line by taking into account the speed
         
         Input:

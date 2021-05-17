@@ -25,7 +25,7 @@ class NetworkLayer:
         self.layer = self.initial_layer
 
 
-    def select_intersection_trajectory(self, buffer) -> QgsVectorLayer:
+    def select_intersection_trajectory(self, buffer):
         """Reduce the network layer features by only keeping the line intersecting the buffer
 
         Input:
@@ -131,7 +131,7 @@ class NetworkLayer:
 
         self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
 
-    def create_vector_from_path(self):
+    def create_vector_from_path(self) -> QgsVectorLayer:
         """Create a QgsVectorLayer from the selected features """
 
         layer = processing.run("native:saveselectedfeatures", {'INPUT': self.layer, 'OUTPUT': 'memory:'})['OUTPUT']

@@ -3,6 +3,7 @@ from .import_.leuvenmapmatching.map.inmem import InMemMap
 import collections
 from shapely import *
 from qgis.core import *
+import string
 
 from .utils.layerTraductor import *
 
@@ -13,7 +14,8 @@ from .utils.geometry import *
 class Matcheur:
 
 
-    def __init__(self, _network_layer, _path_layer, _OID = "OID" ,progression = None):
+    def __init__(self, _network_layer : QgsVectorLayer, 
+                 _path_layer : QgsVectorLayer, _OID = "OID"):
 
         self.network_layer = _network_layer
         self.path_layer = _path_layer
@@ -22,23 +24,20 @@ class Matcheur:
 
         self.polyline = None
 
-        #print(network_layer)
-        #print(path_layer)
 
-        #QgsProject.instance().addMapLayer(network_layer)
-
-    def setParameters(self, _searching_radius, _sigma):
+    def setParameters(self, _searching_radius : float, _sigma : float):
         self.searching_radius = _searching_radius
         self.sigma = _sigma
     
 
-    def set_layers(self,network,path):
+    def set_layers(self,network : QgsVectorLayer,path : QgsVectorLayer):
         self.network_layer = network
         self.path_layer = path
 
 
     def find_best_path_in_network(self):
-        
+        """Find the path in the network that has been the most likely taken by the cyclist"""
+    
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
         pointlayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
 
@@ -83,8 +82,9 @@ class Matcheur:
         #conserver/ selectionner les lignes dans un nouveau vect?
 
 
-    # polyline is a simple linestring
-    def snap_points_along_line(self, speedField, speedlim=1.5 ,minpts = 5 , maxpts = float("inf")) : 
+    
+    def snap_points_along_line( self, speedField : string, speedlim : float =1.5 ,
+                                minpts : int = 5 , maxpts = float("inf")) : 
         
 
         #to dict
@@ -96,7 +96,7 @@ class Matcheur:
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
             return -1 
-        #print(len(linelayer))
+
 
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
         self.polyline = polyline
@@ -256,6 +256,7 @@ class Matcheur:
 
 
     def snap_point_by_distance(self):
+
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
         pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
 

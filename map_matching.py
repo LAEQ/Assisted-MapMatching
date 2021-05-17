@@ -389,6 +389,7 @@ class MapMatching:
 
         self.dlg.change_button_state(3)
 
+
     def on_click_pre_matching(self) -> None:
         """Start the process of mapMatching and add the result to Qgis"""
         
@@ -408,13 +409,9 @@ class MapMatching:
             if(settings["check_speed"] == False):
                 print("error speed disactivated and speed matching started")
                 return
-            
-            self.layers.reduce_path_layer(  settings["combo_speed"],
-                                            settings["spin_stop_speed"])
                                             
-            self.layers.match_speed(matcheur, settings["combo_speed"])
+            self.layers.match_speed(matcheur, settings["combo_speed"], settings["spin_stop_speed"])
 
-            
 
         elif settings["combo_algo_matching"] == "Matching closest":
             self.layers.match_closest(matcheur)
@@ -450,12 +447,10 @@ class MapMatching:
                 print("error speed not checked and use speed matching")
                 return
 
-            self.layers.reduce_Path_layer(  settings["combo_speed"],
-                                            settings["spin_stop_speed"])
-
             self.layers.apply_modification( settings["combo_algo_matching"],
                                             matcheur,
-                                            speed_column_name= settings["combo_speed"])
+                                            speed_column_name= settings["combo_speed"],
+                                            speed_limit = settings["spin_stop_speed"])
 
         else:
             self.layers.apply_modification( settings["combo_algo_matching"],
