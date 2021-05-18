@@ -1,7 +1,9 @@
+from .matcheur import Matcheur
 from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
-
+import string
+from typing import List
 
 class PathLayer:
 
@@ -14,12 +16,16 @@ class PathLayer:
         self.layer.setName("Points Matché")
         _layer.removeSelection()
 
-    def create_buffer(self, range):
+
+    def create_buffer(self, range: int) -> QgsVectorLayer:
         """Create a buffer around every features of the path_layer.
 
         Input:
-        range -- The radius of the buffer around a point
+        range       -- The radius of the buffer around a point
         """
+
+        if range <= 0 :
+            return None
 
         # Create a list of points
         feats = [feat for feat in self.layer.getFeatures()]
@@ -45,109 +51,140 @@ class PathLayer:
 
         prov.addFeatures(feats)
 
-        # ajoute à QGIS
-        # QgsProject.instance().addMapLayer(mem_layer)
-        self.buffer = mem_layer
+        return mem_layer
 
-    def merge_stationary_point(self, speed_row_name, precision_stop_speed=0.1):
-        """Merge at center every group of points which speed is lower than precision_stop_speed.
 
-        Input:
-        speed_row_name       -- a String which contain the name of the speed row in the selected layer
-        precision_stop_speed -- a double which contain the max Speed where we concider that lower is a stop
+    def merge_stationary_point(self,speed_column_name: string, speed_limit : float = 0.1):
+        """Merge at center every group of points which speed is lower than speed_limit.
+
+        Input: 
+        speed_column_name   -- a String which contain the name of the speed column in the selected layer
+        speed_limit         -- a double which contain the max Speed where we concider that lower is a stop
 
         Output:
         Modify the layer of this class
         """
 
-        end_group = False
+        start_grouping = False
 
         temporary_feats = []
 
         for feat in self.initial_layer.getFeatures():
 
-            if (feat[speed_row_name] <= precision_stop_speed):
-                end_group = True
+            if(feat[speed_column_name] <= speed_limit):
+                start_grouping = True
 
                 temporary_feats.append(feat.id())
 
             else:
-                if (end_group):
-                    # fusion of several points that are at a stop
-                    end_group = False
+                if(start_grouping):
+                    #fusion of several points that are at a stop
+                    start_grouping = False
 
-                    average_x = 0
-                    average_y = 0
-                    number_of_iteration = 0
+                    self.merge_coordinate_points(temporary_feats)
 
-                    # We calculate the average position in the group
-                    for feat_id in feat_temp:
-                        f = self.initiasl_layer.getFeature(
-                            feat_id + 1)  # +1 because IDs start at 0 but the attribute table start at 1
-                        geom = f.geometry()
-
-                        average_x += geom.asPoint().x()
-                        average_y += geom.asPoint().y()
-
-                        number_of_iteration += 1
-
-                    average_x = average_x / number_of_iteration
-                    average_y = average_y / number_of_iteration
-
-                    # We change the position of each point to the calculated average
-                    for feat_id in temporary_feats:
-                        f = self.initial_layer.getFeature(feat_id + 1)  # +1
-                        geom = f.geometry()
-                        geo = QgsGeometry.fromPointXY(QgsPointXY(average_x, average_y))
-                        self.layer.dataProvider().changeGeometryValues({f.id(): geo})
-
-                    # We empty the group and wait for the next one to form
+                    #We empty the group and wait for the next one to form
                     temporary_feats = []
 
-            # QgsProject.instance().addMapLayer(self.layer)
 
-    # =========================================================================================================================
-    #                                                         Perso
-    # =========================================================================================================================
-    def move_layer(self):
+        if(start_grouping):
+            self.merge_coordinate_points(temporary_feats)
 
-        print("Start move layer")
+        #♥QgsProject.instance().addMapLayer(self.layer)
+
+    
+    def merge_coordinate_points(self,features: List[int]):
+        """Merge a list of points at their average center"""
+
+        average_x = 0
+        average_y = 0
+        number_of_iteration =0
+
+        #We calculate the average position in the group
+        for feat_id in features:
+            f = self.initial_layer.getFeature(feat_id) 
+            geom = f.geometry()
+
+            average_x += geom.asPoint().x()
+            average_y += geom.asPoint().y()
+
+            number_of_iteration +=1
+
+        average_x = average_x/number_of_iteration
+        average_y = average_y/number_of_iteration
+
+        #We change the position of each point to the calculated average
+
+        for feat_id in features:
+            
+            f = self.initial_layer.getFeature(feat_id) 
+
+            geom = f.geometry()
+            geo = QgsGeometry.fromPointXY(QgsPointXY(average_x, average_y))
+            self.layer.dataProvider().changeGeometryValues({ feat_id : geo })
+
+    def speed_point_matching(self,matcheur : Matcheur, speed_column_name : string = "speed" , speed_limit : float = 1.5):
+        """ Match the point in the path layer to a line by taking into account the speed
+        
+        Input:
+        matcheur :          -- An object of class Matcheur 
+        speed_column_name   -- a String which contain the name of the speed column in the selected layer
+        """
+
+        newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim= speed_limit , minpts = 5 , maxpts = float("inf"))
+        if newpts == -1:
+            print("Error in matcheur.snap_points_along_line")
+            return 
 
         i = 0
+
         for f in self.layer.getFeatures():
-            geom = f.geometry()
-            geo = QgsGeometry.fromPointXY(QgsPointXY(geom.asPoint().x(), geom.asPoint().y() - 10))
-            self.layer.dataProvider().changeGeometryValues({f.id(): geo})
+            geo = QgsGeometry.fromPointXY(QgsPointXY(newpts[i].x, newpts[i].y))
+            self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
+            i += 1
 
-        print("End move layer")
+        self.layer.setName("matched point by speed")
 
-        # important pour afficher le changement à l'écran
-        self.layer.triggerRepaint()
+        #QgsProject.instance().addMapLayer(self.layer)
 
-    def start_point_matching():
-        pass
+    def closest_point_matching(self, matcheur: Matcheur):
+        """ Match the point in the path layer to the closest point on a line
+        
+        Input:
+        matcheur :    -- An object of class Matcheur 
+        """
 
+        layer = matcheur.snap_point_to_closest()
 
-"""
-UTILE POUR APRES:
-layer.selectedFeatures() : donne les points selectionné
-layer.getFeatures() : renvoie tous les points
-layer.selectedFeatureIds() : renvoie les ids des points selectionné
+        if layer == -1:
+            print("Error in matcheur.closest_point_matching")
+            return
 
-create memory layer from several points:
+        self.layer = layer
 
-from qgis.core import QgsFeatureRequest
+        #QgsProject.instance().addMapLayer(self.layer)
 
-memory_layer = layer.materialize(QgsFeatureRequest().setFilterFids(layer.selectedFeatureIds()))
-QgsProject.instance().addMapLayer(memory_layer)
+    def distance_point_matching(self, matcheur: Matcheur):
+        """ Match the point in the path layer to a line by taking into account the speed
+        
+        Input:
+        matcheur :  -- An object of class Matcheur 
+        """
 
-Point de type : QgsFeature
-Layer de type QGSVectorLayer
+        layer = matcheur.snap_point_by_distance()
 
-Ajoute 10 en y a tt les points du layer:
-for f in self.layer.getFeatures():
-    geom = f.geometry()
-    geo = QgsGeometry.fromPointXY(QgsPointXY(geom.asPoint().x(), geom.asPoint().y()+10))
-    self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
+        if layer == -1:
+            print("Error in matcheur.closest_point_matching")
+            return
 
-"""
+        self.layer = layer
+
+        #matcheur.instance().addMapLayer(self.layer)
+
+    def reset_path(self):
+        """Reselec the path used in the last matching."""
+        
+        self.initial_layer.selectAll()
+        self.layer = processing.run("native:saveselectedfeatures", {'INPUT': self.initial_layer, 'OUTPUT': 'memory:'})['OUTPUT']
+        self.layer.setName("Points Matché 2")
+        self.initial_layer.removeSelection()

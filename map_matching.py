@@ -25,9 +25,9 @@ import os.path
 from random import random
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.core import QgsProject
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsProject, QgsVectorFileWriter
+from qgis.PyQt.QtGui import QIcon, QTextCursor
+from qgis.PyQt.QtWidgets import QAction , QFileDialog
 from qgis.core import QgsWkbTypes
 
 # Initialize Qt resources from file resources.py
@@ -35,10 +35,13 @@ from .resources import *
 # Import the code for the dialog
 from .map_matching_dialog import MapMatchingDialog
 
-from .model.layer_manager import LayerManager
+from .model.ui.layer_manager import LayerManager
 from .model.layer import Layers
 from .model.network import NetworkLayer
 from .model.path import PathLayer
+from .model.ui.settings import Settings
+from .model.matcheur import Matcheur
+
 
 
 class MapMatching:
@@ -58,6 +61,7 @@ class MapMatching:
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
         locale = QSettings().value('locale/userLocale')[0:2]
+
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
@@ -71,6 +75,7 @@ class MapMatching:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'q3m.window.title')
+
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -94,6 +99,7 @@ class MapMatching:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+
         return QCoreApplication.translate('MapMatching', message)
 
     def add_action(
@@ -198,6 +204,8 @@ class MapMatching:
             self.dlg = MapMatchingDialog()
             self.dlg.set_manager(self.manager)
 
+            self.settings = Settings(self.dlg)
+
             # Translations
             self.dlg.setWindowTitle(self.tr("q3m.window.title"))
             for label, widget in self.dlg.labels():
@@ -208,16 +216,72 @@ class MapMatching:
                 label = label.replace("_", ".").replace("btn", "q3m.window.btn")
                 widget.setText(self.tr(label))
 
+            for name, tab in self.dlg.tab():
+
+                label = tab.tabText(0)
+                label = label.replace("_", ".").replace("tab", "q3m.window.tab")
+                tab.setTabText(0,self.tr(label))
+
+                label = tab.tabText(1)
+                label = label.replace("_", ".").replace("tab", "q3m.window.tab")
+                tab.setTabText(1,self.tr(label))
+
+            for label, widget in self.dlg.groupBox():
+                label = label.replace("_", ".").replace("group", "q3m.window.group")
+                widget.setTitle(self.tr(label))
+
+            for label, widget in self.dlg.checkBox():
+                if label != "check_speed":
+                    label = label.replace("_", ".").replace("check", "q3m.window.check")
+                    widget.setText(self.tr(label))
+
+            #Voir si on peut pas faire mieux
+            dir = os.path.dirname(__file__)
+            file = os.path.abspath(os.path.join(dir, './ressources/documentation/', 'help_en.html'))
+            file2 = os.path.abspath(os.path.join(dir,'./ressources/documentation/', 'help_settings_en.html'))
+            if os.path.exists(file):
+                with open(file2) as help2:
+                    help = help2.read()
+                    self.dlg.textBrowser_settings.insertHtml(help)
+                    self.dlg.textBrowser_settings.moveCursor(QTextCursor.Start)
+
+                with open(file) as helpf:
+                    help = helpf.read()
+                    self.dlg.textBrowser_help.insertHtml(help)
+                    self.dlg.textBrowser_help.moveCursor(QTextCursor.Start)
+            
+
             # Listeners
-            self.dlg.btn_reload_layers.clicked.connect(self.load)
-            self.dlg.btn_map_matching.clicked.connect(self.start_map_matching)
+            self.dlg.btn_reload_layers.clicked.connect(self.on_click_reloads)
+            
+            self.dlg.btn_reduce_network.clicked.connect(self.on_click_reduce_network)
+            self.dlg.btn_correct_topology.clicked.connect(self.on_click_correct_topology)
+            
+            self.dlg.btn_map_matching.clicked.connect(self.on_click_pre_matching)
+            
+            self.dlg.btn_reselect_path.clicked.connect(self.on_click_reSelect_path)
+            self.dlg.btn_apply_path_change.clicked.connect(self.on_click_apply_modification)
+
+            self.dlg.btn_export_matched_track.clicked.connect(self.on_click_export_matched_track)
+            
+            self.dlg.btn_export_polyline.clicked.connect(self.on_click_export_polyline) #self.load
+            self.dlg.btn_reset.clicked.connect(self.load) #reset
+            self.dlg.btn_export_project.clicked.connect(self.on_click_export_project)
+
+            # Enabled buttons
+            self.dlg.change_button_state(1)
+
+            self.dlg.check_speed.clicked.connect(self.dlg.update_matching_box)
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
             # QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
+            
+
 
         self.manager.set_layers(self.iface.mapCanvas().layers())
-        self.dlg.update()
+        self.dlg.update_layer_box()
+        
 
     def will_removed(self, node, _from, _to) -> None:
         pass
@@ -238,8 +302,17 @@ class MapMatching:
             # substitute with your code.
             pass
 
+
+    def on_click_reloads(self):
+        self.dlg.clear_combo()
+        self.manager.set_layers(self.iface.mapCanvas().layers())
+        self.dlg.update_layer_box()
+
+
     def load(self):
         """Load sample datas"""
+        QgsProject.instance().removeAllMapLayers()
+        self.dlg.remove_all_layers()
 
         pts_pth = os.path.join(self.plugin_dir, "ressources", "datas", "points.gpkg")
         layer = self.iface.addVectorLayer(pts_pth, "trace_{:.5f}".format(random()), "ogr")
@@ -249,17 +322,224 @@ class MapMatching:
         layer = self.iface.addVectorLayer(network_path, "reseau_{:.5f}".format(random()), "ogr")
         self.manager.add_layer(layer)
 
-        self.dlg.update()
+        self.dlg.update_layer_box()
 
-    def start_map_matching(self):
-        """Start the process of mapMatching after verifying the validity of the comboBox data."""
 
-        network_layer = self.manager.network_layers()[0]
-        path_layer = self.manager.path_layers()[0]
-        buffer = 10
+    def reset(self):
+        self.dlg.change_button_state(1)
+        
+
+
+    #=============================================================================#
+    #==============================Processing part================================#
+    #=============================================================================#
+    
+
+    def on_click_reduce_network(self) -> None:
+        """Create the object Layers, reduce the network, add the result layer to qgis"""
+
+        val = self.settings.get_settings()
+
+        network_layer = self.manager.find_layer(val["combo_network"])
+        path_layer = self.manager.find_layer(val["combo_path"])
+
+        buffer = val["spin_buffer_range"]
+
+        if not LayerManager.are_valid(path_layer, network_layer):
+            print("error layer not valids")
+            return
 
         network_layer = NetworkLayer(network_layer)
         path_layer = PathLayer(path_layer)
 
-        layer = Layers(path_layer, network_layer)
-        layer.reduce_network_layer(buffer)
+
+        self.layers = Layers(path_layer, network_layer)
+
+        self.layers.reduce_network_layer(buffer)
+
+        network = self.layers.network_layer.layer
+
+        self.manager.add_layer(network)
+
+        self.manager.deselect_layer(val["combo_network"])
+
+        self.dlg.update_layer_box()
+
+        #self.dlg.combo_network.setCurrentIndex(self.dlg.combo_network.findText(network.sourceName()))
+
+        self.dlg.change_button_state(2)
+
+
+    def on_click_correct_topology(self) -> None:
+        """Correct the topology of the network layer"""
+
+        if self.layers == None:
+            print("Error, no layer created")
+            return -1
+
+        val = self.settings.get_settings()
+
+        self.layers.correct_network_layer_topology( val["spin_close_call"], 
+                                                    val["spin_intersection"])
+        network = self.layers.network_layer.layer
+
+        self.manager.add_layer(network)
+
+        self.manager.remove_layer("Reduced network")
+
+        self.dlg.change_button_state(3)
+
+
+    def on_click_pre_matching(self) -> None:
+        """Start the process of mapMatching and add the result to Qgis"""
+        
+        settings = self.settings.get_settings()
+
+        self.layers.network_layer.add_attribute_to_layers()
+
+        matcheur = Matcheur(self.layers.network_layer.layer, 
+                            self.layers.path_layer.layer, 
+                            _OID = settings["combo_oid"])
+        
+        matcheur.setParameters( settings["spin_searching_radius"],
+                                settings["spin_sigma"])
+        path = None
+
+        if settings["combo_algo_matching"] == "Matching with Speed":
+            if(settings["check_speed"] == False):
+                print("error speed disactivated and speed matching started")
+                return
+                                            
+            self.layers.match_speed(matcheur, settings["combo_speed"], settings["spin_stop_speed"])
+
+
+        elif settings["combo_algo_matching"] == "Matching closest":
+            self.layers.match_closest(matcheur)
+
+        elif settings["combo_algo_matching"] == "Matching by distance":
+            self.layers.match_by_distance(matcheur)
+
+        path = self.layers.path_layer.layer
+        self.manager.add_layer(path)
+
+        self.dlg.change_button_state(4)
+        self.dlg.update_matched_path_box()
+
+
+    def on_click_reSelect_path(self) -> None:
+        self.layers.reSelect_path()
+
+
+    def on_click_apply_modification(self) -> None:
+        """Create a new matched path layer and add it to QGIS"""
+        
+        settings = self.settings.get_settings()
+
+        matcheur = Matcheur(None, 
+                            self.layers.path_layer.layer, 
+                            _OID = settings["combo_oid"])
+
+        matcheur.setParameters( settings["spin_searching_radius"],
+                                settings["spin_sigma"])
+
+        if settings["combo_algo_matching"] == "Matching with Speed" :
+            if settings["check_speed"] == False:
+                print("error speed not checked and use speed matching")
+                return
+
+            self.layers.apply_modification( settings["combo_algo_matching"],
+                                            matcheur,
+                                            speed_column_name= settings["combo_speed"],
+                                            speed_limit = settings["spin_stop_speed"])
+
+        else:
+            self.layers.apply_modification( settings["combo_algo_matching"],
+                                            matcheur)
+
+        path = self.layers.path_layer.layer
+        self.manager.add_layer(path)
+
+        self.dlg.update_matched_path_box()
+
+
+    def on_click_export_matched_track(self) -> None:
+        """Export the Matched path selected in the comboBox"""
+
+        if self.dlg.combo_matched_track.currentText() == "":
+            print("Error : no matched layer detected")
+            return
+        name = QFileDialog.getSaveFileName(self.dlg,"export : " + self.dlg.combo_matched_track.currentText())
+        layer = self.manager.find_layer(self.dlg.combo_matched_track.currentText())
+        
+        settings = self.settings.get_settings()
+
+        QgsVectorFileWriter.writeAsVectorFormat(layer,name[0],"utf-8",layer.crs(),settings["combo_format"])
+
+    
+    def on_click_export_polyline(self) -> None:
+        """Export the polyline of the last matching operation"""
+
+        poly = self.layers.get_polyline()
+        settings = self.settings.get_settings()
+        
+        #temporaire#########################
+        #QgsProject.instance().addMapLayer(poly)
+        ####################################
+
+        name = QFileDialog.getSaveFileName(self.dlg,"Save polyline as: ")
+        QgsVectorFileWriter.writeAsVectorFormat(poly,name[0],"utf-8",poly.crs(),settings["combo_format"])
+
+
+    def on_click_export_project(self) -> None:
+        """Export every element of the project checked in settings"""
+
+        settings = self.settings.get_settings()
+
+        #verify the checked box in the settings 
+        exported_layers = []
+        
+        if settings["check_initial_path"] == True:
+            exported_layers.append(self.layers.path_layer.initial_layer)
+
+        if settings["check_polyline"] == True:
+            poly = self.layers.get_polyline()
+            if poly == -1:
+                print("Error in export project no polyline generated yet")
+                return
+            exported_layers.append(poly)
+
+        if settings["check_corrected_network"] == True:
+            exported_layers.append(self.layers.network_layer.layer)
+        if settings["check_matched_path"] == True:
+            layers = self.manager.get_matched_layers()
+            if len(layers) == 0:
+                print("Error in export project: No matched layer found")
+            for layer in layers:
+                exported_layers.append(layer)
+            
+        if(len(exported_layers) == 0):
+            print("Error : nothing to export. See the export settings and check the boxes that interest you")
+            return
+
+        #Find where to save the project
+        name = QFileDialog.getSaveFileName(self.dlg,"export : " + self.dlg.combo_matched_track.currentText())
+
+        #setup the export
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = settings["combo_format"]
+        options.layerName = exported_layers[0].name()
+        context = QgsProject.instance().transformContext()
+
+        #create file and write one layer inside
+        QgsVectorFileWriter.writeAsVectorFormatV2(exported_layers[0],name[0],context,options)
+
+        #Change option to append news vector to the file
+        options.actionOnExistingFile = QgsVectorFileWriter.CreateOrOverwriteLayer
+        i=0
+        for layer in exported_layers:
+            if i == 0:
+                i+=1
+                continue
+
+            options.layerName = layer.name()
+            QgsVectorFileWriter.writeAsVectorFormatV2(layer,name[0],context,options)
