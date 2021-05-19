@@ -35,15 +35,15 @@ class LayerManager:
 
 
     def remove_layer(self, _from: int) -> None:
-        try:
-            del self.layers[_from]
-        except Exception:
-            pass
+        self.layers.pop(_from)
 
 
-    def remove_layer(self, name: string) ->None:
+
+    def remove_layer_from_name(self, name: string) ->None:
         """Delete a layer on Qgis and in the programm that has the same name"""
         try:
+            print("test")
+            print(self.layers)
             for layer in self.layers:
                 if(layer.sourceName() == name):
                     QgsProject.instance().removeMapLayer(self.find_layer(name))
@@ -52,6 +52,8 @@ class LayerManager:
         except Exception:
             print("Couldn't delete this vector")
 
+        print(name)
+        print(self.layers)
         print("Didn't found the layer in the list")
             
 
@@ -64,8 +66,7 @@ class LayerManager:
 
 
     def get_matched_layers(self) -> List[QgsVectorLayer]:
-        for layer in self.layers:
-            print(layer.sourceName())
+
         return [layer for layer in self.layers if   LayerManager.is_path_layer(layer) and 
                                                     (layer.sourceName() == "matched point by distance" or
                                                     layer.sourceName() == "matched point by speed" or
@@ -93,6 +94,7 @@ class LayerManager:
             if layer.name() == name:
                 return layer
         return None
+
 
 
     @classmethod

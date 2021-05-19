@@ -27,6 +27,12 @@ class Button_manager():
         self.dlg.btn_reselect_path.setEnabled(False)
         self.dlg.btn_apply_path_change.setEnabled(False)
 
+        self.dlg.combo_matched_track.setEnabled(False)
+        self.dlg.btn_export_matched_track.setEnabled(False)
+        self.dlg.btn_export_polyline.setEnabled(False)
+        self.dlg.btn_export_project.setEnabled(False)
+
+
 
     def set_input_state_buttons(self) -> None:
         """Activate every buttons related to the network reduction"""
@@ -77,9 +83,7 @@ class Button_manager():
         self.dlg.btn_reselect_path.setEnabled(True)
         self.dlg.btn_apply_path_change.setEnabled(True)
 
-
-    def set_import_state(self):
-        """Activate every buttons related to the importation"""
-        
-        self.__disable_all_buttons()
-        #todo
+        self.dlg.combo_matched_track.setEnabled(True)
+        self.dlg.btn_export_matched_track.setEnabled(True)
+        self.dlg.btn_export_polyline.setEnabled(True)
+        self.dlg.btn_export_project.setEnabled(True)

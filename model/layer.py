@@ -19,6 +19,9 @@ class Layers:
         # Buffer's creation
         buffer = self.path_layer.create_buffer(range)
 
+        if type(buffer) == str:
+            return buffer
+
         # Spatial selection
         self.network_layer.select_intersection_trajectory(buffer)
 

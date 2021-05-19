@@ -9,12 +9,19 @@ class PathLayer:
 
     def __init__(self, _layer):
         self.initial_layer = _layer
+        self.layer = None
 
-        # copy the layer and create a new one with no dependances to the precedent
-        _layer.selectAll()
-        self.layer = processing.run("native:saveselectedfeatures", {'INPUT': _layer, 'OUTPUT': 'memory:'})['OUTPUT']
-        self.layer.setName("Points Matché")
-        _layer.removeSelection()
+        
+
+    def dupplicate_initial_layer(self):
+        """Copy the initial layer and create a new one with no dependances to the precedent"""
+        try:
+            self.initial_layer.selectAll()
+            self.layer = processing.run("native:saveselectedfeatures", {'INPUT': self.initial_layer, 'OUTPUT': 'memory:'})['OUTPUT']
+            self.layer.setName("Points Matché")
+            self.initial_layer.removeSelection()
+        except:
+            return "processing"
 
 
     def create_buffer(self, range: int) -> QgsVectorLayer:
@@ -25,7 +32,7 @@ class PathLayer:
         """
 
         if range <= 0 :
-            return None
+            return "buffer.range"
 
         # Create a list of points
         feats = [feat for feat in self.layer.getFeatures()]

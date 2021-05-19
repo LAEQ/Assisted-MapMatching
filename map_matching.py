@@ -23,12 +23,13 @@
 """
 import os.path
 from random import random
+import string
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.core import QgsProject, QgsVectorFileWriter
+from qgis.core import QgsProject, QgsVectorFileWriter, QgsLayerTree
 from qgis.PyQt.QtGui import QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import QAction , QFileDialog
-from qgis.core import QgsWkbTypes
+from qgis.core import Qgis
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -82,6 +83,7 @@ class MapMatching:
         self.first_start = None
         self.dlg = None
         self.manager = LayerManager()
+        self.layers = None
 
         # @todo Investigate diff between instance and iface mapLayers
         # QgsProject.instance().mapLayers()
@@ -278,7 +280,6 @@ class MapMatching:
             # QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
             
 
-
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update_layer_box()
         
@@ -288,6 +289,46 @@ class MapMatching:
 
     def has_removed(self, node, _from: int, _to: int) -> None:
         pass
+        """ En cours d'étude: beaucoup de problèmes
+        #Reflexion: 
+        #Si l'utilisateur supprime un objet utilisé dans layers: bloquer le programme
+
+        all_layers = [layer for layer in QgsProject.instance().mapLayers().values()]
+        manager_layer = self.manager.layers
+
+        #recupère l'index du layer à supprimer dans manager_layer
+        #attention all_layers != manager_layer
+        #manager_layer n'a que les layers actifs
+        try:
+            index = -1
+            for i in range(len(manager_layer)):
+                if manager_layer[i] == all_layers[_from]:
+                    index = i
+
+            if index == -1:
+                print("Can't delete something non existing")
+                return
+        except:
+            print("Problem with layers deletion : layer manager may have some difficulties")
+            return
+        
+        
+
+        if(self.layers == None):
+
+            self.manager.remove_layer(index)
+
+            self.dlg.update_layer_box()
+
+        else:
+            if (self.layers.network_layer.layer.name() == manager_layer[i].name() or
+                self.layers.path_layer.layer.name() == manager_layer[i].name()):
+                #self.dlg.blockplugin
+                #ajouter les autres conditions
+                print("Error u deleted sth that i use in my plugin: punition block plugin")
+        """
+        
+       
 
     def run(self):
         """Run method that performs all the real work"""
@@ -327,6 +368,15 @@ class MapMatching:
 
     def reset(self):
         self.dlg.change_button_state(1)
+
+    def create_message_error(self,level,message,pre_message = "Error", duration = 10):
+        """widget = self.iface.messageBar().createMessage(pre_message,message)
+        button = QPushButton(widget)
+        button.setText(button_message)
+        button.pressed.connect(self.fill_comboBox)
+        widget.layout().addWidget(button)
+        self.iface.messageBar().pushWidget(widget, level = level)"""
+        self.iface.messageBar().pushMessage(pre_message,message, level, duration)
         
 
 
@@ -340,22 +390,40 @@ class MapMatching:
 
         val = self.settings.get_settings()
 
+        if val["combo_network"] == "" or val["combo_path"] == "":
+            message = self.tr("q3m.error.missing.input")
+            self.create_message_error(Qgis.Warning,message)
+            return
+
         network_layer = self.manager.find_layer(val["combo_network"])
         path_layer = self.manager.find_layer(val["combo_path"])
+
 
         buffer = val["spin_buffer_range"]
 
         if not LayerManager.are_valid(path_layer, network_layer):
-            print("error layer not valids")
+            message = self.tr("q3m.error.invalid.layer")
+            self.create_message_error(Qgis.Warning,message)
             return
 
         network_layer = NetworkLayer(network_layer)
         path_layer = PathLayer(path_layer)
+        error = path_layer.dupplicate_initial_layer()
 
+        if error != None:
+            message = self.tr("q3m.error." + error)
+            self.create_message_error(Qgis.Warning,message)
+            return
+        
 
         self.layers = Layers(path_layer, network_layer)
 
-        self.layers.reduce_network_layer(buffer)
+        error = self.layers.reduce_network_layer(buffer)
+
+        if error != None:
+            message = self.tr("q3m.error." + error)
+            self.create_message_error(Qgis.Warning,message)
+            return
 
         network = self.layers.network_layer.layer
 
@@ -385,7 +453,7 @@ class MapMatching:
 
         self.manager.add_layer(network)
 
-        self.manager.remove_layer("Reduced network")
+        self.manager.remove_layer_from_name("Reduced network")
 
         self.dlg.change_button_state(3)
 

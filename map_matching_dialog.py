@@ -28,7 +28,7 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget, QGroupBox, QCheckBox
 from qgis.core import QgsVectorLayer, QgsFields
 from typing import List
-from .model.ui.button_manager import Button_manager
+from model.ui.button_manager import Button_manager
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 # from model.layer_manager import LayerManager
@@ -150,7 +150,6 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
                 2 = Correcting phase
                 3 = Matching phase
                 4 = Modification phase
-                5 = Import phase
         """
 
         if self.buttonManager == None:
@@ -166,8 +165,6 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
             self.buttonManager.set_pre_matching_state_buttons()
         elif state == 4:
             self.buttonManager.set_modification_state_buttons()
-        elif state == 5:
-            self.buttonManager.set_import_state()
 
 
     def save_state(self) -> None:
@@ -185,7 +182,7 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if  self.manager.selected_path != "" and self.manager.selected_path != self.combo_path.currentText():
             self.combo_path.setCurrentIndex(self.combo_path.findText(self.manager.selected_path))
-        if  self.manager.selected_path != "" and self.manager.selected_network != self.combo_network.currentText():
+        if  self.manager.selected_network != "" and self.manager.selected_network != self.combo_network.currentText():
             self.combo_network.setCurrentIndex(self.combo_network.findText(self.manager.selected_network))
         if  self.manager.OID != "" and self.manager.OID != self.combo_oid.currentText():
             self.combo_oid.setCurrentIndex(self.combo_oid.findText(self.manager.OID))
