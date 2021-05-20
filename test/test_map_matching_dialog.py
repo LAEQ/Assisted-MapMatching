@@ -37,7 +37,6 @@ class MapMatchingDialogTest(unittest.TestCase):
         """Runs after each test."""
         self.dialog = None
 
-
     def test_update_layer_box(self):
         magic_points = self.fixtures.points()
         magic_network = [self.fixtures.network_1()]
@@ -48,33 +47,7 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.assertEqual(1, self.dialog.combo_network.count())
 
 
-    def test_clear_combo(self):
-        magic_points = self.fixtures.points()
-        magic_network = [self.fixtures.network_1()]
-        self.manager.get_path_layers = MagicMock(return_value=magic_points)
-        self.manager.get_network_layers = MagicMock(return_value=magic_network)
-        self.dialog.update_layer_box()
-        self.dialog.clear_combo()
-        self.assertEqual(0, self.dialog.combo_path.count())
-        self.assertEqual(0, self.dialog.combo_network.count())
-        self.assertEqual(0, self.dialog.combo_oid.count())
-        self.assertEqual(0, self.dialog.combo_speed.count())
-
-
-    def test_path_changed(self):
-        magic_points = self.fixtures.points()
-        magic_network = self.fixtures.networks()
-        magic_fields = self.fixtures.points_fields_1()
-        self.manager.get_path_layers = MagicMock(return_value=magic_points)
-        self.manager.get_network_layers = MagicMock(return_value=magic_network)
-        self.manager.get_path_attributes = MagicMock(return_value=magic_fields)
-        self.dialog.update_layer_box()
-        self.dialog.combo_path.setCurrentIndex(1)
-        #2 because points_fields_1 has only 2 fields of type integer /integer48...
-        self.assertEqual(2, self.dialog.combo_oid.count())
-
-
-    def test_update_matched_path_box(self):
+    def test_update_matching_box(self):
         index = self.dialog.combo_algo_matching.findText("Matching with Speed")
         self.dialog.combo_algo_matching.removeItem(index)
 
@@ -104,6 +77,20 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.dialog.update_matched_path_box()
         self.assertEqual(len(magic_points), self.dialog.combo_matched_track.count())
 
+
+    def test_path_changed(self):
+        magic_points = self.fixtures.points()
+        magic_network = self.fixtures.networks()
+        magic_fields = self.fixtures.points_fields_1()
+        self.manager.get_path_layers = MagicMock(return_value=magic_points)
+        self.manager.get_network_layers = MagicMock(return_value=magic_network)
+        self.manager.get_path_attributes = MagicMock(return_value=magic_fields)
+        self.dialog.update_layer_box()
+        self.dialog.combo_path.setCurrentIndex(1)
+        #2 because points_fields_1 has only 2 fields of type integer /integer48...
+        self.assertEqual(2, self.dialog.combo_oid.count())
+
+
     def test_restore_state(self):
         magic_points = self.fixtures.points()
         magic_network = self.fixtures.networks()
@@ -125,8 +112,18 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.assertEqual("fid", self.dialog.combo_oid.currentText())
         self.assertEqual("Speed", self.dialog.combo_speed.currentText())
 
-
-
+    
+    def test_clear_combo(self):
+        magic_points = self.fixtures.points()
+        magic_network = [self.fixtures.network_1()]
+        self.manager.get_path_layers = MagicMock(return_value=magic_points)
+        self.manager.get_network_layers = MagicMock(return_value=magic_network)
+        self.dialog.update_layer_box()
+        self.dialog.clear_combo()
+        self.assertEqual(0, self.dialog.combo_path.count())
+        self.assertEqual(0, self.dialog.combo_network.count())
+        self.assertEqual(0, self.dialog.combo_oid.count())
+        self.assertEqual(0, self.dialog.combo_speed.count())
 
 
 if __name__ == "__main__":

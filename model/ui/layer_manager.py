@@ -16,15 +16,6 @@ class LayerManager:
         self.speed = None
 
 
-    def save(self, path: string, network : string, OID : string, speed : string) -> None:
-        """Store values for later restoration or uses"""
-
-        self.selected_path = path
-        self.selected_network = network
-        self.OID = OID
-        self.speed = speed
-
-
     def set_layers(self, layers: List[QgsVectorLayer]) -> None:
         self.layers = layers
 
@@ -35,26 +26,27 @@ class LayerManager:
 
 
     def remove_layer(self, _from: int) -> None:
-        self.layers.pop(_from)
-
+        try:
+            self.layers.pop(_from)
+        except:
+            #index out of range
+            return 
 
 
     def remove_layer_from_name(self, name: string) ->None:
         """Delete a layer on Qgis and in the programm that has the same name"""
         try:
-            print("test")
-            print(self.layers)
             for layer in self.layers:
                 if(layer.sourceName() == name):
                     QgsProject.instance().removeMapLayer(self.find_layer(name))
                     self.layers.remove(layer)
                     return
         except Exception:
-            print("Couldn't delete this vector")
+            #print("Couldn't delete this vector")
+            return
+            
 
-        print(name)
-        print(self.layers)
-        print("Didn't found the layer in the list")
+        #print("Didn't found the layer in the list")
             
 
     def deselect_layer(self, name: string) ->None: #modif
@@ -77,16 +69,16 @@ class LayerManager:
         return [layer for layer in self.layers if LayerManager.is_network_layer(layer)]
 
 
-    def load_layer(self, path: str) -> None:
-        layer = QgsVectorLayer(path, os.path.basename(path), "ogr")
-        self.layers.append(layer)
-
-
     def get_path_attributes(self, index: int) -> List[QgsField]:
         try:
             return self.get_path_layers()[index].fields()
         except Exception:
             return []
+
+    
+    def load_layer(self, path: str) -> None:
+        layer = QgsVectorLayer(path, os.path.basename(path), "ogr")
+        self.layers.append(layer)
 
 
     def find_layer(self, name: string) -> QgsVectorLayer:
@@ -94,6 +86,14 @@ class LayerManager:
             if layer.name() == name:
                 return layer
         return None
+
+    def save(self, path: string, network : string, OID : string, speed : string) -> None:
+        """Store values for later restoration or uses"""
+
+        self.selected_path = path
+        self.selected_network = network
+        self.OID = OID
+        self.speed = speed
 
 
 

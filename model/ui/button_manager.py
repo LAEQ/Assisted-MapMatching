@@ -50,8 +50,8 @@ class Button_manager():
 
     def set_topology_state_buttons(self) -> None:
         """Activate every buttons related to topological operations"""
+        self.__disable_all_buttons()
 
-        self.set_input_state_buttons()
         self.dlg.btn_correct_topology.setEnabled(True)
 
 

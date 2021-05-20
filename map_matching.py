@@ -431,7 +431,8 @@ class MapMatching:
 
         self.manager.deselect_layer(val["combo_network"])
 
-        self.dlg.update_layer_box()
+        # Inutile on bloque les box après début procédure
+        # self.dlg.update_layer_box()
 
         #self.dlg.combo_network.setCurrentIndex(self.dlg.combo_network.findText(network.sourceName()))
 

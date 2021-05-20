@@ -35,18 +35,18 @@ class LayerFixtures:
             self.network_2(),
         ]
 
-    # def generate_vector_path_4_fields():
-    #     layer = QgsVectorLayer("Marker?crs=EPSG:4326", "layer_1", "memory")
-    #     pr = layer.dataProvider()  # need to create a data provider
-    #     fields = [QgsField("id", QVariant.Int),
-    #               QgsField("name", QVariant.String),
-    #               QgsField("oid ", QVariant.Int),
-    #               QgsField("speed", QVariant.Double)
-    #               ]
-    #     pr.addAttributes(fields)
-    #     layer.updateFields()
-    #
-    #     return layer
+    def generate_vector_path_4_fields(self, epsg = "4326", name = "layer_1"):
+        layer = QgsVectorLayer("Point?crs=EPSG:"+epsg, name, "memory")
+        pr = layer.dataProvider()  # need to create a data provider
+        fields = [QgsField("id", QVariant.Int),
+                  QgsField("name", QVariant.String),
+                  QgsField("oid ", QVariant.Int),
+                  QgsField("speed", QVariant.Double)
+                  ]
+        pr.addAttributes(fields)
+        layer.updateFields()
+        
+        return layer
 
     # def generate_vector_path_8_fields():
     #     layer = QgsVectorLayer("Marker?crs=EPSG:4326", "layer_1", "memory")
@@ -66,18 +66,19 @@ class LayerFixtures:
     #     return layer
     #
     #
-    # def generate_network_4_fields():
-    #     layer = QgsVectorLayer("LINESTRING?crs=EPSG:4326", "layer_1", "memory")
-    #     pr = layer.dataProvider()  # need to create a data provider
-    #     fields = [QgsField("id", QVariant.Int),
-    #               QgsField("name", QVariant.String),
-    #               QgsField("oid ", QVariant.Int),
-    #               QgsField("speed", QVariant.Double)
-    #               ]
-    #     pr.addAttributes(fields)
-    #     layer.updateFields()
-    #
-    #     return layer
+    def generate_network_4_fields(self,epsg = "4326", name = "layer_1"):
+        layer = QgsVectorLayer("LINESTRING?crs=EPSG:"+epsg, name, "memory")
+        pr = layer.dataProvider()  # need to create a data provider
+        fields = [QgsField("id", QVariant.Int),
+                  QgsField("name", QVariant.String),
+                  QgsField("oid ", QVariant.Int),
+                  QgsField("speed", QVariant.Double)
+                  ]
+        pr.addAttributes(fields)
+        layer.updateFields()
+
+        return layer
+
     def points(self):
         return [
             self.points_1(),

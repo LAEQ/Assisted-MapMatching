@@ -28,7 +28,7 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget, QGroupBox, QCheckBox
 from qgis.core import QgsVectorLayer, QgsFields
 from typing import List
-from model.ui.button_manager import Button_manager
+from .model.ui.button_manager import Button_manager
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 # from model.layer_manager import LayerManager
