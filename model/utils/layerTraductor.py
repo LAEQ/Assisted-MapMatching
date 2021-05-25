@@ -1,5 +1,9 @@
-from shapely import wkt
-from shapely.geometry import shape
+#from shapely import wkt
+try:
+    from shapely.geometry import shape
+except:
+    print("Can't load shapely, please install it with pip")
+
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
 import json
 
@@ -23,6 +27,9 @@ class layerTraductor:
             ]
     
         """
+
+        if type(layer) != QgsVectorLayer:
+            return None
 
         final_list = []
         temp = layer.fields().names()
@@ -53,6 +60,10 @@ class layerTraductor:
         mem_layer -- A QgsVectorLayer filled with the elements in feat_list
 
         """
+
+        if (type(layer_patern) != QgsVectorLayer or
+            type(feat_list) != list ):
+            return None
 
         epsg = layer_patern.crs().postgisSrid()
 
@@ -86,4 +97,11 @@ class layerTraductor:
     @staticmethod
     def order_list_of_dict(feat_list,column_name = "OID"):
         """Sort a list according to it's OID column"""
+        if( type(feat_list) != list or
+            feat_list == [] ):
+            return None
+
+        if not column_name in feat_list[0]:
+            return None
+
         return sorted(feat_list,key= lambda obj: obj[column_name])

@@ -1,13 +1,21 @@
-import shapely
-from shapely import ops
-from shapely.geometry import Point
-from ..import_.pyqtree import *
+try:
+    import shapely
+    from shapely.geometry import LineString
+except Exception:
+    print("Couldn't load shapely")
+    raise
+
+try:
+    from ..import_.pyqtree import *
+    from ..import_.leuvenmapmatching.map.inmem import InMemMap
+    from ..import_.leuvenmapmatching.matcher.distance import DistanceMatcher
+    from ..import_.dbscan import dbscan2
+except Exception:
+    print("Couldn't access the import file, check your path")
+    raise
+
 import collections
 import numpy as np
-from ..import_.leuvenmapmatching.map.inmem import InMemMap
-from ..import_.leuvenmapmatching.matcher.distance import DistanceMatcher
-
-from ..import_.dbscan import dbscan2
 
 
 
@@ -16,7 +24,7 @@ from ..import_.dbscan import dbscan2
 #############################################################################
 
 
-def build_sp_index(geometries) : 
+def build_sp_index(geometries: list) : 
     """ Create a spatial index pyqtree
 
     Input: 
@@ -26,11 +34,14 @@ def build_sp_index(geometries) :
     sp_index      -- An object of class pyqtree.Index
     """
 
+    if geometries == []:
+        #print("Error empty input value in build_sp_index")
+        return
+
     maxX = max([geom.bounds[2] for geom in geometries])
-    minX = max([geom.bounds[0] for geom in geometries])
+    minX = min([geom.bounds[0] for geom in geometries])
     maxY = max([geom.bounds[3] for geom in geometries])
-    minY = max([geom.bounds[1] for geom in geometries])
-    
+    minY = min([geom.bounds[1] for geom in geometries])
 
     sp_index = Index((minX,minY,maxX,maxY))
     
@@ -43,7 +54,7 @@ def build_sp_index(geometries) :
 
 ## permet de recuperer dans un index spatial la geometry
 ## la plus proche d'une autre en entree dans un certain rayon
-def NearestGeometry(geom,sp_index,search_dist) : 
+def nearest_geometry(geom,sp_index : Index, search_dist : int) : 
     """Return the closest entity in a radius.
     
     Input:
@@ -54,14 +65,21 @@ def NearestGeometry(geom,sp_index,search_dist) :
     Output:
     The closest entity to geom in search_dist radius
     """
+    if geom == None or sp_index == None or search_dist <= 0:
+        return "geometry.nearest_geometry.invalid_input"
 
     candidates = sp_index.intersect(geom.buffer(search_dist).bounds)
+
+    if len(candidates) == 0:
+        #print("No candidate found in a distance of " + str(search_dist) + " around " + str(geom))
+        return "geometry.nearest_geometry.no_candidate_found"
+    
     distances = [(candidate, candidate.distance(geom)) for candidate in candidates]
     distances.sort(key=lambda x:x[1])
     return distances[0][0]
 
 
-def mean_point(points, digit) : 
+def mean_point(points : list, digit : int) : 
     """Return a point with the average position of every points in points
 
     Input:
@@ -72,6 +90,10 @@ def mean_point(points, digit) :
     A Point of type : shapely.geometry.point.Point
     
     """
+
+    if points == None or points == []:
+        return "geometry.mean_point.incorrect_input"
+
     mx = truncate(sum([pt.x for pt in points]) / len(points),digit)
     my = truncate(sum([pt.y for pt in points]) / len(points),digit)
     return shapely.geometry.Point(mx,my)
@@ -84,6 +106,9 @@ def mean_point(points, digit) :
 def truncate(f, n):
     '''Truncates/pads a float f to n decimal places without rounding'''
 
+    if n <0:
+        n = 0
+
     s = '{}'.format(f)
     if 'e' in s or 'E' in s:
         return '{0:.{1}f}'.format(f, n)
@@ -94,6 +119,13 @@ def truncate(f, n):
 def truncate_coords(line,digit) : 
     """Truncates a shapely.geometry.LineString with a precision of digit."""
 
+    if type(line) != shapely.geometry.linestring.LineString:
+        #print("Can't truncate " + str(type(line)) + " with truncate_coords")
+        return line
+
+    if digit <0:
+        digit = 0
+
     coords = list(line.coords)
     newpts = [(truncate(c[0],digit),truncate(c[1],digit)) for c in coords]
     return shapely.geometry.LineString(newpts)
@@ -102,11 +134,27 @@ def truncate_coords(line,digit) :
 def truncate_coords_pts(point,digit) : 
     """Truncate a shapely.geometry.Point with a precision of digit"""
 
+    if type(point) != shapely.geometry.point.Point:
+        #print("Can't truncate " + str(type(point)) + " with truncate_coords_pts")
+        return point
+
+    if digit <0:
+        digit = 0
+
     return shapely.geometry.Point(truncate(point.x,digit),truncate(point.y,digit))
 
 
 def reverse_line(line) : 
     """Reverse the order of the vertices in the line"""
+
+    if( type(line) != shapely.geometry.linestring.LineString or
+        line == LineString()):
+        #print("Can't reverse " + str(type(line)) + " with reverse_line")
+        return line
+
+    """if line == LineString():
+        return "geometry.reverse_line.empty_lineString
+    """
 
     coords = list(line.coords)
     coords.reverse()
@@ -115,6 +163,12 @@ def reverse_line(line) :
 
 def get_extremites(line) : 
     """Return a tuple with the extemities of the line"""
+
+    if( type(line) != shapely.geometry.linestring.LineString or
+        line == LineString()):
+        #print("Can't reverse " + str(type(line)) + " with reverse_line")
+        return line,None
+    
     coords = list(line.coords)
     p1 = shapely.geometry.Point(coords[0])
     p2 = shapely.geometry.Point(coords[-1]) 
@@ -131,6 +185,19 @@ def cut_line(line, points):
     Output:
     lines : -- A list of LineString
     """
+
+    if( type(line) != shapely.geometry.linestring.LineString or 
+        line == LineString() ):
+        print("Can't reverse " + str(type(line)) + " with reverse_line")
+        return None
+
+    if( type(points) != list or 
+        points == [] or
+        type(points[0]) != shapely.geometry.point.Point ):
+
+        #print("Problem with the point " + str(points) + " in reverse line")
+        return [line]
+        
 
     # First coords of line
     coords = list(line.coords)
@@ -160,11 +227,7 @@ def cut_line(line, points):
                 lines.append(shapely.geometry.LineString(coords[i:j+1]))
         #special case for loops
     except:
-        print(shapely.wkt.dumps(line))
-        for pt in points:
-            print(shapely.wkt.dumps(pt))
-        
-        raise ValueError("error")
+        print("Votre ligne fait des allés retours")
 
 
 
@@ -180,6 +243,8 @@ def cut_line(line, points):
 
 def cut_line_between(line,p1,p2) : 
     """Cut a line between two points
+
+    Both points are projected on the line.
     
     Input:
     line:   -- A shapely.geometry.LineString object
@@ -189,6 +254,17 @@ def cut_line_between(line,p1,p2) :
     A new shapely.geometry.LineString Object 
 
     """
+
+    if( type(line) != shapely.geometry.linestring.LineString or 
+        line == LineString() ):
+        return None
+
+    if( type(p1) != shapely.geometry.point.Point or 
+        type(p2) != shapely.geometry.point.Point ):
+
+        #print("Problem with one of the points " + str(p1) + "--" + str(p2) + " in cut line between")
+        return [line]
+
     d1a = line.project(p1)
     d2a = line.project(p2)
     rev_line = reverse_line(line)
@@ -222,6 +298,10 @@ def to_simple_lines(line) :
     new_lines  -- A list of shapely.geometry.LineString object
     """
 
+    if( type(line) != shapely.geometry.linestring.LineString or 
+        line == LineString() ) :
+        return [line]
+
     new_lines = []
     coords = list(line.coords)
     for i in range(len(coords)-1) : 
@@ -239,6 +319,12 @@ def connect_lines(l1,l2) :
     Output:
     A shapely.geometry.LineString object obtained by merging the two lines
     """
+
+    if( type(l1) != shapely.geometry.linestring.LineString or 
+        type(l2) != shapely.geometry.linestring.LineString or 
+        l2 == LineString() or
+        l1 == LineString() ) :
+        return None
 
     s1,e1 = get_extremites(l1)
     s2,e2 = get_extremites(l2)
@@ -264,8 +350,15 @@ def to_lixels(line,distance) :
     distance: -- A double
 
     Output:
-    segments  -- A shapely.geometry.LineString object
+    segments  -- A list of shapely.geometry.LineString object
     """
+
+    if( type(line) != shapely.geometry.linestring.LineString or 
+        line == LineString() ) :
+        return None
+
+    if distance <=0:
+        return [line]
 
     #creation de tous les points sur la ligne
     totdist=0
@@ -279,7 +372,7 @@ def to_lixels(line,distance) :
 
 ## input : list of shapely.geometry.Points, float, digits
 ## output : list of shapely.geometry.Points (consolidated)
-def consolidate(points,tol=0.3, progression = None) :
+def consolidate(points,tol=0.3) :
     """ Merge every points in a list of points that are close to each other in a radius of 0.3
 
     Input:
@@ -323,6 +416,10 @@ def SplitLoop(line) :
     segments:   -- A list of shapely.geometry.LineString 
     """
 
+    if( type(line) != shapely.geometry.linestring.LineString or 
+        line == LineString() ) :
+        return None
+
     start,end = get_extremites(line)
     if start.distance(end)<0.001 : 
         pts = list(line.coords)
@@ -331,7 +428,7 @@ def SplitLoop(line) :
         if n == 1:
             return [line]
         pts1 = pts[0:n]
-        pts2 = pts[n-1:len(pts)]
+        pts2 = pts[n:len(pts)]
 
         segments =[shapely.geometry.LineString(pts1),shapely.geometry.LineString(pts2)]
     else : 
@@ -364,9 +461,11 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
     cnt = 0
     for feat in linelayer : 
         for sline in to_simple_lines(feat["geometry"]) : 
-            for lixel in to_lixels(sline, tol) : 
-                base_lines.append({"OID" : cnt, "geometry" : lixel})
-                cnt+=1
+            lixels = to_lixels(sline, tol)
+            if lixels != None:
+                for lixel in lixels : 
+                    base_lines.append({"OID" : cnt, "geometry" : lixel})
+                    cnt+=1
     
     #---------------------------------------------------------------------------------
     # step 2 : a partir de cet ensemble de segments simples, recalculer le chemin le plus
@@ -377,7 +476,7 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
     ##step2 : construire le chemin
     pts = [(pt["geometry"].x,pt["geometry"].y) for pt in pointlayer]
     
-    searching_radius = 45
+    #searching_radius = 45
     
     #calculer le meilleur chemin
     matcher = DistanceMatcher(mymap, max_dist_init=searching_radius, max_dist=searching_radius, obs_noise=sigma, obs_noise_ne=sigma*2,
@@ -401,7 +500,7 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
     lines = selected_lines
     l2 = lines.pop(0)
 
-    s1,e1 = get_extremites(l2) #€rror
+    s1,e1 = get_extremites(l2)
     if s1.distance(lines[0])<e1.distance(lines[0]) : 
         c2 = list(l2.coords)
         c2.reverse()
@@ -424,6 +523,7 @@ def build_graph(linelayer) :
     linelayer2 = []
 
     for feat in linelayer:
+        #↓tentative d'optimisation: fait bugué l'application
         """p1,p2 = get_extremites(feat["geometry"])
         if feat["geometry"].length != 0:
             ratio =  p1.distance(p2) / feat["geometry"].length

@@ -5,10 +5,18 @@ Created on Wed Apr 21 09:21:19 2021
 @author: gelbj
 """
 
-import shapely
-from shapely.geometry import Point
+try:
+    import shapely
+    from shapely.geometry import Point
+except:
+    print("Couldn't import shapely")
+
 import itertools
-from .utils.geometry import *
+
+try:
+    from .utils.geometry import *
+except:
+    print("##PLUGIN## - Problem with geometry in topology.py")
 
 
 #############################################################################
@@ -38,7 +46,7 @@ def simplify_coordinates(linelayer, digits) :
 
 
 def deal_with_danglenodes(linelayer, tolerance = 0.01) : 
-    """ Cut every lines which are touched by the extremity of another line in two
+    """ Cut every lines which are tPqrouched by the extremity of another line in two
     
     Input:      
     linelayer:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
@@ -143,7 +151,7 @@ def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) : #meme
 ## le cas ou les extremites de deux lignes sont tres proches (tolerance)
 ## mais ne se rejoignent pas...
 ## NB : on est ici sur du pseudo-code
-def deal_with_closecall(linelayer, progression = None, tolerance = 0.3, digits = 3) : #!=
+def deal_with_closecall(linelayer, tolerance = 0.3, digits = 3) : #!=
     """ Join every lines that are close to each other
     
     Input:      
@@ -158,7 +166,7 @@ def deal_with_closecall(linelayer, progression = None, tolerance = 0.3, digits =
     pts = [get_extremites(feat["geometry"]) for feat in linelayer]
     pts = list(itertools.chain.from_iterable(pts))
     
-    conso_points = consolidate(pts, tolerance, progression)
+    conso_points = consolidate(pts, tolerance)
     
     sp_index = build_sp_index(conso_points)
     
@@ -169,10 +177,10 @@ def deal_with_closecall(linelayer, progression = None, tolerance = 0.3, digits =
         end = pts.pop(-1)
        
 
-        newstart = NearestGeometry(start,sp_index,tolerance*15)
+        newstart = nearest_geometry(start,sp_index,tolerance*15)
 
         
-        newend = NearestGeometry(end,sp_index,tolerance*15)
+        newend = nearest_geometry(end,sp_index,tolerance*15)
         
         dupp = feat.copy()
         new_line =  shapely.geometry.LineString([newstart]+pts+[newend])

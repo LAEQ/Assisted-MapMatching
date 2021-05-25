@@ -1,13 +1,26 @@
-from .import_.leuvenmapmatching.matcher.distance import DistanceMatcher
-from .import_.leuvenmapmatching.map.inmem import InMemMap
-import collections
-from shapely import *
 from qgis.core import *
 import string
 
-from .utils.layerTraductor import *
+try:
+    from .import_.leuvenmapmatching.matcher.distance import DistanceMatcher
+    from .import_.leuvenmapmatching.map.inmem import InMemMap
+except:
+    print(" ##PLUGIN## - Problem with leuvenMapMatching in Matcheur.py")
+try:
+    from .utils.layerTraductor import *
+except:
+    print("##PLUGIN## - Problem with layerTraductor in Matcheur.py")
+try:
+    from .utils.geometry import *
+except:
+    print("##PLUGIN## - Problem with geometry in Matcheur.py")
 
-from .utils.geometry import *
+try:
+    from shapely.geometry import Point
+except:
+    print("##PLUGIN## - Couldn't import shapely in matcheur.py")
+
+
 
 #project et interpolate
 
@@ -44,8 +57,11 @@ class Matcheur:
 
         pointlayer = layerTraductor.order_list_of_dict(pointlayer,self.OID)
 
-        # lecture d'un ensemble de ligne 
-        graph,linedict = build_graph(linelayer)
+        try:
+            # lecture d'un ensemble de ligne 
+            graph,linedict = build_graph(linelayer)
+        except:
+            return "graph.find.path"
 
 
         mymap = InMemMap("mymap", graph=graph, use_latlon=False)
@@ -60,9 +76,12 @@ class Matcheur:
         sigma = self.sigma
         print("Line Selecting -------------------------------------------------")
         #calculer le meilleur chemin
-        matcher = DistanceMatcher(mymap, max_dist_init=dist, max_dist=dist, obs_noise=sigma, obs_noise_ne=sigma*2,
-                              non_emitting_states=True,only_edges=True)
-        states, _ = matcher.match(pts)
+        try:
+            matcher = DistanceMatcher(mymap, max_dist_init=dist, max_dist=dist, obs_noise=sigma, obs_noise_ne=sigma*2,
+                                  non_emitting_states=True,only_edges=True)
+            states, _ = matcher.match(pts)
+        except:
+            return "matching.find.path"
         print("END Selection -------------------------------------------------")
 
         #recuperer toutes les lignes
@@ -79,8 +98,6 @@ class Matcheur:
         self.tag_id = [str(feat['joID']) for feat in self.network_layer.getFeatures()]
 
 
-        #conserver/ selectionner les lignes dans un nouveau vect?
-
 
     
     def snap_points_along_line( self, speedField : string, speedlim : float =1.5 ,
@@ -95,7 +112,7 @@ class Matcheur:
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
-            return -1 
+            return -1
 
 
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)

@@ -242,7 +242,7 @@
         <translation >Il y a un problème avec le processing : vérifier s'il est activé sur votre plateforme (->Console python: import processing)</translation>
     </message>
     <message>
-        <source>q3m.error.buffer.range</source>
+        <source>q3m.error.path.create_buffer.buffer_range</source>
         <translation >La taille du tampon renseigné est trop petite</translation>
     </message>
 

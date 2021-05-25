@@ -79,7 +79,8 @@ class Layers:
     def reSelect_path(self):
         """ Select on the canvas the path used by the last matching """
 
-        self.network_layer.select_possible_path()
+        return self.network_layer.select_possible_path()
+
 
     def apply_modification( self,type_of_matching : string,
                             matcheur : Matcheur, 

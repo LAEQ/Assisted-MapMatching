@@ -27,4 +27,6 @@ pylupdate5 q3m.pro
 lrelease-qt5 MapMatching_en.ts MapMatching_fr.ts ...
 ```
 
-
+#shapely install on docker:
+python -m pip install -U pip
+pip install shapely

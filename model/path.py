@@ -1,7 +1,13 @@
-from .matcheur import Matcheur
+try:
+    from .matcheur import Matcheur
+except:
+    print("##PLUGIN## - Couldn't load the Matcheur")
+
 from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
+
+
 import string
 from typing import List
 
@@ -32,7 +38,7 @@ class PathLayer:
         """
 
         if range <= 0 :
-            return "buffer.range"
+            return "path.create_buffer.buffer_range"
 
         # Create a list of points
         feats = [feat for feat in self.layer.getFeatures()]
@@ -72,6 +78,14 @@ class PathLayer:
         Modify the layer of this class
         """
 
+        #data validation
+        if speed_limit < 0 :
+            return "path.negative.speed.limit"
+
+        if self.layer.fields().indexFromName(speed_column_name) == -1:
+            return "path.wrong.speed.column"
+
+
         start_grouping = False
 
         temporary_feats = []
@@ -103,15 +117,18 @@ class PathLayer:
     def merge_coordinate_points(self,features: List[int]):
         """Merge a list of points at their average center"""
 
+
         average_x = 0
         average_y = 0
         number_of_iteration =0
 
         #We calculate the average position in the group
         for feat_id in features:
+            
             f = self.initial_layer.getFeature(feat_id) 
-            geom = f.geometry()
 
+            geom = f.geometry()
+            
             average_x += geom.asPoint().x()
             average_y += geom.asPoint().y()
 
@@ -126,7 +143,7 @@ class PathLayer:
             
             f = self.initial_layer.getFeature(feat_id) 
 
-            geom = f.geometry()
+            #geom = f.geometry()
             geo = QgsGeometry.fromPointXY(QgsPointXY(average_x, average_y))
             self.layer.dataProvider().changeGeometryValues({ feat_id : geo })
 
@@ -138,10 +155,17 @@ class PathLayer:
         speed_column_name   -- a String which contain the name of the speed column in the selected layer
         """
 
+        if speed_limit < 0:
+            return "path.negative.speed.limit"
+
+
+        if self.layer.fields().indexFromName(speed_column_name) == -1:
+            return "path.wrong.speed.column"
+
         newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim= speed_limit , minpts = 5 , maxpts = float("inf"))
         if newpts == -1:
-            print("Error in matcheur.snap_points_along_line")
-            return 
+            #print("Error in matcheur.snap_points_along_line")
+            return "path.speed_point_matching."
 
         i = 0
 
@@ -164,8 +188,8 @@ class PathLayer:
         layer = matcheur.snap_point_to_closest()
 
         if layer == -1:
+            return "path.closest_point_matching"
             print("Error in matcheur.closest_point_matching")
-            return
 
         self.layer = layer
 
@@ -181,8 +205,8 @@ class PathLayer:
         layer = matcheur.snap_point_by_distance()
 
         if layer == -1:
+            return "path.distance_point_matching"
             print("Error in matcheur.closest_point_matching")
-            return
 
         self.layer = layer
 

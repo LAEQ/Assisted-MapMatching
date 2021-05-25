@@ -2,13 +2,10 @@ from qgis import processing
 from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 
-# from .topology import *
-from shapely import wkt
-
 from .utils.layerTraductor import *
 
 from .topology import *
-from .utils.geometry import connect_lines
+
 
 """
 This class take care of the network layer
@@ -82,7 +79,8 @@ class NetworkLayer:
         attribute_name : -- A string that represent the name of the new column
         """
 
-        #self.layer = self.initial_layer
+        if attribute_name == "" or attribute_name == None:
+            return "network.add_attribute_to_layers.empty_attribute_name"
 
         provider = self.layer.dataProvider()
 
@@ -90,13 +88,13 @@ class NetworkLayer:
 
         self.layer.updateFields()
 
-        test = len(self.layer.fields().names())-1
+        length = len(self.layer.fields().names())-1
 
         self.layer.startEditing()
         i=0
         for f in self.layer.getFeatures():
             tesid = f.id()
-            attr_value={test:i}
+            attr_value={length:i}
             provider.changeAttributeValues({tesid:attr_value})
             i+=1
         self.layer.commitChanges()
@@ -109,7 +107,10 @@ class NetworkLayer:
         matcheur :  -- An object of class Matcheur 
         """
         
-        matcheur.find_best_path_in_network()
+        result = matcheur.find_best_path_in_network()
+
+        if type(result) == str:
+            return result
 
         self.possible_path = matcheur.tag_id
 
@@ -120,14 +121,19 @@ class NetworkLayer:
         """ Select in the network_layer the path recorded at the last matching """
 
         if(self.possible_path) == None:
-            print("error : path not created yet")
-            return -1
-
-        self.layer.selectByExpression('"joID" in (' +','.join(self.possible_path)+ ')' )
-
+            #print("error : path not created yet") "network.select_possible_path.no_path.registered"
+            return "network.select_possible_path.no_path.registered"
+        try:
+            self.layer.selectByExpression('"joID" in (' +','.join(self.possible_path)+ ')' )
+        except:
+            print("Seems like the network has been deleted")
 
     def change_possible_path(self): #penser à mettre un warning si layer vide de selection
         """ Change the path recorded """
+        
+        if self.layer.selectedFeatureCount() <=0:
+            print("Nothing has been selected: potential problem. Please select a road at least")
+            return "network.change_possible_path.no_selection"
 
         self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
 
