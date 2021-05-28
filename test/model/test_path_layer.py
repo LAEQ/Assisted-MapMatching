@@ -120,9 +120,9 @@ class TestPathLayer(unittest.TestCase):
         matcheur = Matcheur(None,None,None)
 
         #Error from snap_point_along_line
-        matcheur.snap_points_along_line = MagicMock(return_value = -1)
+        matcheur.snap_points_along_line = MagicMock(return_value = "test")
         result = self.path_layer.speed_point_matching(matcheur,"Speed")
-        self.assertEqual("path.speed_point_matching",result)
+        self.assertEqual("path.speed_point_matching.test",result)
 
         #speed limit negative
         result = self.path_layer.speed_point_matching(matcheur,speed_limit = -10)
@@ -153,7 +153,7 @@ class TestPathLayer(unittest.TestCase):
         matcheur = Matcheur(None,None,None)
         matcheur.snap_point_to_closest = MagicMock(return_value = (-1,[]))
         result = self.path_layer.closest_point_matching(matcheur)
-        self.assertEqual("path.closest_point_matching.snap_error", result)
+        self.assertEqual("path.closest_point_matching.matcheur.snap_point_to_closest.empty_layer", result)
 
 
     def distance_point_matching(self):

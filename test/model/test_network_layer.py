@@ -56,4 +56,4 @@ class TestNetworkLayer(unittest.TestCase):
 
         result = self.network_layer.select_possible_path()
 
-        self.assertEqual("network.select_possible_path.no_path.registered", result)
+        self.assertEqual("network.select_possible_path.no_path_registered", result)

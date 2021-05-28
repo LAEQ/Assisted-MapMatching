@@ -110,7 +110,7 @@ class TestLayerTraductor(unittest.TestCase):
         self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",res)
 
         res = layerTraductor.order_list_of_dict(feat_list, "ERROR")
-        self.assertEqual("layer_traductor.order_list_of_dict.error_column_name",res)
+        self.assertEqual("layer_traductor.order_list_of_dict.wrong_oid_column",res)
 
         
 
