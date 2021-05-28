@@ -32,6 +32,10 @@ class Button_manager():
         self.dlg.btn_export_polyline.setEnabled(False)
         self.dlg.btn_export_project.setEnabled(False)
 
+    def set_bug_state_buttons(self) -> None:
+        """Disactivate every buttons and only allow the reset of the application"""
+        
+        self.__disable_all_buttons()
 
 
     def set_input_state_buttons(self) -> None:

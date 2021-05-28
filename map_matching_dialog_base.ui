@@ -735,8 +735,22 @@
     </widget>
    </widget>
   </widget>
+  <widget class="QPushButton" name="dev_tool_import">
+   <property name="geometry">
+    <rect>
+     <x>594</x>
+     <y>20</y>
+     <width>111</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>dev_tool_import</string>
+   </property>
+  </widget>
   <zorder>tabWidget</zorder>
   <zorder>label_subtitle</zorder>
+  <zorder>dev_tool_import</zorder>
  </widget>
  <resources/>
  <connections/>

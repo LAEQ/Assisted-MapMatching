@@ -178,10 +178,14 @@ def deal_with_closecall(linelayer, tolerance = 0.3, digits = 3) : #!=
        
 
         newstart = nearest_geometry(start,sp_index,tolerance*15)
-
+        if type(newstart) == str:
+            return "topology.deal_with_closecall." + newstart
         
         newend = nearest_geometry(end,sp_index,tolerance*15)
+        if type(newend) == str:
+            return "topology.deal_with_closecall." + newend
         
+
         dupp = feat.copy()
         new_line =  shapely.geometry.LineString([newstart]+pts+[newend])
         dupp["geometry"] = new_line

@@ -92,7 +92,7 @@ def mean_point(points : list, digit : int) :
     """
 
     if points == None or points == []:
-        return "geometry.mean_point.incorrect_input"
+        return "geometry.mean_point.empty_list"
 
     mx = truncate(sum([pt.x for pt in points]) / len(points),digit)
     my = truncate(sum([pt.y for pt in points]) / len(points),digit)
@@ -152,9 +152,6 @@ def reverse_line(line) :
         #print("Can't reverse " + str(type(line)) + " with reverse_line")
         return line
 
-    """if line == LineString():
-        return "geometry.reverse_line.empty_lineString
-    """
 
     coords = list(line.coords)
     coords.reverse()
@@ -188,7 +185,7 @@ def cut_line(line, points):
 
     if( type(line) != shapely.geometry.linestring.LineString or 
         line == LineString() ):
-        print("Can't reverse " + str(type(line)) + " with reverse_line")
+        #print("Can't reverse " + str(type(line)) + " with reverse_line")
         return None
 
     if( type(points) != list or 
@@ -328,15 +325,22 @@ def connect_lines(l1,l2) :
 
     s1,e1 = get_extremites(l1)
     s2,e2 = get_extremites(l2)
+
+    #J'ajoute une petite tolérance pour éviter des pbms de troncatures
+    if( s2.distance(e1) != 0 and s2.distance(e1) >= 0.01 and
+        e2.distance(e1) != 0 and e2.distance(e1) >= 0.01 ):
+
+        return None
+
     if s2.distance(e1)<e2.distance(e1) : 
         c1 = list(l1.coords)
         c2 = list(l2.coords)
-        return shapely.geometry.LineString(c1+c2)
+        return shapely.geometry.LineString(c1+c2[1:len(c2)])
     else : 
         c1 = list(l1.coords)
         c2 = list(l2.coords)
         c2.reverse()
-        return shapely.geometry.LineString(c1+c2)
+        return shapely.geometry.LineString(c1+c2[1:len(c2)])
 
 
 # input : une shapely LineString et une distance de decoupage
@@ -372,7 +376,7 @@ def to_lixels(line,distance) :
 
 ## input : list of shapely.geometry.Points, float, digits
 ## output : list of shapely.geometry.Points (consolidated)
-def consolidate(points,tol=0.3) :
+def consolidate(points,tol=0.31) :
     """ Merge every points in a list of points that are close to each other in a radius of 0.3
 
     Input:
@@ -506,7 +510,18 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
         c2.reverse()
         l2 = shapely.geometry.LineString(c2)
     for l1 in lines : 
-        l2 = connect_lines(l2,l1)
+        test = connect_lines(l2,l1)
+        if test != None:
+            l2 = test
+        else:
+            d1, f1 = get_extremites(l1) 
+            d2, f2 = get_extremites(l2)
+            print("-------Error: 2 lines not connected to each other----------")
+            print(d2)
+            print(f2)
+            print(d1)
+            print(f1)
+            print("-----------------")
         
     start = l2.interpolate(l2.project(pointlayer[0]["geometry"]))
     end = l2.interpolate(l2.project(pointlayer[-1]["geometry"]))

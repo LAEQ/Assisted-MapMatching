@@ -161,7 +161,8 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
             print("Error: no button manager created")
             return -1
 
-
+        if state == 0:
+            self.buttonManager.set_bug_state_buttons()
         if state == 1:
             self.buttonManager.set_input_state_buttons()
         elif state == 2:

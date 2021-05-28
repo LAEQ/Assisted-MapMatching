@@ -32,13 +32,18 @@ class NetworkLayer:
 
         # Sécurité: on commence à vide
         self.initial_layer.removeSelection()
-
-        test = processing.run("qgis:selectbylocation",
-                              {'INPUT': self.initial_layer, 'PREDICATE': 0, 'INTERSECT': buffer, 'METHOD': 0})
+        try:
+            test = processing.run("qgis:selectbylocation",
+                            {'INPUT': self.initial_layer, 'PREDICATE': 0, 'INTERSECT': buffer, 'METHOD': 0})
+        except:
+            print("Error processing in select_intersection_trajectory (Network.py)")
+            return "network.select_intersection_trajectory.processing"
 
         reduced_layer = self.initial_layer.materialize(
             QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
         self.initial_layer.removeSelection()
+
+        reduced_layer.setProviderEncoding("UTF-8")
 
         #Deselect the precedent network
         #QgsProject.instance().layerTreeRoot().findLayer(self.initial_layer.id()).setItemVisibilityChecked(False)
@@ -56,6 +61,9 @@ class NetworkLayer:
 
         shapely_dict = layerTraductor.from_vector_layer_to_list_of_dict(self.layer)
 
+        if type(shapely_dict) == str:
+            return "network.correct_topology." + shapely_dict
+
         # We truncate all the points value
         corrected_list = simplify_coordinates(shapely_dict, 3)
 
@@ -70,7 +78,9 @@ class NetworkLayer:
         corrected_list = deal_with_closecall(corrected_list, close_call_tol)
 
         self.layer = layerTraductor.from_list_of_dict_to_layer(corrected_list, self.layer, "LineString", "corrected layer")
-
+        
+        if type(self.layer) == str:
+            return "network.correct_topology." + self.layer
 
     def add_attribute_to_layers(self, attribute_name = 'joID'):
         """ Create a new column to the network_layer indexed from 0 to the number of feature in the layer  
@@ -110,7 +120,7 @@ class NetworkLayer:
         result = matcheur.find_best_path_in_network()
 
         if type(result) == str:
-            return result
+            return "network.find_path."+result
 
         self.possible_path = matcheur.tag_id
 
@@ -122,7 +132,7 @@ class NetworkLayer:
 
         if(self.possible_path) == None:
             #print("error : path not created yet") "network.select_possible_path.no_path.registered"
-            return "network.select_possible_path.no_path.registered"
+            return "network.select_possible_path.no_path_registered"
         try:
             self.layer.selectByExpression('"joID" in (' +','.join(self.possible_path)+ ')' )
         except:

@@ -1,6 +1,5 @@
 import os
 import unittest
-from unittest.mock import MagicMock
 
 try:
     import shapely
@@ -106,7 +105,7 @@ class TestGeometry(unittest.TestCase):
 
         #empty points
         res = mean_point([], 1)
-        self.assertEqual("geometry.mean_point.incorrect_input", res)
+        self.assertEqual("geometry.mean_point.empty_list", res)
 
     
     def test_truncate(self):
@@ -200,7 +199,6 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual( [Point(2,3),None] , [resA, resB] )
 
     def test_cut_line(self):
-        #peut etre cassé lorsque: allé retour
 
         #Normal case attention: cut line ajoute meme en dehors
         line = LineString([ (0,0),
@@ -296,7 +294,7 @@ class TestGeometry(unittest.TestCase):
 
 
     def test_to_simple_lines(self):
-        #weird : ask jerem
+
         #normal case
         line = LineString([ (0,0),
                             (2,2),
@@ -320,23 +318,28 @@ class TestGeometry(unittest.TestCase):
 
 
     def test_connect_lines(self):
+        
+        #verifier que les deux lignes se touchent
+
+        #changer resultat de sortit
+
+        #normal case
         l1 = LineString([(0,0),(1,1)])
         l2 = LineString([(1,1),(3,3)])
 
         res = connect_lines(l1,l2)
-
-        #etrange
-        expected_result = LineString([(0,0),(1,1),(1,1),(3,3)])
+        expected_result = LineString([(0,0),(1,1),(3,3)])
         self.assertEqual(expected_result, res)
 
+        ##Doen't touch each other on end
+        l1 = LineString([(0,0),(1,1)])
         l2 = LineString([(2,2),(3,3)])
 
         res = connect_lines(l1,l2)
 
-        #création d'une nouvelle ligne
-        expected_result = LineString([(0,0),(1,1),(2,2),(3,3)])
-        self.assertEqual(expected_result, res)
-
+        
+        self.assertEqual(None, res)
+        
         
         #wrong input:
         res = connect_lines(None,l2)
@@ -347,6 +350,8 @@ class TestGeometry(unittest.TestCase):
         
         
     def test_to_lixels(self):
+        
+        #corriger : supprimer same cote à cote
 
         #Normal case
         l1 = LineString([(0,0),(16,0)])
@@ -396,8 +401,8 @@ class TestGeometry(unittest.TestCase):
 
     def test_consolidate(self):
         #pbm
-        pass
-        """
+        
+        
         points = [  Point(0,0),
                     Point(0,1),
                     Point(0,0.3),
@@ -406,11 +411,8 @@ class TestGeometry(unittest.TestCase):
                     Point(1,1)]
 
         res = consolidate(points)
+
         
-        print(".")
-        for p in res:
-            print(p)
-        """
     
     def test_splitLoop(self):
 
@@ -439,10 +441,12 @@ class TestGeometry(unittest.TestCase):
 
     def test_build_polyline(self):
         pass
+    #trop difficile à tester
         #todo:
         # test every parameter with random values
         # import values et tester sur la fonction
 
     def test_build_graph(self):
-        
+        #trop difficile à tester
+
         pass

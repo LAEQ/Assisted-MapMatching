@@ -27,18 +27,20 @@ except:
 class Matcheur:
 
 
-    def __init__(self, _network_layer : QgsVectorLayer, 
-                 _path_layer : QgsVectorLayer, _OID = "OID"):
+    def __init__(self, _network_layer : QgsVectorLayer = None, 
+                 _path_layer : QgsVectorLayer = None, _OID = "OID"):
 
         self.network_layer = _network_layer
         self.path_layer = _path_layer
 
         self.OID = _OID
+        self.searching_radius = None
+        self.sigma = None
 
         self.polyline = None
 
 
-    def setParameters(self, _searching_radius : float, _sigma : float):
+    def set_parameters(self, _searching_radius : float, _sigma : float):
         self.searching_radius = _searching_radius
         self.sigma = _sigma
     
@@ -47,21 +49,45 @@ class Matcheur:
         self.network_layer = network
         self.path_layer = path
 
+    def verify_input(self):
+
+ 
+        if( self.searching_radius == None or
+            self.searching_radius < 0 ) :
+            return "matcheur.error_searching_radius"
+
+        if (self.sigma == None or 
+            self.sigma <=0):
+            return "matcheur.error_sigma"
+
+        return True
+            
+            
 
     def find_best_path_in_network(self):
         """Find the path in the network that has been the most likely taken by the cyclist"""
+
+        res = self.verify_input()
+        if res != True:
+            return res
     
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
-        pointlayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
+        if type(linelayer) == str:
+            return "matcheur.find_best_path_in_network." + linelayer
 
+        pointlayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
+        if type(pointlayer) == str:
+            return "matcheur.find_best_path_in_network." + pointlayer
 
         pointlayer = layerTraductor.order_list_of_dict(pointlayer,self.OID)
+        if type(pointlayer) == str:
+            return "matcheur.find_best_path_in_network." +pointlayer
 
         try:
             # lecture d'un ensemble de ligne 
             graph,linedict = build_graph(linelayer)
         except:
-            return "graph.find.path"
+            return "matcheur.find_best_path_in_network.geometry.build_graph.error_build_graph"
 
 
         mymap = InMemMap("mymap", graph=graph, use_latlon=False)
@@ -81,7 +107,7 @@ class Matcheur:
                                   non_emitting_states=True,only_edges=True)
             states, _ = matcher.match(pts)
         except:
-            return "matching.find.path"
+            return "matcheur.find_best_path_in_network.distance_matcher"
         print("END Selection -------------------------------------------------")
 
         #recuperer toutes les lignes
@@ -95,6 +121,9 @@ class Matcheur:
         
         #The road tha algorithm think the user took
         self.network_layer = layerTraductor.from_list_of_dict_to_layer(selected_lines,self.network_layer)
+        if type(self.network_layer) == str:
+            return "matcheur.find_best_path_in_network." + self.network_layer
+
         self.tag_id = [str(feat['joID']) for feat in self.network_layer.getFeatures()]
 
 
@@ -103,8 +132,11 @@ class Matcheur:
     def snap_points_along_line( self, speedField : string, speedlim : float =1.5 ,
                                 minpts : int = 5 , maxpts = float("inf")) : 
         
+        res = self.verify_input()
+        if res != True:
+            return res
 
-        #to dict
+        #to dict : No need to check for the outPut result: we controll the input before
         linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
         pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
 
@@ -112,7 +144,7 @@ class Matcheur:
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
-            return -1
+            return "macheur.snap_points_along_line.empty_layer"
 
 
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
@@ -254,22 +286,27 @@ class Matcheur:
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
-            return (-1) 
+            return (-1,[]) 
 
 
         polyline = build_polyline(linelayer, pointslayer, 15, self.searching_radius, self.sigma)
         self.polyline = polyline
         print("Finished build polyline for closest")
 
+        too_far_list = []
+
         for feat in pointslayer :
 
             point = polyline.interpolate(polyline.project(Point(feat["geometry"].x,feat["geometry"].y)))
+
+            if feat["geometry"].distance(point) > self.searching_radius:
+                too_far_list.append(feat[self.OID])
 
             feat["geometry"] = point
 
         
 
-        return layerTraductor.from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point to closest")
+        return layerTraductor.from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point to closest"), too_far_list
 
 
     def snap_point_by_distance(self):

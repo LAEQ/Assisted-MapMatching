@@ -29,7 +29,7 @@ class layerTraductor:
         """
 
         if type(layer) != QgsVectorLayer:
-            return None
+            return "layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer"
 
         final_list = []
         temp = layer.fields().names()
@@ -43,7 +43,7 @@ class layerTraductor:
             
             tempa = f.geometry().asJson()
 
-            temporary_dictionary["geometry"] = shape(json.loads(tempa))
+            temporary_dictionary["geometry"] = shape(json.loads(tempa, encoding="utf8"))
 
             final_list.append(temporary_dictionary)
 
@@ -61,15 +61,18 @@ class layerTraductor:
 
         """
 
-        if (type(layer_patern) != QgsVectorLayer or
-            type(feat_list) != list ):
-            return None
+        if type(layer_patern) != QgsVectorLayer:
+            return "layer_traductor.from_list_of_dict_to_layer.not_a_layer"
+             
+        if type(feat_list) != list :
+            return "layer_traductor.from_list_of_dict_to_layer.not_a_list"
 
         epsg = layer_patern.crs().postgisSrid()
 
         typ = type_layer+"?crs=EPSG:"+ str(epsg)
 
         mem_layer = QgsVectorLayer(typ,name,"memory")
+        mem_layer.setProviderEncoding("UTF-8")
 
         pr = mem_layer.dataProvider()
         layer_fields = layer_patern.fields()
@@ -79,7 +82,11 @@ class layerTraductor:
 
         for obj in feat_list:
             f= QgsFeature()
-            geom = QgsGeometry().fromWkt(obj["geometry"].wkt)
+            try:
+                geom = QgsGeometry().fromWkt(obj["geometry"].wkt)
+            except:
+                print("Can't convert with wkt: layerTraductor: from_list_of_dict_to_layer")
+                return "layer_traductor.from_list_of_dict_to_layer.conversion_error"
             f.setGeometry(geom)
 
             attributes_list = []
@@ -99,9 +106,9 @@ class layerTraductor:
         """Sort a list according to it's OID column"""
         if( type(feat_list) != list or
             feat_list == [] ):
-            return None
+            return "layer_traductor.order_list_of_dict.error_feat_list"
 
         if not column_name in feat_list[0]:
-            return None
+            return "layer_traductor.order_list_of_dict.wrong_oid_column"
 
         return sorted(feat_list,key= lambda obj: obj[column_name])

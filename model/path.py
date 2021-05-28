@@ -27,7 +27,7 @@ class PathLayer:
             self.layer.setName("Points Matché")
             self.initial_layer.removeSelection()
         except:
-            return "processing"
+            return "path.dupplicate_initial_layer.processing"
 
 
     def create_buffer(self, range: int) -> QgsVectorLayer:
@@ -80,10 +80,10 @@ class PathLayer:
 
         #data validation
         if speed_limit < 0 :
-            return "path.negative.speed.limit"
+            return "path.negative_speed_limit"
 
         if self.layer.fields().indexFromName(speed_column_name) == -1:
-            return "path.wrong.speed.column"
+            return "path.wrong_speed_column"
 
 
         start_grouping = False
@@ -156,16 +156,17 @@ class PathLayer:
         """
 
         if speed_limit < 0:
-            return "path.negative.speed.limit"
+            return "path.negative_speed_limit"
 
 
         if self.layer.fields().indexFromName(speed_column_name) == -1:
-            return "path.wrong.speed.column"
-
-        newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim= speed_limit , minpts = 5 , maxpts = float("inf"))
-        if newpts == -1:
-            #print("Error in matcheur.snap_points_along_line")
-            return "path.speed_point_matching."
+            return "path.wrong_speed_column"
+        try:
+            newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim= speed_limit , minpts = 5 , maxpts = float("inf"))
+        except:
+            return "path.speed_point_matching.matcheur.snap_points_along_line"
+        if type(newpts) == str :
+            return "path.speed_point_matching." + newpts
 
         i = 0
 
@@ -185,13 +186,17 @@ class PathLayer:
         matcheur :    -- An object of class Matcheur 
         """
 
-        layer = matcheur.snap_point_to_closest()
-
+        layer, error = matcheur.snap_point_to_closest()
+        
         if layer == -1:
-            return "path.closest_point_matching"
-            print("Error in matcheur.closest_point_matching")
+            return "path.closest_point_matching.matcheur.snap_point_to_closest.empty_layer"
+
 
         self.layer = layer
+
+        if error != []:
+            print("Warning : " + len(error) + " point were matched out of the searching radius ")
+            return "path.closest_point_matching.point_out_of_range." + len(error)
 
         #QgsProject.instance().addMapLayer(self.layer)
 
@@ -205,7 +210,7 @@ class PathLayer:
         layer = matcheur.snap_point_by_distance()
 
         if layer == -1:
-            return "path.distance_point_matching"
+            return "path.distance_point_matching.matcheur.snap_point_by_distance.empty_layer"
             print("Error in matcheur.closest_point_matching")
 
         self.layer = layer

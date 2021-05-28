@@ -49,10 +49,12 @@ class TestLayerTraductor(unittest.TestCase):
         #wrong input
 
         res = layerTraductor.from_vector_layer_to_list_of_dict(None)
-        self.assertEqual(None, res)
+        self.assertEqual("layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer", res)
 
 
     def test_from_list_of_dict_to_layer(self):
+
+        #normal test
         feat_list = [   {"id" : 0 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
                         {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
                         {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
@@ -74,6 +76,8 @@ class TestLayerTraductor(unittest.TestCase):
             
             i+=1
             self.assertEqual(expected_result, liste_result)
+
+
 
     
     def test_order_list_of_dict(self):
@@ -100,11 +104,13 @@ class TestLayerTraductor(unittest.TestCase):
 
         #wrong input test
         res = layerTraductor.order_list_of_dict(None, "oid ")
-        self.assertEqual(None,res)
-
-        res = layerTraductor.order_list_of_dict(feat_list, "ERROR")
-        self.assertEqual(None,res)
+        self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",res)
 
         res = layerTraductor.order_list_of_dict([], "oid ")
-        self.assertEqual(None,res)
+        self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",res)
+
+        res = layerTraductor.order_list_of_dict(feat_list, "ERROR")
+        self.assertEqual("layer_traductor.order_list_of_dict.error_column_name",res)
+
+        
 
