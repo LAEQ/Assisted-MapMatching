@@ -32,6 +32,10 @@ class Button_manager():
         self.dlg.btn_export_polyline.setEnabled(False)
         self.dlg.btn_export_project.setEnabled(False)
 
+    def set_bug_state_buttons(self) -> None:
+        """Disactivate every buttons and only allow the reset of the application"""
+        
+        self.__disable_all_buttons()
 
 
     def set_input_state_buttons(self) -> None:
@@ -57,7 +61,7 @@ class Button_manager():
 
     def set_pre_matching_state_buttons(self):
         """ Activate every buttons related to the 
-            pre-mapMatching operation
+            pre-mapMatching operation.
         """
         
         self.__disable_all_buttons()
@@ -71,7 +75,7 @@ class Button_manager():
 
     def set_modification_state_buttons(self) -> None:
         """ Activate every buttons related to the 
-            modification of the matched trace
+            modification of the matched trace.
         """
 
         self.__disable_all_buttons()
@@ -83,6 +87,16 @@ class Button_manager():
         self.dlg.btn_reselect_path.setEnabled(True)
         self.dlg.btn_apply_path_change.setEnabled(True)
 
+        self.dlg.combo_matched_track.setEnabled(True)
+        self.dlg.btn_export_matched_track.setEnabled(True)
+        self.dlg.btn_export_polyline.setEnabled(True)
+        self.dlg.btn_export_project.setEnabled(True)
+
+    def set_export_buttons(self) -> None:
+        """Only activate the buttons related to the exportation."""
+
+        self.__disable_all_buttons()
+        
         self.dlg.combo_matched_track.setEnabled(True)
         self.dlg.btn_export_matched_track.setEnabled(True)
         self.dlg.btn_export_polyline.setEnabled(True)

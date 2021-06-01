@@ -47,7 +47,7 @@ class TestNetworkLayer(unittest.TestCase):
 
         result = self.network_layer.find_path(matcheur)
 
-        self.assertEqual("graph.find.path",result)
+        self.assertEqual("network.find_path.graph.find.path",result)
     
 
     def test_error_select_possible_path(self):
@@ -56,4 +56,4 @@ class TestNetworkLayer(unittest.TestCase):
 
         result = self.network_layer.select_possible_path()
 
-        self.assertEqual("network.select_possible_path.no_path.registered", result)
+        self.assertEqual("network.select_possible_path.no_path_registered", result)

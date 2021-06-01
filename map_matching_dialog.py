@@ -90,10 +90,12 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         """
 
         if self.check_speed.isChecked():
+            self.combo_speed.setEnabled(True)
             self.combo_algo_matching.addItem("Matching with Speed")
             index = self.combo_algo_matching.findText("Matching with Speed")
             self.combo_algo_matching.setCurrentIndex(index)
         else:
+            self.combo_speed.setEnabled(False)
             index = self.combo_algo_matching.findText("Matching with Speed")
             self.combo_algo_matching.removeItem(index)
 
@@ -161,7 +163,8 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
             print("Error: no button manager created")
             return -1
 
-
+        if state == 0:
+            self.buttonManager.set_bug_state_buttons()
         if state == 1:
             self.buttonManager.set_input_state_buttons()
         elif state == 2:
@@ -170,6 +173,8 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
             self.buttonManager.set_pre_matching_state_buttons()
         elif state == 4:
             self.buttonManager.set_modification_state_buttons()
+        elif state == 5:
+            self.buttonManager.set_export_buttons()
 
 
     def save_state(self) -> None:

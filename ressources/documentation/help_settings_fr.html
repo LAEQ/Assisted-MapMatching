@@ -1,0 +1,26 @@
+<html lang="en">
+<head>
+  <title>LAEQ-Cartographic Correlation</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+    <h2>Q3M User Friendly Map matching<br>Settings Tab</h2>
+    <p>Here you can tinker the settings inside our function to obtain the expected result</p>
+    <h3>Limit stop speed: </h3>
+    <p>This slider represent the limit where we will consider every point with a speed value inferior to it at the stop status</p>
+    <h3>Topological tolerance</h3>
+    <h4>Close call :</h4>
+    <p>This slider represent the length at wich we will consider that two point touch each other and need to be merged </p>
+    <h4>Intersection and Dangle Nodes :</h4>
+    <p>This slider represent the length at wich we will consider that two point touch each other and we need to cut the lines </p>
+    <h3>Map-matching tolerance :</h3>
+    <h4>Searching radius</h4>
+    <p>This slider is a parameter in the map matching function that represent the searching radius around every point of the path</p>
+    <h4>Sigma</h4>
+    <p>This slider is a parameter in the map matching function that represent the probabilities that a road have to be taken considering it's distance to the point. (greater = more likely) </p>
+
+    <p>Here is a few tips that could be the reason why the plugin doesn't work: <br><br>
+      <dd>- Your map layer isn't complete and the algorithm couldn't find a connection between two part of the path</dd><br>
+      <dd>- The map matching parameter search radius is too low or too high</dd><br>
+    </p>
+</body>

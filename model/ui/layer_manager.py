@@ -60,9 +60,9 @@ class LayerManager:
     def get_matched_layers(self) -> List[QgsVectorLayer]:
 
         return [layer for layer in self.layers if   LayerManager.is_path_layer(layer) and 
-                                                    (layer.sourceName() == "matched point by distance" or
-                                                    layer.sourceName() == "matched point by speed" or
-                                                    layer.sourceName() == "matched point to closest")]
+                                                    (layer.sourceName().split('_')[0] == "matched point by distance" or
+                                                    layer.sourceName().split('_')[0] == "matched point by speed" or
+                                                    layer.sourceName().split('_')[0] == "matched point to closest")]
 
 
     def get_network_layers(self) -> List[QgsVectorLayer]:
