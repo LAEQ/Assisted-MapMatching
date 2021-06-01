@@ -7,6 +7,19 @@
     <!-- *************************Interface Graphique******************************* -->
     <!-- *************************************************************************** -->
 
+    <!-- Help File -->
+
+
+    <message>
+        <source>q3m.window.help_file</source>
+        <translation>help_en.html</translation>
+    </message>
+
+    <message>
+        <source>q3m.window.help_settings_file</source>
+        <translation>help_settings_en.html</translation>
+    </message>
+
 
     <!-- Header -->
 
@@ -148,7 +161,7 @@
 
 
     <message>
-        <source>q3m.window.label.speed.limit</source>
+        <source>q3m.window.label.speed_limit</source>
         <translation >Speed stop limit</translation>
     </message>
 
@@ -162,7 +175,7 @@
     </message>
 
     <message>
-        <source>q3m.window.label.close.call</source>
+        <source>q3m.window.label.close_call</source>
         <translation >Close call</translation>
     </message>
 
@@ -181,7 +194,7 @@
     </message>
 
     <message>
-        <source>q3m.window.label.searching.radius</source>
+        <source>q3m.window.label.searching_radius</source>
         <translation >Searching radius</translation>
     </message>
 

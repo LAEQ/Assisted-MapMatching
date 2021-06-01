@@ -120,7 +120,7 @@ class TestPathLayer(unittest.TestCase):
         matcheur = Matcheur(None,None,None)
 
         #Error from snap_point_along_line
-        matcheur.snap_points_along_line = MagicMock(return_value = "test")
+        matcheur.snap_points_along_line = MagicMock(return_value = ("test",[]))
         result = self.path_layer.speed_point_matching(matcheur,"Speed")
         self.assertEqual("path.speed_point_matching.test",result)
 
@@ -138,7 +138,7 @@ class TestPathLayer(unittest.TestCase):
         for f in self.path_layer.layer.getFeatures():
             list_test.append(SimpleNamespace(x=0, y =0))
         
-        matcheur.snap_points_along_line = MagicMock(return_value = list_test)
+        matcheur.snap_points_along_line = MagicMock(return_value = (list_test,[]))
         result = self.path_layer.speed_point_matching(matcheur, 'Speed', 1.5)
 
         self.assertEqual(result, None)

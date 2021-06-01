@@ -1,29 +1,35 @@
-try:
-    from .matcheur import Matcheur
-except:
-    print("##PLUGIN## - Couldn't load the Matcheur")
-
-from qgis.core import *
-from qgis.PyQt.QtCore import QVariant
-from qgis import processing
-
-
 import string
 from typing import List
 
+from qgis.core import *
+from qgis import processing
+
+try:
+    from .matcheur import Matcheur
+except ImportError as err:
+    print("##PLUGIN## - Couldn't load the Matcheur")
+    print(str(err))
+
+
 class PathLayer:
+
 
     def __init__(self, _layer):
         self.initial_layer = _layer
         self.layer = None
 
         
-
     def dupplicate_initial_layer(self):
-        """Copy the initial layer and create a new one with no dependances to the precedent"""
+        """Copy the initial layer and create a 
+           new one with no dependances to the precedent."""
+
         try:
             self.initial_layer.selectAll()
-            self.layer = processing.run("native:saveselectedfeatures", {'INPUT': self.initial_layer, 'OUTPUT': 'memory:'})['OUTPUT']
+            self.layer = processing.run(
+                    "native:saveselectedfeatures", 
+                    {'INPUT': self.initial_layer, 
+                    'OUTPUT': 'memory:'})['OUTPUT']
+
             self.layer.setName("Points Matché")
             self.initial_layer.removeSelection()
         except:
@@ -37,7 +43,7 @@ class PathLayer:
         range       -- The radius of the buffer around a point
         """
 
-        if range <= 0 :
+        if range <= 0:
             return "path.create_buffer.buffer_range"
 
         # Create a list of points
@@ -67,25 +73,30 @@ class PathLayer:
         return mem_layer
 
 
-    def merge_stationary_point(self,speed_column_name: string, speed_limit : float = 0.1):
-        """Merge at center every group of points which speed is lower than speed_limit.
+    def merge_stationary_point(
+            self,speed_column_name: string, 
+            speed_limit: float = 0.1):
+        """Merge at center every group of points 
+            which speed is lower than speed_limit.
 
         Input: 
-        speed_column_name   -- a String which contain the name of the speed column in the selected layer
-        speed_limit         -- a double which contain the max Speed where we concider that lower is a stop
+        speed_column_name   -- a String which contain the name of the speed column 
+                               in the selected layer
+        speed_limit         -- a double which contain the max Speed where we 
+                               concider that lower is a stop
 
         Output:
         Modify the layer of this class
         """
 
         #data validation
-        if speed_limit < 0 :
+        if speed_limit < 0:
             return "path.negative_speed_limit"
 
         if self.layer.fields().indexFromName(speed_column_name) == -1:
             return "path.wrong_speed_column"
 
-
+        #We start the process. The layer is ordered, we treat the feature pack by pack
         start_grouping = False
 
         temporary_feats = []
@@ -93,11 +104,12 @@ class PathLayer:
         for feat in self.initial_layer.getFeatures():
 
             if(feat[speed_column_name] <= speed_limit):
+                #Feature at a stop
                 start_grouping = True
-
                 temporary_feats.append(feat.id())
 
             else:
+                #Feature mooving
                 if(start_grouping):
                     #fusion of several points that are at a stop
                     start_grouping = False
@@ -107,15 +119,16 @@ class PathLayer:
                     #We empty the group and wait for the next one to form
                     temporary_feats = []
 
-
+        #Check for the last pack
         if(start_grouping):
             self.merge_coordinate_points(temporary_feats)
 
-        #♥QgsProject.instance().addMapLayer(self.layer)
+        #Success
+        return None
 
     
     def merge_coordinate_points(self,features: List[int]):
-        """Merge a list of points at their average center"""
+        """Merge a list of points at their average center."""
 
 
         average_x = 0
@@ -145,45 +158,65 @@ class PathLayer:
 
             #geom = f.geometry()
             geo = QgsGeometry.fromPointXY(QgsPointXY(average_x, average_y))
-            self.layer.dataProvider().changeGeometryValues({ feat_id : geo })
+            self.layer.dataProvider().changeGeometryValues({ feat_id: geo })
 
-    def speed_point_matching(self,matcheur : Matcheur, speed_column_name : string = "speed" , speed_limit : float = 1.5):
+    def speed_point_matching(self,
+                            matcheur: Matcheur, 
+                            speed_column_name: string = "speed", 
+                            speed_limit: float = 1.5):
         """ Match the point in the path layer to a line by taking into account the speed
         
         Input:
-        matcheur :          -- An object of class Matcheur 
-        speed_column_name   -- a String which contain the name of the speed column in the selected layer
+        matcheur:           -- An object of class Matcheur 
+        speed_column_name:  -- a String which contain the name of the speed column 
+                               in the selected layer
         """
 
+        #Check input validity
         if speed_limit < 0:
             return "path.negative_speed_limit"
 
-
         if self.layer.fields().indexFromName(speed_column_name) == -1:
             return "path.wrong_speed_column"
+
+        #Start snapping points
         try:
-            newpts = matcheur.snap_points_along_line(speedField = speed_column_name, speedlim= speed_limit , minpts = 5 , maxpts = float("inf"))
+            newpts ,error = matcheur.snap_points_along_line(
+                    speedField = speed_column_name, 
+                    speedlim= speed_limit , 
+                    minpts = 5 , 
+                    maxpts = float("inf"))
         except:
-            return "path.speed_point_matching.matcheur.snap_points_along_line"
-        if type(newpts) == str :
+            return "path.speed_point_matching.matcheur.snap_points_along_line.exception"
+
+        if isinstance(newpts, str):
             return "path.speed_point_matching." + newpts
 
+        #Report values to our QgsVectorLayer
         i = 0
-
         for f in self.layer.getFeatures():
             geo = QgsGeometry.fromPointXY(QgsPointXY(newpts[i].x, newpts[i].y))
-            self.layer.dataProvider().changeGeometryValues({ f.id() : geo })
+            self.layer.dataProvider().changeGeometryValues({ f.id(): geo })
             i += 1
+
+        if error != []:
+            #Some points have been matched out of the range 
+            print("Warning: " + str(len(error)) + " on " + 
+                str(error[-1]) + " point were matched out of the searching radius ")
+            return ("path.speed_point_matching.point_out_of_range-" + 
+                    str(len(error)-1) + "-" + str(error[-1]))
 
         self.layer.setName("matched point by speed")
 
-        #QgsProject.instance().addMapLayer(self.layer)
+        #Success
+        return None
+
 
     def closest_point_matching(self, matcheur: Matcheur):
-        """ Match the point in the path layer to the closest point on a line
+        """ Match the point in the path layer to the closest point on a line.
         
         Input:
-        matcheur :    -- An object of class Matcheur 
+        matcheur:    -- An object of class Matcheur 
         """
 
         layer, error = matcheur.snap_point_to_closest()
@@ -195,32 +228,49 @@ class PathLayer:
         self.layer = layer
 
         if error != []:
-            print("Warning : " + len(error) + " point were matched out of the searching radius ")
-            return "path.closest_point_matching.point_out_of_range." + len(error)
+            #Some points have been matched out of the range 
+            print("Warning: " + str(len(error)) + " on " + 
+                str(error[-1]) + " point were matched out of the searching radius ")
+            return ("path.closest_point_matching.point_out_of_range-" +
+                    str(len(error)-1) + "-" + str(error[-1]))
 
-        #QgsProject.instance().addMapLayer(self.layer)
+        #Succes
+        return None
+
 
     def distance_point_matching(self, matcheur: Matcheur):
-        """ Match the point in the path layer to a line by taking into account the speed
+        """ Match the point in the path layer to a line 
+            by taking into account the speed
         
         Input:
-        matcheur :  -- An object of class Matcheur 
+        matcheur:  -- An object of class Matcheur 
         """
 
-        layer = matcheur.snap_point_by_distance()
+        layer, error = matcheur.snap_point_by_distance()
 
         if layer == -1:
+            #Some points have been matched out of the range 
             return "path.distance_point_matching.matcheur.snap_point_by_distance.empty_layer"
             print("Error in matcheur.closest_point_matching")
 
         self.layer = layer
 
-        #matcheur.instance().addMapLayer(self.layer)
+        if error != []:
+            print("Warning: " + str(len(error)) + " on " + str(error[-1]) + 
+                  "point were matched out of the searching radius ")
+            return ("path.distance_point_matching.point_out_of_range-" + 
+                    str(len(error)-1) + "-" + str(error[-1]))
+
+        #Success
+        return None
+
 
     def reset_path(self):
-        """Reselec the path used in the last matching."""
+        """Reset layer to it's initial value."""
         
         self.initial_layer.selectAll()
-        self.layer = processing.run("native:saveselectedfeatures", {'INPUT': self.initial_layer, 'OUTPUT': 'memory:'})['OUTPUT']
+        self.layer = processing.run("native:saveselectedfeatures", 
+                                    {'INPUT': self.initial_layer, 
+                                    'OUTPUT': 'memory:'})['OUTPUT']
         self.layer.setName("Points Matché 2")
         self.initial_layer.removeSelection()

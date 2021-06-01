@@ -1,28 +1,27 @@
+import collections
+import numpy as np
+
 try:
     import shapely
     from shapely.geometry import LineString
-except Exception:
+except ImportError:
     print("Couldn't load shapely")
     raise
 
+#Import own class
 try:
     from ..import_.pyqtree import *
     from ..import_.leuvenmapmatching.map.inmem import InMemMap
     from ..import_.leuvenmapmatching.matcher.distance import DistanceMatcher
     from ..import_.dbscan import dbscan2
-except Exception:
+except ImportError:
     print("Couldn't access the import file, check your path")
     raise
 
-import collections
-import numpy as np
-
-
 
 #############################################################################
-## Fonction d'indexation spatiale
+## Spatial indexing function
 #############################################################################
-
 
 def build_sp_index(geometries: list) : 
     """ Create a spatial index pyqtree
@@ -52,8 +51,6 @@ def build_sp_index(geometries: list) :
     return sp_index
 
 
-## permet de recuperer dans un index spatial la geometry
-## la plus proche d'une autre en entree dans un certain rayon
 def nearest_geometry(geom,sp_index : Index, search_dist : int) : 
     """Return the closest entity in a radius.
     
@@ -80,7 +77,7 @@ def nearest_geometry(geom,sp_index : Index, search_dist : int) :
 
 
 def mean_point(points : list, digit : int) : 
-    """Return a point with the average position of every points in points
+    """Return a point with the average position of every points in the list points.
 
     Input:
     points:  -- A list of shapely.geometry.point.Point
@@ -104,7 +101,7 @@ def mean_point(points : list, digit : int) :
 #############################################################################
 
 def truncate(f, n):
-    '''Truncates/pads a float f to n decimal places without rounding'''
+    """Truncates/pads a float f to n decimal places without rounding."""
 
     if n <0:
         n = 0
@@ -119,7 +116,7 @@ def truncate(f, n):
 def truncate_coords(line,digit) : 
     """Truncates a shapely.geometry.LineString with a precision of digit."""
 
-    if type(line) != shapely.geometry.linestring.LineString:
+    if not isinstance(line, shapely.geometry.linestring.LineString):
         #print("Can't truncate " + str(type(line)) + " with truncate_coords")
         return line
 
@@ -134,7 +131,7 @@ def truncate_coords(line,digit) :
 def truncate_coords_pts(point,digit) : 
     """Truncate a shapely.geometry.Point with a precision of digit"""
 
-    if type(point) != shapely.geometry.point.Point:
+    if not isinstance(point, shapely.geometry.point.Point ):
         #print("Can't truncate " + str(type(point)) + " with truncate_coords_pts")
         return point
 
@@ -145,9 +142,9 @@ def truncate_coords_pts(point,digit) :
 
 
 def reverse_line(line) : 
-    """Reverse the order of the vertices in the line"""
+    """Reverse the order of the vertices in the line."""
 
-    if( type(line) != shapely.geometry.linestring.LineString or
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or
         line == LineString()):
         #print("Can't reverse " + str(type(line)) + " with reverse_line")
         return line
@@ -159,9 +156,9 @@ def reverse_line(line) :
 
 
 def get_extremites(line) : 
-    """Return a tuple with the extemities of the line"""
+    """Return a tuple with the extemities of the line."""
 
-    if( type(line) != shapely.geometry.linestring.LineString or
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or
         line == LineString()):
         #print("Can't reverse " + str(type(line)) + " with reverse_line")
         return line,None
@@ -183,14 +180,14 @@ def cut_line(line, points):
     lines : -- A list of LineString
     """
 
-    if( type(line) != shapely.geometry.linestring.LineString or 
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or 
         line == LineString() ):
         #print("Can't reverse " + str(type(line)) + " with reverse_line")
         return None
 
-    if( type(points) != list or 
+    if( not isinstance(points, list) or 
         points == [] or
-        type(points[0]) != shapely.geometry.point.Point ):
+        not isinstance(points[0], shapely.geometry.point.Point) ):
 
         #print("Problem with the point " + str(points) + " in reverse line")
         return [line]
@@ -239,7 +236,7 @@ def cut_line(line, points):
 
 
 def cut_line_between(line,p1,p2) : 
-    """Cut a line between two points
+    """Cut a line between two points.
 
     Both points are projected on the line.
     
@@ -252,12 +249,12 @@ def cut_line_between(line,p1,p2) :
 
     """
 
-    if( type(line) != shapely.geometry.linestring.LineString or 
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or 
         line == LineString() ):
         return None
 
-    if( type(p1) != shapely.geometry.point.Point or 
-        type(p2) != shapely.geometry.point.Point ):
+    if( not isinstance(p1, shapely.geometry.point.Point) or 
+        not isinstance(p2, shapely.geometry.point.Point) ):
 
         #print("Problem with one of the points " + str(p1) + "--" + str(p2) + " in cut line between")
         return [line]
@@ -286,7 +283,7 @@ def cut_line_between(line,p1,p2) :
 
 
 def to_simple_lines(line) : 
-    """Divide a polyLineString into several single LineString
+    """Divide a polyLineString into several single LineString.
     
     Input:
     line       -- A shapely.geometry.LineString object
@@ -295,7 +292,7 @@ def to_simple_lines(line) :
     new_lines  -- A list of shapely.geometry.LineString object
     """
 
-    if( type(line) != shapely.geometry.linestring.LineString or 
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or 
         line == LineString() ) :
         return [line]
 
@@ -307,7 +304,8 @@ def to_simple_lines(line) :
 
 
 def connect_lines(l1,l2) : 
-    """Merge two lineString if at least one of their extremities are connected together
+    """Merge two lineString if at least one of their extremities 
+       are connected together.
     
     Input:
     l1:     -- A shapely.geometry.LineString object
@@ -317,8 +315,8 @@ def connect_lines(l1,l2) :
     A shapely.geometry.LineString object obtained by merging the two lines
     """
 
-    if( type(l1) != shapely.geometry.linestring.LineString or 
-        type(l2) != shapely.geometry.linestring.LineString or 
+    if( not isinstance(l1, shapely.geometry.linestring.LineString) or 
+        not isinstance(l2, shapely.geometry.linestring.LineString) or 
         l2 == LineString() or
         l1 == LineString() ) :
         return None
@@ -326,7 +324,7 @@ def connect_lines(l1,l2) :
     s1,e1 = get_extremites(l1)
     s2,e2 = get_extremites(l2)
 
-    #J'ajoute une petite tolérance pour éviter des pbms de troncatures
+    #Add a little tolerance to avoid truncation issues
     if( s2.distance(e1) != 0 and s2.distance(e1) >= 0.01 and
         e2.distance(e1) != 0 and e2.distance(e1) >= 0.01 ):
 
@@ -343,11 +341,8 @@ def connect_lines(l1,l2) :
         return shapely.geometry.LineString(c1+c2[1:len(c2)])
 
 
-# input : une shapely LineString et une distance de decoupage
-# output : une liste de shapely LineString
-# decoupe la linestring originale selon une distance definie
 def to_lixels(line,distance) : 
-    """Cut a line every distance cm
+    """Cut a line every distance cm.
 
     Input:
     line:     -- A shapely.geometry.LineString object
@@ -357,14 +352,14 @@ def to_lixels(line,distance) :
     segments  -- A list of shapely.geometry.LineString object
     """
 
-    if( type(line) != shapely.geometry.linestring.LineString or 
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or 
         line == LineString() ) :
         return None
 
     if distance <=0:
         return [line]
 
-    #creation de tous les points sur la ligne
+    #Creation of every points on the line
     totdist=0
     length = line.length
     pts = []
@@ -374,10 +369,10 @@ def to_lixels(line,distance) :
     segments = cut_line(line,pts)
     return segments
 
-## input : list of shapely.geometry.Points, float, digits
-## output : list of shapely.geometry.Points (consolidated)
+
 def consolidate(points,tol=0.31) :
-    """ Merge every points in a list of points that are close to each other in a radius of 0.3
+    """ Merge every points in a list of points that are close to each other 
+        in a radius of 0.3.
 
     Input:
     points:     -- A list of shapely.geometry.Point
@@ -403,15 +398,9 @@ def consolidate(points,tol=0.31) :
 
         
         
-## input : shapely.geometry.LineString,
-## output : list of shapely.geometry.LineString
-## deux LineString obtenue apres decoupage de l'input en son centre
-## NOTE : si utilise avec QGIS, il faudra penser a duppliquer les 
-## attributs de la features en cours de modification
-## si on decoupe un rond point en deux lignes, chacune de ces lignes
-## doit heriter des attributes du round point (table attributaire)
+
 def SplitLoop(line) : 
-    """Cut a lin if it's a loop in two
+    """Cut line in two if it's a loop 
     
     Input:
     line:   -- A shapely.geometry.LineString object
@@ -420,7 +409,7 @@ def SplitLoop(line) :
     segments:   -- A list of shapely.geometry.LineString 
     """
 
-    if( type(line) != shapely.geometry.linestring.LineString or 
+    if( not isinstance(line, shapely.geometry.linestring.LineString) or 
         line == LineString() ) :
         return None
 
@@ -442,25 +431,34 @@ def SplitLoop(line) :
     return segments
 
 
+
 ####################################################################################
-####################################################################################
-# FONCTION DE GENERATION D'UNE POLYLIGNE
-####################################################################################
+# Polyline generation function
 ####################################################################################
 
-# a partir d'un ensemble de ligne, de point et d'une tolerance
-# generer une seule longue linestring qui pourra etre utilisee
-# pour ajuster les points dessus. Tolerance est important pour 
-# le cas des aller-retour sur une meme ligne, plus la tolerance
-# est petite, plus on pourra identifier clairement le point de retoure
-# NB : possibilite de bcp optimiser en decoupant uniquement les lignes
-# sur lesquelles ce serait necessaire : les lignes pour lesquels
-# le debut ne coincide pas avec la prochaine.
-# valeur recommandee pour tol actuellement : 15
-def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) : 
-    #---------------------------------------------------------------------------------
-    # step 1 : creer un ensemble de lignes simples et decoupee selon une distance = tol
-    #---------------------------------------------------------------------------------
+
+def build_polyline( linelayer: list, pointlayer: list, tol : float, 
+                    searching_radius : float, sigma : float ) : 
+    """Create a long linestring from a linelayer, points and a tolerance
+       
+       The tolerance is important to identify possible round-trip. 
+       15 is the recommended value
+       
+       Input:
+       linelayer:           -- A list of dict representing the network 
+       pointlayer:          -- A list of dict representing the trace
+       tol:                 -- A float
+       searching_radius:    -- A float representing the searching range 
+                               of the algorithm for every points
+        sigma:              -- A float. The bigger he is, the more weight 
+                               we give to distant roads
+        
+        Output:
+        cutted_polyline:    -- A list of dict representing the polyline
+       """
+
+    # step 1 : Create a set of simple lines cutted every tol cm
+
     base_lines = []
     cnt = 0
     for feat in linelayer : 
@@ -471,20 +469,17 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
                     base_lines.append({"OID" : cnt, "geometry" : lixel})
                     cnt+=1
     
-    #---------------------------------------------------------------------------------
-    # step 2 : a partir de cet ensemble de segments simples, recalculer le chemin le plus
-    # probable. L'idee etant de se debarasser ainsi de tous les elements superflus
-    #---------------------------------------------------------------------------------
+    
+    # step 2 : Calculate the best path and remove useless elements
     graph,linedict = build_graph(base_lines)
     mymap = InMemMap("mymap", graph=graph, use_latlon=False)
-    ##step2 : construire le chemin
     pts = [(pt["geometry"].x,pt["geometry"].y) for pt in pointlayer]
     
-    #searching_radius = 45
-    
-    #calculer le meilleur chemin
-    matcher = DistanceMatcher(mymap, max_dist_init=searching_radius, max_dist=searching_radius, obs_noise=sigma, obs_noise_ne=sigma*2,
-                          non_emitting_states=True,only_edges=True)
+
+    matcher = DistanceMatcher(mymap, max_dist_init=searching_radius, 
+                              max_dist=searching_radius, obs_noise=sigma, 
+                              obs_noise_ne=sigma*2,
+                              non_emitting_states=True,only_edges=True)
     states, _ = matcher.match(pts)
     actualstate = None
     selected_lines = []
@@ -494,10 +489,8 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
             selected_lines.append(linedict[state]["geometry"])
 
 
-    #---------------------------------------------------------------------------------
-    # step 3 : Generer une longue polyligne a partir de tous les segments retenus
-    #---------------------------------------------------------------------------------
-
+    # step 3 : Generate a long polyline from the values conserved
+    
     if(len(selected_lines)) <= 1:
         print("Error not enough selected line")
         return
@@ -513,15 +506,18 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
         test = connect_lines(l2,l1)
         if test != None:
             l2 = test
-        else:
+        else: 
+            """Debugging tool
             d1, f1 = get_extremites(l1) 
             d2, f2 = get_extremites(l2)
-            print("-------Error: 2 lines not connected to each other----------")
+            print("-------Error: 2 lines are not connected to each other----------")
             print(d2)
             print(f2)
             print(d1)
             print(f1)
             print("-----------------")
+            """
+            pass
         
     start = l2.interpolate(l2.project(pointlayer[0]["geometry"]))
     end = l2.interpolate(l2.project(pointlayer[-1]["geometry"]))
@@ -530,22 +526,15 @@ def build_polyline(linelayer, pointlayer, tol, searching_radius, sigma ) :
     return cutted_polyline
 
 
-    # fonction permetttant de creer les deux dictionnaires necessaires a la creation d'un graph
 def build_graph(linelayer) : 
+    """Construct two dictionnary needed to create a graph"""
+
     allnodes = collections.defaultdict(lambda : None)
     linedict = {}
-    #Etape 1 : recuperer tous les noeuds
+    #Step one: Get every nodes
     linelayer2 = []
 
     for feat in linelayer:
-        #↓tentative d'optimisation: fait bugué l'application
-        """p1,p2 = get_extremites(feat["geometry"])
-        if feat["geometry"].length != 0:
-            ratio =  p1.distance(p2) / feat["geometry"].length
-            if ratio >= 0.9:
-                linelayer2.append(feat)
-        
-            else:"""
         lines = to_simple_lines(feat["geometry"])
         for line in lines:
             dupp = feat.copy()
@@ -557,8 +546,6 @@ def build_graph(linelayer) :
     for feat in  linelayer2: 
         line = feat["geometry"]
         start,end = get_extremites(line)
-        #les extremites de la lignes sont des points
-        #on definit leur nom par la concatenation des leur coordonnes geographique
         p1 = str(truncate(start.x,2))+"_"+str(truncate(start.y,2))
         p2 = str(truncate(end.x,2))+"_"+str(truncate(end.y,2))
         linedict[(p1,p2)]=feat

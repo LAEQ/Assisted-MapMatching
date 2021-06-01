@@ -5,12 +5,12 @@
 [general]
 name=LAEQ-MapMatching
 qgisMinimumVersion=3.0
-description=To come
+description= This QGIS plugin match a trajectory on a network using leuvenMapMatching and allow the user to modify the result
 version=0.1
 author=LAEQ
 email=Philippe.Apparicio@UCS.INRS.Ca
 
-about=Description to come
+about= This plugin doesn't need any librarie on windows. You need to install the latest version (1.7.1+) of shapely on mac and linux (pip install shapely) : https://pypi.org/project/Shapely/ , 
 
 tracker=https://github.com/LAEQ/q3m/issues
 repository=https://github.com/LAEQ/q3m
@@ -19,14 +19,13 @@ repository=https://github.com/LAEQ/q3m
 # Recommended items:
 
 hasProcessingProvider=no
-# Uncomment the following line and add your changelog:
-# changelog=
+
 
 # Tags are comma separated with spaces allowed
-tags=mapmatching trajectory
+tags=mapmatching trajectory, Leuven MapMatching,
 
 homepage=https://github.com/LAEQ/q3m/blob/main/README.md
-category=Plugins
+category=Vector
 icon=icon.png
 # experimental flag
 experimental=False
@@ -38,9 +37,6 @@ deprecated=False
 # (or upgraded) can be specified.
 # Check the documentation for more information.
 # plugin_dependencies=
-
-Category of the plugin: Raster, Vector, Database or Web
-# category=
 
 # If the plugin can run on QGIS Server.
 server=False

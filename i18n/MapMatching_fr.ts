@@ -7,6 +7,19 @@
     <!-- *************************Interface Graphique******************************* -->
     <!-- *************************************************************************** -->
 
+    <!-- Help File -->
+
+
+    <message>
+        <source>q3m.window.help_file</source>
+        <translation>help_fr.html</translation>
+    </message>
+
+    <message>
+        <source>q3m.window.help_settings_file</source>
+        <translation>help_settings_fr.html</translation>
+    </message>
+
 
     <!-- Header -->
 
@@ -354,7 +367,7 @@
 
     <message>
         <source>q3m.error.point_out_of_range</source>
-        <translation >Une partie des points se retrouvent matché à une distance plus grande que celle renseigné dans les paramètres. Nombre de points : </translation>
+        <translation >Une partie des points se retrouvent matché à une distance plus grande que celle renseignée dans les paramètres. Nombre de points : </translation>
     </message>
 
 

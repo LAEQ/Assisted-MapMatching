@@ -12,23 +12,23 @@ class layerTraductor:
 
     @staticmethod
     def from_vector_layer_to_list_of_dict(layer):
-        """Transform the input layer into a format readable for shapely
+        """Transform the input layer into a format readable for shapely.
 
         Input:
         layer -- A QgsVectorLayer
 
         Output:
-        final_list -- A list composed of the dictionnary version of each feature plus a pair ['geometry']
+        final_list -- A list composed of the dictionnary version of each feature 
+                      plus a field ['geometry']
         i.e: 
         final_list = [ 
             {'fid': 1 , 'speed': 3.14 , 'geometry' : wktGeometry}, 
             { 'fid': 2 , ...}, 
             ... 
             ]
-    
         """
 
-        if type(layer) != QgsVectorLayer:
+        if not isinstance(layer, QgsVectorLayer):
             return "layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer"
 
         final_list = []
@@ -43,28 +43,33 @@ class layerTraductor:
             
             tempa = f.geometry().asJson()
 
-            temporary_dictionary["geometry"] = shape(json.loads(tempa, encoding="utf8"))
+            temporary_dictionary["geometry"] = shape(json.loads(tempa))
 
             final_list.append(temporary_dictionary)
 
         return final_list
 
+
     @staticmethod
-    def from_list_of_dict_to_layer(feat_list,layer_patern,type_layer = "Linestring",name = "new layer"):
-        """Transform a list into a QgsVectorLayer (memory) based on this vectorLayer model (self.initial_layer) 
+    def from_list_of_dict_to_layer(feat_list,
+                                   layer_patern,type_layer = "Linestring",
+                                   name = "new layer"):
+        """Transform a list into a QgsVectorLayer (memory) 
+           based on the layer patern model.
 
         Input:
-        feat_list -- A list composed of dictionnary (1 dictionnary = 1 feature) with at least a 'geometry' parameter in each 
+        feat_list -- A list composed of dictionnary (1 dictionnary = 1 feature) 
+                     with at least a 'geometry' parameter in each 
 
         Output:
         mem_layer -- A QgsVectorLayer filled with the elements in feat_list
 
         """
 
-        if type(layer_patern) != QgsVectorLayer:
+        if not isinstance(layer_patern, QgsVectorLayer):
             return "layer_traductor.from_list_of_dict_to_layer.not_a_layer"
              
-        if type(feat_list) != list :
+        if not isinstance(feat_list, list) :
             return "layer_traductor.from_list_of_dict_to_layer.not_a_list"
 
         epsg = layer_patern.crs().postgisSrid()
@@ -84,8 +89,9 @@ class layerTraductor:
             f= QgsFeature()
             try:
                 geom = QgsGeometry().fromWkt(obj["geometry"].wkt)
-            except:
+            except Exception as err:
                 print("Can't convert with wkt: layerTraductor: from_list_of_dict_to_layer")
+                print(str(err))
                 return "layer_traductor.from_list_of_dict_to_layer.conversion_error"
             f.setGeometry(geom)
 
@@ -103,8 +109,9 @@ class layerTraductor:
 
     @staticmethod
     def order_list_of_dict(feat_list,column_name = "OID"):
-        """Sort a list according to it's OID column"""
-        if( type(feat_list) != list or
+        """Sort a list according to it's OID column."""
+
+        if( not isinstance(feat_list,list) or
             feat_list == [] ):
             return "layer_traductor.order_list_of_dict.error_feat_list"
 
