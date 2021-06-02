@@ -1,21 +1,13 @@
 import string
 
 from qgis.core import *
-try:
-    from shapely.geometry import Point
-except ImportError as err:
-    print("Couldn't import shapely")
-    print(str(err))
+from shapely.geometry import Point
 
 #Import own class
-try:
-    from .import_.leuvenmapmatching.matcher.distance import DistanceMatcher
-    from .import_.leuvenmapmatching.map.inmem import InMemMap
-    from .utils.layerTraductor import *
-    from .utils.geometry import *
-except ImportError as err:
-    print("Import error in Matcheur.py: problem with Local path/files")
-    print(str(err))
+from .import_.leuvenmapmatching.matcher.distance import DistanceMatcher
+from .import_.leuvenmapmatching.map.inmem import InMemMap
+from .utils.layerTraductor import *
+from .utils.geometry import *
 
 
 class Matcheur:

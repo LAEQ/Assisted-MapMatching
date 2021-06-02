@@ -4,11 +4,9 @@ from typing import List
 from qgis.core import *
 from qgis import processing
 
-try:
-    from .matcheur import Matcheur
-except ImportError as err:
-    print("##PLUGIN## - Couldn't load the Matcheur")
-    print(str(err))
+
+from .matcheur import Matcheur
+
 
 
 class PathLayer:

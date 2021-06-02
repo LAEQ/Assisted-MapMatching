@@ -5,13 +5,11 @@ import shapely
 from shapely.geometry import LineString
 
 #Import own class
-try:
-    from ..import_.pyqtree import *
-    from ..import_.leuvenmapmatching.map.inmem import InMemMap
-    from ..import_.leuvenmapmatching.matcher.distance import DistanceMatcher
-    from ..import_.dbscan import dbscan2
-except ImportError:
-    print("Couldn't access the import file, check your path")
+from ..import_.pyqtree import *
+from ..import_.leuvenmapmatching.map.inmem import InMemMap
+from ..import_.leuvenmapmatching.matcher.distance import DistanceMatcher
+from ..import_.dbscan import dbscan2
+
 
 
 #############################################################################

@@ -25,36 +25,29 @@ import os.path
 from random import random
 import string
 
-try:
-    from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-    from qgis.core import Qgis, QgsProject, QgsVectorFileWriter
-    from qgis.PyQt.QtGui import QIcon, QTextCursor
-    from qgis.PyQt.QtWidgets import QAction , QFileDialog
-except ImportError as err:
-    print("Couldn't import module QGIS")
-    print(str(err))
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.core import Qgis, QgsProject, QgsVectorFileWriter
+from qgis.PyQt.QtGui import QIcon, QTextCursor
+from qgis.PyQt.QtWidgets import QAction , QFileDialog
 
-try:
-    # Initialize Qt resources from file resources.py
-    from .resources import *
-    # Import the code for the dialog
-    from .map_matching_dialog import MapMatchingDialog
+# Initialize Qt resources from file resources.py
+from .resources import *
+# Import the code for the dialog
+from .map_matching_dialog import MapMatchingDialog
 
-    #Import own class
-    from .model.ui.layer_manager import LayerManager
-    from .model.layer import Layers
-    from .model.network import NetworkLayer
-    from .model.path import PathLayer
-    from .model.ui.settings import Settings
-    from .model.matcheur import Matcheur
-except ImportError as err:
-    print("Path error")
-    print(str(err))
+#Import own class
+from .model import imports
+from .model.ui.layer_manager import LayerManager
+from .model.ui.settings import Settings
+
+from .model.layer import Layers
+from .model.network import NetworkLayer
+from .model.path import PathLayer
+from .model.matcheur import Matcheur
 
 
 class MapMatching:
     """QGIS Plugin Implementation."""
-
 
     def __init__(self, iface):
         """Constructor.
@@ -85,7 +78,6 @@ class MapMatching:
         self.actions = []
         self.menu = self.tr(u'q3m.window.title')
 
-
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
@@ -93,6 +85,9 @@ class MapMatching:
         self.manager = LayerManager()
         self.layers = None
         self.is_algo_removing = False
+
+        #Test Import:
+        self.import_working = imports.check_imports()
 
 
     # noinspection PyMethodMayBeStatic
@@ -300,7 +295,14 @@ class MapMatching:
             #==============================================
 
             # Prepare the interface buttons
-            self.dlg.change_button_state(1)
+            if not self.import_working:
+                #block the interface
+                self.error_handler("map_matching.init_ui.import",
+                                    level= Qgis.Critical)
+                self.dlg.change_button_state(0)
+            else:
+                #Prepare step 1
+                self.dlg.change_button_state(1)
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
@@ -397,6 +399,12 @@ class MapMatching:
 
     def reset(self):
         """Put back the plugin at the first step."""
+        if not self.import_working:
+            self.import_working = imports.check_imports()
+            if not self.import_working:
+                self.error_handler("map_matching.reset.import",
+                                    level=Qgis.Critical)
+                return
 
         self.layers = None
         self.dlg.change_button_state(1)

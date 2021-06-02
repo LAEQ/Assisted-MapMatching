@@ -263,6 +263,11 @@
         <translation >The test is working</translation>
     </message>
 
+    <message>
+        <source>q3m.error.import</source>
+        <translation >Il y a un problème avec les imports. Se référer à la documentation pour plus de détail sur l'erreur</translation>
+    </message>
+
 
     <!-- ******************* Map_matching.py error message******************** -->
 

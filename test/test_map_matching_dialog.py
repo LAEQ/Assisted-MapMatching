@@ -8,12 +8,9 @@
 
 """
 import unittest
-from random import randint
 from unittest.mock import MagicMock
 
-from qgis.core import QgsVectorLayer, QgsField
-from qgis.PyQt.QtWidgets import QDialogButtonBox, QDialog
-from qgis.PyQt.QtCore import QVariant
+
 from map_matching_dialog import MapMatchingDialog
 from model.ui.layer_manager import LayerManager
 from test.fixtures.layers import LayerFixtures
@@ -48,9 +45,12 @@ class MapMatchingDialogTest(unittest.TestCase):
 
 
     def test_update_matching_box(self):
+        #setup
+        self.dialog.fill_fixed_box(["Matching with Speed", "Matching by distance", "Matching closest"])
         index = self.dialog.combo_algo_matching.findText("Matching with Speed")
         self.dialog.combo_algo_matching.removeItem(index)
 
+        #test
         self.dialog.check_speed.isChecked = MagicMock(return_value = True)
         self.dialog.update_matching_box()
 

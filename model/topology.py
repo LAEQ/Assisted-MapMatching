@@ -1,22 +1,9 @@
-# -*- coding: utf-8 -*-
 import itertools
 
-try:
-    import shapely
-    from shapely.geometry import Point
-except:
-    print("Couldn't import shapely")
+import shapely
 
 #Import Own Class
-try:
-    from .utils.geometry import *
-except:
-    print("##PLUGIN## - Problem with geometry in topology.py")
-
-
-#############################################################################
-## Corrections des erreurs topologiques
-#############################################################################
+from .utils.geometry import *
 
 
 def simplify_coordinates(linelayer, digits) : 
@@ -75,8 +62,8 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
 
         start,end = get_extremites(line)
         for candidate in ok_candidates : 
-            if candidate.distance(start) > tolerance and candidate.distance(end) > tolerance : 
-
+            if (candidate.distance(start) > tolerance and 
+                    candidate.distance(end) > tolerance): 
 
                 for pt in cut_points : 
                     if candidate.distance(pt) > 0 :

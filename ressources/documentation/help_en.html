@@ -5,31 +5,68 @@
 </head>
 <body>
     <h2>LAEQ-Cartographic Correlation<br>Matching Tab</h2>
-    <p>This plugin match a trajectory on a network</p>
-    <h3>Quick description</h3>
-    <p>In order to complete the process, you will have to go through 3 step:<br><br>
-    <strong>Step 1: Input</strong>    --> This step prepare the data for the Matching.<br>
-    <strong>Step 2: Matching</strong> --> This is the step where you will match your point on the network and correct manualy potential error from the algorithm.<br>
-    <strong>Step 3: Export</strong>   --> This step is where you can export your result. You can also do it manualy. 
-    </p>
-    <h3>Network Layer : </h3>
-    <p>This dropDown list show all layers of type <strong>LineString</strong> that are active in the current QGIS project </p>
-    <h3>Path Layer : </h3>
-    <p>This dropDown list show all layers of type <strong>Point</strong> that are active in the current QGIS project </p>
-    <h3>OID :</h3>
-    <p>This dropDown list show all the feature of type <strong>"Integer/Integer64/int/int8"</strong> present inside of the Path layer selected. It represent the original ID of every points</p>
-    <h3>Speed :</h3>
-    <p>This dropDown list show all the feature of type <strong>Real/double</strong> of the Path layer selected. It represent the speed at wich the measurement was taken</p>
-    <h3>Buffer range :</h3>
-    <p>This slider represent the maximum distance to find line on the network for each trajectory point. The bigget this value is, the longest the computing time </p>
-    <h3>The plugin isn't working:</h3>
+    <p>This plugin aims to adjust a GPS track on a network (map-matching) semi-automatically<br>We recommend that you read the plugin documentation before using it: <a href="https://www.google.com/">link</a></p>
+    <h3>Quick description of the matching process</h3>
+    <p>The map-matching process has 3 successive steps</p>
 
-    <p>Here is a few tips that could be the reason why the plugin doesn't work: <br><br>
-      Your layers aren't conform to the plugin standards:
-      <dd>- Check that your two layers are active (checked) or they won't be detected </dd><br>
-      <dd>- Check your two layers geometry's type are LineString for one and Point for the other </dd><br>
-      <dd>- Check that your two layers are in the same projection system (SCR) and that they are both in meter (cartesian) </dd><br>
-      <dd>- Check that your path layer (Point) has an OID field and a speed field (if not uncheck the box next to the comboBox) </dd><br>
-      <dd>- Try reloading if you corrected the precedent error and nothing appeared </dd><br>
-    </p>
+    <h3># Step 1: Input</h3>
+    <p>This step prepare the data to facilitate the work of the map-matching algorithms. 
+      It correct the topology of the network and verify the validity of the input. <br> 
+      Fill every fields, then reduce and correct the network in order to reach the next step<br>
+      Here is the description of every fields:</p>
+
+      <h4>Network layer: </h4>
+    <p>&emsp; This dropDown list show all layers of type <strong>LineString</strong> that are active on QGIS.
+      Select the layer on wich you want to adjust your GPS track<br>
+    The type <stron>MultilineString</stron> isn't supported. You can convert your <strong>MultiLineString</strong> layer to a <strong>LineString</strong> layer with the tool "Multipart to SingleParts" of QGIS</p>
+	  
+      <h4>GPS trace layer: </h4>
+    <p>&emsp; This dropDown list show all layers of type <strong>Point</strong> that are active on QGIS
+      Select the layer that you want to match to a network</p>
+    
+      <h4>OID (Object identifier) :</h4>
+    <p>&emsp; This dropDown list show all the attributes of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected GPS trace. This field must be an unique identifier of every points and is used to order them. A point present earlier on the trace must have a smaller number than another present later.</p>
+    
+      <h4>Buffer range: </h4>
+    <p>&emsp; This slider represent the maximum distance to find line on the selected network for each trajectory point. The bigget this value is, the longest the computing time</p>
+
+    <h3># Step 2: Matching</h3>
+    <p>This step match the points of the GPS trace on the network (already prepared for this). If the map-matching algorithm made a mistake, the user can correct by selecting the path used manually and applicate the changes. (that will restart the map-matching algorithm on the new selection)<br> 
+      Two field can be completed:  </p>
+    
+      <h4>Speed :</h4>
+    <p>&emsp;This dropDown list show all the attributes of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected GPS trace. It represent the speed at which every point has been taken. This field is necessary only if you use the matching method "matching with speed". </p>
+    
+      <h4>ComboBox Matching algorithm</h4>
+    <p>&emsp; This dropDown list allow you to choose the type of matching. Three option are available.</p>
+	 <ul>
+	 	 <li>Matching with speed : Taking into account the speed, the GPS trace is cutted into mooving or stopped section. Every points of a stopped section are merged at their average location and snapped to their closest location on the selected line on the network. The mooving section are then adjusted between the sections separated by the groups of stopped point. Check the documentation for more detail.</li><br>
+	 	 <li>Matching by distance: This method adjust the points along the path by taking into account the distance between every points and the ratio between the length of the original track (in between each points), and the path selected.</li><br>
+	 	 <li>Matching to closest : This methode simply project every points to the closest road on the selected path.</li>
+	 </ul> 
+
+   <h3># Step 3: Export</h3>
+    <p>This step allow you to export your datas to the selected format. You can also do it manually from QGIS<br> 
+      Three options are available to you</p>
+
+    <h4>Exporter matched trace</h4>
+    <p>&emsp; This option allow you to export the selected matched track present in the dropDown list next to it under the format specified in the settings.</p>
+
+    <h4>Export the polyline</h4>
+    <p>&emsp; This option allow you to export the polyline representing the path used by the cyclist.</p>
+
+    <h4>Export project</h4>
+    <p>&emsp; This option allow you to export every elements coched in the settings inside a single file (Warning: There is a problem with the multiple export to shapefile format).</p>
+
+   <h3>The plugin isn't working: </h3>
+
+    <h4>Here is a few tips to correct some error that might happen during the process: </h4>
+      <p>Your layers aren't conform to the plugin standards:</p>
+      <dd>- Check that your two layers are active (checked) or they won't be detected</dd><br>
+      <dd>- Check your two layers geometry's type are LineString for one and Point for the other.</dd><br>
+      <dd>- Check that your two layers are in the same projection system (SCR) and that they are both in meter (cartesian)</dd><br>
+      <dd>- Check that your GPS trace layer has an OID conform to the documentation standards (unique, integer...)</dd><br>
+      <dd>- Try reloading if you corrected the precedent error and nothing appeared</dd><br>
+      <dd>- Never delete a layer on QGIS during the process or the plugin will force you to reset the whole process</dd><br>
+
 </body>

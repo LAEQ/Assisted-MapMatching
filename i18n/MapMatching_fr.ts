@@ -263,6 +263,11 @@
         <translation >Le test est fonctionnel</translation>
     </message>
 
+    <message>
+        <source>q3m.error.import</source>
+        <translation >Il y a un problème avec les imports. Se référer à la documentation pour plus de détail sur l'erreur</translation>
+    </message>
+
 
     <!-- ******************* Map_matching.py error message******************** -->
 
@@ -272,12 +277,12 @@
 
     <message>
         <source>q3m.error.pre_algo_layer_deletion</source>
-        <translation >Il est conseillé de cliquer sur RELOAD pour éviter d'avoir des valeurs désormais inexistante dans les comboBox</translation>
+        <translation >Il est conseillé de cliquer sur RELOAD pour éviter d'avoir des valeurs désormais inexistantes dans les comboBox</translation>
     </message>
 
     <message>
         <source>q3m.error.post_algo_layer_deletion</source>
-        <translation >C'est jamais une bonne idée de supprimer des éléments au milieu du traitement. Appuyer sur RESET pour revenir à 0</translation>
+        <translation >Merci de ne pas supprimer des éléments au milieu du traitement. Appuyer sur RESET pour revenir à 0</translation>
     </message>
 
 
@@ -291,7 +296,7 @@
 
     <message>
         <source>q3m.error.can't_find_layer</source>
-        <translation >Impossible de trouver une des couches renseignés dans une des boites, essayer de cliquer sur reload pour supprimer les choix inexistant</translation>
+        <translation >Impossible de trouver une des couches renseignés dans une des boites, essayer de cliquer sur reload pour supprimer les choix inexistants</translation>
     </message>
 
     <message>
@@ -314,7 +319,7 @@
 
     <message>
         <source>q3m.error.no_matched_layer</source>
-        <translation >Aucune couche matché détécté. Une couche devrait automatiquement apparaitre après avoir lancé le pré-matching</translation>
+        <translation >Aucune couche matchée détecté. Une couche devrait automatiquement apparaître après avoir lancé le pré-matching</translation>
     </message>
 
     <message>
@@ -324,7 +329,7 @@
 
     <message>
         <source>q3m.error.nothing_to_export</source>
-        <translation >Rien à exporter. Merci de cocher au moins une case dans les paramètres d'exportation présent dans le second onglet </translation>
+        <translation >Rien a exporter. Merci de cocher au moins une case dans les paramètres d'exportation présents dans le second onglet </translation>
     </message>
 
 
@@ -343,12 +348,12 @@
 
     <message>
         <source>q3m.error.no_path_registered</source>
-        <translation >Impossible de selectionner la route emprunté par l'utilisateur: celle ci n'a pas été créé</translation>
+        <translation >Impossible de sélectionner la route empruntée par l'utilisateur: celle-ci n'a pas été créée</translation>
     </message>
 
     <message>
         <source>q3m.error.no_selection</source>
-        <translation >Aucune route selectionné</translation>
+        <translation >Aucune route sélectionnée</translation>
     </message>
 
 
@@ -367,7 +372,7 @@
 
     <message>
         <source>q3m.error.negative_speed_limit</source>
-        <translation >La limite de vitesse renseigné dans les paramètres ne peut être inférieur à 0</translation>
+        <translation >La limite de vitesse renseignée dans les paramètres ne peut être inférieure à 0</translation>
     </message>
 
     <message>
@@ -377,12 +382,12 @@
 
     <message>
         <source>q3m.error.empty_layer</source>
-        <translation >La couche utilisé pour cet algorithme est vide</translation>
+        <translation >La couche utilisée pour cet algorithme est vide</translation>
     </message>
 
     <message>
         <source>q3m.error.point_out_of_range</source>
-        <translation >Une partie des points se retrouvent matché à une distance plus grande que celle renseignée dans les paramètres. Nombre de points : </translation>
+        <translation >Une partie des points se retrouvent matchés à une distance plus grande que celle renseignée dans les paramètres. Nombre de points : </translation>
     </message>
 
 
@@ -415,7 +420,7 @@
     
     <message>
         <source>q3m.error.not_a_layer</source>
-        <translation >Le paramètre renseigné n'est pas de type QgsVectorLayer et ne peut donc pas être convertit</translation>
+        <translation >Le paramètre renseigné n'est pas de type QgsVectorLayer et ne peut donc pas être converti</translation>
     </message>
     
     <message>
@@ -425,7 +430,7 @@
 
     <message>
         <source>q3m.error.conversion_error</source>
-        <translation >Erreur lors de de la conversion des géometries. Le problème vient de l'encodage des données</translation>
+        <translation >Erreur lors de la conversion des géométries. Le problème vient de l'encodage des données</translation>
     </message>
 
     <message>
@@ -444,12 +449,12 @@
 
     <message>
         <source>q3m.error.no_candidate_found</source>
-        <translation >Aucune entité trouvé dans le rayon renseigné autour d'un des points</translation>
+        <translation >Aucune entité trouvée dans le rayon renseigné autour d'un des points</translation>
     </message>
 
     <message>
         <source>q3m.error.empty_list</source>
-        <translation >Un des paramètres de la fonction à produit une erreur: Une liste vide à été détécté </translation>
+        <translation >Un des paramètres de la fonction à produit une erreur: Une liste vide a été détecté </translation>
     </message>
 
 </context>

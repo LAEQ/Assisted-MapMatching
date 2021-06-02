@@ -1,6 +1,5 @@
 import os
 import unittest
-from unittest.mock import MagicMock
 
 from qgis.core import QgsFeature, QgsPointXY
 

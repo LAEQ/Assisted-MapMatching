@@ -25,19 +25,15 @@
 import os
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget, QGroupBox, QCheckBox
-from qgis.core import QgsVectorLayer, QgsFields
-from typing import List
+from qgis.PyQt.QtWidgets import QLabel, QPushButton, QTabWidget, QGroupBox, QCheckBox
 
 try:
     from .model.ui.button_manager import Button_manager
 except:
-    print("Import test unitaire")
+    print("Import unittest")
     from model.ui.button_manager import Button_manager
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
-# from model.layer_manager import LayerManager
-# from .model.layer_manager import LayerManager
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'map_matching_dialog_base.ui'))

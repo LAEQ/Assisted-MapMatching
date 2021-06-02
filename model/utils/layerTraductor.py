@@ -1,11 +1,8 @@
-#from shapely import wkt
-try:
-    from shapely.geometry import shape
-except:
-    print("Can't load shapely, please install it with pip")
-
-from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
 import json
+
+from shapely.geometry import shape
+from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
+
 
 class layerTraductor:
 
