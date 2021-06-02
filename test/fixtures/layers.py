@@ -8,8 +8,8 @@ class LayerFixtures:
         self.cur_dir = os.path.dirname(__file__)
 
     def points_1(self):
-        path = os.path.join(self.cur_dir, "points_1.gpkg")
-        return QgsVectorLayer(path, "points_1.gpkg", "ogr")
+        path = os.path.join(self.cur_dir, "points_1.geojson")
+        return QgsVectorLayer(path, "points_1.geojson", "ogr")
 
     def points_fields_1(self):
         layer = self.points_1()
