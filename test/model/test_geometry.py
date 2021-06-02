@@ -380,23 +380,6 @@ class TestGeometry(unittest.TestCase):
 
         self.assertEqual([l1],res)
 
-        #Polyline
-
-        """
-        l1 = LineString([(0,0),(10,0),(20,0),(30,0)])
-
-        res = to_lixels(l1,5)
-
-        expected_result = [ LineString([(0,0),(5,0)]),
-                            LineString([(5,0),(10,0)]),
-                            LineString([(10,0),(15,0)]),
-                            LineString([(15,0),(20,0)]),
-                            LineString([(20,0),(25,0)]),
-                            LineString([(25,0),(30,0)])]
-        print(".") #PROBLEM: MULTIPLICATE 
-        for p in res:
-            print(p)
-        self.assertEqual(expected_result, res)"""
 
 
     def test_consolidate(self):
@@ -439,14 +422,3 @@ class TestGeometry(unittest.TestCase):
         res = SplitLoop(None)
         self.assertEqual(None, res)
 
-    def test_build_polyline(self):
-        pass
-    #trop difficile à tester
-        #todo:
-        # test every parameter with random values
-        # import values et tester sur la fonction
-
-    def test_build_graph(self):
-        #trop difficile à tester
-
-        pass

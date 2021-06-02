@@ -251,6 +251,12 @@ class MapMatching:
                                                             "q3m.window.check")
                     widget.setText(self.tr(label))
 
+            fixed_elements = []
+            fixed_elements.append(self.tr("q3m.window.speed_matching"))
+            fixed_elements.append(self.tr("q3m.window.distance_matching"))
+            fixed_elements.append(self.tr("q3m.window.closest_matching"))
+            self.dlg.fill_fixed_box(fixed_elements)
+
             #documentation loading
             dir = os.path.dirname(__file__)
 
@@ -577,16 +583,16 @@ class MapMatching:
                                 settings["spin_sigma"])
 
         
-        if settings["combo_algo_matching"] == "Matching with Speed":
+        if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching"):
             res = self.layers.match_speed(
                     matcheur, 
                     settings["combo_speed"], 
                     settings["spin_stop_speed"])
 
-        elif settings["combo_algo_matching"] == "Matching closest":
+        elif settings["combo_algo_matching"] == self.tr("q3m.window.closest_matching"):
             res = self.layers.match_closest(matcheur)
 
-        elif settings["combo_algo_matching"] == "Matching by distance":
+        elif settings["combo_algo_matching"] == self.tr("q3m.window.distance_matching"):
             res = self.layers.match_by_distance(matcheur)
             
         if res is not None:
@@ -631,9 +637,9 @@ class MapMatching:
                 settings["spin_sigma"])
 
         #Start the matching after checking the input
-        if settings["combo_algo_matching"] == "Matching with Speed" :
+        if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching") :
             error = self.layers.apply_modification( 
-                    settings["combo_algo_matching"],
+                    "speed_matching",
                     matcheur,
                     speed_column_name= settings["combo_speed"],
                     speed_limit = settings["spin_stop_speed"])
@@ -643,8 +649,14 @@ class MapMatching:
                     "map_matching.on_click_apply_modification." + error)
 
         else:
+            
+            if settings["combo_algo_matching"] == self.tr("q3m.window.distance_matching") :
+                type_of_matching = "distance_matching"
+            else:
+                type_of_matching = "closest_matching"
+
             error = self.layers.apply_modification( 
-                    settings["combo_algo_matching"],
+                    type_of_matching,
                     matcheur)
             
             if error is not None:

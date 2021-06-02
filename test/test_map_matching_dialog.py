@@ -55,13 +55,15 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.dialog.update_matching_box()
 
         self.assertEqual(3, self.dialog.combo_algo_matching.count())
-        self.assertEqual("Matching with Speed", self.dialog.combo_algo_matching.currentText())
+        self.assertEqual("Matching with Speed", 
+                         self.dialog.combo_algo_matching.currentText())
 
         self.dialog.check_speed.isChecked = MagicMock(return_value = False)
         self.dialog.update_matching_box()
 
         self.assertEqual(2, self.dialog.combo_algo_matching.count())
-        self.assertNotEqual("Matching with Speed", self.dialog.combo_algo_matching.currentText())
+        self.assertNotEqual("Matching with Speed", 
+                            self.dialog.combo_algo_matching.currentText())
 
 
     def test_update_matched_path_box(self):
@@ -75,7 +77,8 @@ class MapMatchingDialogTest(unittest.TestCase):
         magic_points = self.fixtures.points()
         self.manager.get_matched_layers = MagicMock(return_value=magic_points)
         self.dialog.update_matched_path_box()
-        self.assertEqual(len(magic_points), self.dialog.combo_matched_track.count())
+        self.assertEqual(len(magic_points), 
+                        self.dialog.combo_matched_track.count())
 
 
     def test_path_changed(self):
@@ -107,10 +110,14 @@ class MapMatchingDialogTest(unittest.TestCase):
 
         self.dialog.restore_state()
 
-        self.assertEqual("points_2.gpkg", self.dialog.combo_path.currentText())
-        self.assertEqual("network_2.gpkg", self.dialog.combo_network.currentText())
-        self.assertEqual("fid", self.dialog.combo_oid.currentText())
-        self.assertEqual("Speed", self.dialog.combo_speed.currentText())
+        self.assertEqual("points_2.gpkg", 
+                         self.dialog.combo_path.currentText())
+        self.assertEqual("network_2.gpkg", 
+                         self.dialog.combo_network.currentText())
+        self.assertEqual("fid", 
+                         self.dialog.combo_oid.currentText())
+        self.assertEqual("Speed", 
+                         self.dialog.combo_speed.currentText())
 
     
     def test_clear_combo(self):

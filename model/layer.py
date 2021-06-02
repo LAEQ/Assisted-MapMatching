@@ -132,9 +132,9 @@ class Layers:
 
         #We set the matcheur to jump the first step: path finding
         matcheur.set_layers(network, self.path_layer.layer) 
-        error = None
+        error = ""
         
-        if (type_of_matching == "Matching with Speed" and 
+        if (type_of_matching == "speed_matching" and 
             speed_column_name != None):
             #Speed matching
             error = self.reduce_path_layer(speed_column_name, speed_limit)
@@ -144,11 +144,11 @@ class Layers:
             error = self.path_layer.speed_point_matching(matcheur,
                                                          speed_column_name,
                                                          speed_limit)
-        elif type_of_matching == "Matching closest":
+        elif type_of_matching == "closest_matching":
             #Closest Matching
             error = self.path_layer.closest_point_matching(matcheur)
 
-        elif type_of_matching == "Matching by distance":
+        elif type_of_matching == "distance_matching":
             #Distance Matching
             error = self.path_layer.distance_point_matching(matcheur)
 

@@ -1,16 +1,18 @@
 import os
 import unittest
 from unittest.mock import MagicMock
+from types import SimpleNamespace
 
 from qgis.core import QgsGeometry, QgsPointXY
 
+#Import own class
 from model.path import PathLayer
 from model.matcheur import Matcheur
-
 from test.fixtures.layers import LayerFixtures
+
 from test.utilities import get_qgis_app
-from types import SimpleNamespace
 QGIS_APP = get_qgis_app()
+
 
 class TestPathLayer(unittest.TestCase):
     def setUp(self) -> None:
@@ -19,9 +21,10 @@ class TestPathLayer(unittest.TestCase):
         self.fixtures = LayerFixtures()
         self.path_layer = PathLayer(self.fixtures.points_1())
 
+
     def test_create_buffer(self):
         self.path_layer.layer = self.path_layer.initial_layer
-        #range negative
+        #negative range
         result = self.path_layer.create_buffer(-1)
         self.assertEqual("path.create_buffer.buffer_range",result)
 
@@ -29,7 +32,7 @@ class TestPathLayer(unittest.TestCase):
         result = self.path_layer.create_buffer(0)
         self.assertEqual("path.create_buffer.buffer_range",result)
 
-        #range normal
+        #normal range
         result = self.path_layer.create_buffer(10)
         self.assertEqual(type(self.path_layer.initial_layer),type(result))
 
@@ -91,9 +94,9 @@ class TestPathLayer(unittest.TestCase):
                 pt = point.geometry().asPoint()
                 self.assertEqual(i,[pt.x(),pt.y()])
         """
+
         #Test with some point matched
         #We consider that 2 points aren't at the same place in our test data
-
         self.path_layer.layer = self.fixtures.points_1()
         self.path_layer.merge_stationary_point("Speed", 1)
 
@@ -142,7 +145,8 @@ class TestPathLayer(unittest.TestCase):
         result = self.path_layer.speed_point_matching(matcheur, 'Speed', 1.5)
 
         self.assertEqual(result, None)
-        self.assertEqual("matched point by speed", self.path_layer.layer.name())
+        self.assertEqual("matched point by speed", 
+                         self.path_layer.layer.name())
 
         for f in self.path_layer.layer.getFeatures():
             pt = f.geometry().asPoint()
@@ -153,7 +157,8 @@ class TestPathLayer(unittest.TestCase):
         matcheur = Matcheur(None,None,None)
         matcheur.snap_point_to_closest = MagicMock(return_value = (-1,[]))
         result = self.path_layer.closest_point_matching(matcheur)
-        self.assertEqual("path.closest_point_matching.matcheur.snap_point_to_closest.empty_layer", result)
+        self.assertEqual("path.closest_point_matching.matcheur.snap_point_to_closest.empty_layer", 
+                        result)
 
 
     def distance_point_matching(self):
@@ -161,13 +166,6 @@ class TestPathLayer(unittest.TestCase):
         matcheur.snap_point_by_distance = MagicMock(return_value = -1)
         result = self.path_layer.distance_point_matching(matcheur)
         self.assertEqual("distance.matching", result)
-
-
-        
-
-    
-        
-
 
 
 if __name__ == "__main__":

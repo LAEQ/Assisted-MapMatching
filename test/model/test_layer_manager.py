@@ -84,18 +84,28 @@ class TestLayerManager(unittest.TestCase):
         self.assertEqual(0, len(result))
 
         #add a network layer with a working name
-        layer =self.fixtures.generate_network_4_fields("3857","matched point by distance")
+        layer =self.fixtures.generate_network_4_fields(
+            "3857",
+            "matched point by distance")
         
         self.manager.add_layer(layer)
         result = self.manager.get_matched_layers()
         self.assertEqual(0, len(result))
 
         #add a path layer with a working name
-        layer =self.fixtures.generate_vector_path_4_fields("3857","matched point by distance")
+        layer =self.fixtures.generate_vector_path_4_fields(
+            "3857",
+            "matched point by distance")
         self.manager.add_layer(layer)
-        layer =self.fixtures.generate_vector_path_4_fields("3857","matched point by speed")
+        
+        layer =self.fixtures.generate_vector_path_4_fields(
+            "3857",
+            "matched point by speed")
         self.manager.add_layer(layer)
-        layer = self.fixtures.generate_vector_path_4_fields("3857","matched point to closest")
+
+        layer = self.fixtures.generate_vector_path_4_fields(
+            "3857",
+            "matched point to closest")
         self.manager.add_layer(layer)
         
         result = self.manager.get_matched_layers()

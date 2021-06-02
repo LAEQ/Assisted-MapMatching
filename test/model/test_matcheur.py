@@ -2,14 +2,6 @@ import os
 import unittest
 from unittest.mock import MagicMock
 
-from qgis.core import QgsFeature, QgsPointXY
-
-try:
-    import shapely
-    from shapely.geometry import LineString, Point
-except:
-    print("Couldn't import shapely.")
-
 from model.utils.layerTraductor import *
 from model.matcheur import *
 

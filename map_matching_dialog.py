@@ -56,7 +56,6 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.manager = None
         self.buttonManager = Button_manager(self)
-        self.fill_fixed_box()
 
         """Listeners"""
         self.combo_path.currentIndexChanged.connect(self.update_attributes_box)
@@ -91,15 +90,15 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if self.check_speed.isChecked():
             self.combo_speed.setEnabled(True)
-            self.combo_algo_matching.addItem("Matching with Speed")
-            index = self.combo_algo_matching.findText("Matching with Speed")
+            self.combo_algo_matching.addItem(self.algo_traduction[0])
+            index = self.combo_algo_matching.findText(self.algo_traduction[0])
             self.combo_algo_matching.setCurrentIndex(index)
         else:
             self.combo_speed.setEnabled(False)
-            index = self.combo_algo_matching.findText("Matching with Speed")
+            index = self.combo_algo_matching.findText(self.algo_traduction[0])
             self.combo_algo_matching.removeItem(index)
 
-            index = self.combo_algo_matching.findText("Matching by distance")
+            index = self.combo_algo_matching.findText(self.algo_traduction[1])
             self.combo_algo_matching.setCurrentIndex(index)
     
 
@@ -209,12 +208,12 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.combo_speed.clear()
 
 
-    def fill_fixed_box(self) -> None:
+    def fill_fixed_box(self, traduction : list) -> None:
         """Fill boxes with values that won't be changed during the whole process"""
+        self.algo_traduction = traduction
+        for trad in traduction:
+            self.combo_algo_matching.addItem(trad)
 
-        self.combo_algo_matching.addItem("Matching with Speed")
-        self.combo_algo_matching.addItem("Matching closest")
-        self.combo_algo_matching.addItem("Matching by distance")
         self.combo_format.addItem("GPKG")
         self.combo_format.addItem("ESRI Shapefile")
 

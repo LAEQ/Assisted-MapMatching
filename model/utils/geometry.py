@@ -1,12 +1,8 @@
 import collections
 import numpy as np
 
-try:
-    import shapely
-    from shapely.geometry import LineString
-except ImportError:
-    print("Couldn't load shapely")
-    raise
+import shapely
+from shapely.geometry import LineString
 
 #Import own class
 try:
@@ -16,7 +12,6 @@ try:
     from ..import_.dbscan import dbscan2
 except ImportError:
     print("Couldn't access the import file, check your path")
-    raise
 
 
 #############################################################################

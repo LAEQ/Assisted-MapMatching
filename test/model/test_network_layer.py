@@ -21,7 +21,8 @@ class TestNetworkLayer(unittest.TestCase):
     def test_add_attribute_to_layers(self):
         self.network_layer.layer = self.fixtures.network_1()
         result = self.network_layer.add_attribute_to_layers(None)
-        self.assertEqual("network.add_attribute_to_layers.empty_attribute_name", result)
+        self.assertEqual("network.add_attribute_to_layers.empty_attribute_name", 
+                        result)
 
 
         result = self.network_layer.add_attribute_to_layers("test")
@@ -43,7 +44,8 @@ class TestNetworkLayer(unittest.TestCase):
         self.network_layer.layer = self.fixtures.network_1()
         matcheur = Matcheur(None,None,None)
 
-        matcheur.find_best_path_in_network = MagicMock(return_value = "graph.find.path")
+        matcheur.find_best_path_in_network = MagicMock(
+                                            return_value = "graph.find.path")
 
         result = self.network_layer.find_path(matcheur)
 
@@ -56,4 +58,5 @@ class TestNetworkLayer(unittest.TestCase):
 
         result = self.network_layer.select_possible_path()
 
-        self.assertEqual("network.select_possible_path.no_path_registered", result)
+        self.assertEqual("network.select_possible_path.no_path_registered", 
+                        result)

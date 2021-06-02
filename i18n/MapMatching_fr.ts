@@ -113,6 +113,21 @@
     </message>
 
     <message>
+        <source>q3m.window.distance_matching</source>
+        <translation >Matcher par la distance</translation>
+    </message>
+
+    <message>
+        <source>q3m.window.speed_matching</source>
+        <translation >Matcher par vitesse</translation>
+    </message>
+    
+    <message>
+        <source>q3m.window.closest_matching</source>
+        <translation >Matcher au plus près</translation>
+    </message>
+
+    <message>
         <source>q3m.window.btn.map.matching</source>
         <translation >Pre-Matching</translation>
     </message>

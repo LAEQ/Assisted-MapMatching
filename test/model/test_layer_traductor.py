@@ -39,10 +39,12 @@ class TestLayerTraductor(unittest.TestCase):
 
         res = layerTraductor.from_vector_layer_to_list_of_dict(layer)
 
-        expected_result = [ {"id" : 0 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
-                            {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
-                            {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
-                            {"id" : 3 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}]
+        expected_result = [ 
+            {"id" : 0 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 3 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}
+            ]
 
         self.assertEqual(expected_result, res)
 
@@ -55,14 +57,19 @@ class TestLayerTraductor(unittest.TestCase):
     def test_from_list_of_dict_to_layer(self):
 
         #normal test
-        feat_list = [   {"id" : 0 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
-                        {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
-                        {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
-                        {"id" : 3 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}]
+        feat_list = [   
+            {"id" : 0 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 3 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}
+            ]
         
         
 
-        res = layerTraductor.from_list_of_dict_to_layer(feat_list, self.fixtures.generate_vector_path_4_fields(), "Point")
+        res = layerTraductor.from_list_of_dict_to_layer(
+                feat_list, 
+                self.fixtures.generate_vector_path_4_fields(), 
+                "Point")
         
         i = 0
         for feat in res.getFeatures():
@@ -83,17 +90,20 @@ class TestLayerTraductor(unittest.TestCase):
     def test_order_list_of_dict(self):
 
         #normal test
-        feat_list = [   {"id" : 3 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
-                        {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
-                        {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
-                        {"id" : 0 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}]
+        feat_list = [   
+            {"id" : 3 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 0 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}]
         
         res = layerTraductor.order_list_of_dict(feat_list, "id")
 
-        expected_result = [ {"id" : 0 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)},
-                                        {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
-                                        {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
-                                        {"id" : 3 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)}]
+        expected_result = [ 
+            {"id" : 0 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 1 , "name" : 'TEST', "oid " : 1, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
+            {"id" : 3 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)}
+            ]
 
         self.assertEqual(expected_result, res)
 
@@ -104,13 +114,16 @@ class TestLayerTraductor(unittest.TestCase):
 
         #wrong input test
         res = layerTraductor.order_list_of_dict(None, "oid ")
-        self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",res)
+        self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",
+                        res)
 
         res = layerTraductor.order_list_of_dict([], "oid ")
-        self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",res)
+        self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",
+                        res)
 
         res = layerTraductor.order_list_of_dict(feat_list, "ERROR")
-        self.assertEqual("layer_traductor.order_list_of_dict.wrong_oid_column",res)
+        self.assertEqual("layer_traductor.order_list_of_dict.wrong_oid_column",
+                        res)
 
         
 
