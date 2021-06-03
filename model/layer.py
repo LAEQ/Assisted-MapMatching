@@ -60,17 +60,14 @@ class Layers:
         """ Start the matching algorithm based on speed """
 
         error = self.reduce_path_layer(speed_column_name, speed_lim)
-
         if error != None:
             return error
 
         error = self.network_layer.find_path(matcheur)
-
         if error != None:
             return "layer.match_speed."+ error
 
         error = self.path_layer.speed_point_matching(matcheur,speed_column_name, speed_limit= speed_lim)
-
         if error != None:
             return "layer.match_speed."+ error
 
@@ -80,23 +77,28 @@ class Layers:
     def match_closest(self,matcheur: Matcheur):
         """ Start the matching algorithm to the closest position on the line """
 
-        self.network_layer.find_path(matcheur)
+        error = self.network_layer.find_path(matcheur)
+        if error != None:
+            return "layer.match_closest."+ error
 
-        res = self.path_layer.closest_point_matching(matcheur)
+        error = self.path_layer.closest_point_matching(matcheur)
+        if error is not None:
+            return "layer.match_closest." + error
 
         self.polyline = matcheur.polyline
-
-        if res != None:
-            return "layer.match_closest." + res
 
 
     def match_by_distance(self,matcheur: Matcheur):
         """ Start the matching algorithm based on the distance between each points """
 
-        self.network_layer.find_path(matcheur)
+        error = self.network_layer.find_path(matcheur)
+        if error is not None:
+            return "layer.match_by_distance."+ error
 
-        self.path_layer.distance_point_matching(matcheur)
-
+        error = self.path_layer.distance_point_matching(matcheur)
+        if error is not None:
+            return "layer.match_by_distance."+ error
+        
         self.polyline = matcheur.polyline
 
 

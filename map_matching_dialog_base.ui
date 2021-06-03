@@ -508,6 +508,9 @@
         <height>22</height>
        </rect>
       </property>
+      <property name="minimum">
+       <double>0.010000000000000</double>
+      </property>
       <property name="maximum">
        <double>9999.989999999999782</double>
       </property>

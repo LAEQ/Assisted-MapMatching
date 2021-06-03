@@ -410,6 +410,16 @@
     </message>
 
     <message>
+        <source>q3m.error.empty_best_path</source>
+        <translation >Couldn't find the best path. Please increase the searching radius </translation>
+    </message>
+
+    <message>
+        <source>q3m.error.empty_polyline</source>
+        <translation >Couldn't build the polyline. Please increase the searching radius</translation>
+    </message>
+
+    <message>
         <source>q3m.error.distance_matcher</source>
         <translation >An error happened because of the librairy Leuvenmapmatching</translation>
     </message>

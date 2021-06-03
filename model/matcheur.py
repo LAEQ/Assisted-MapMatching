@@ -104,6 +104,8 @@ class Matcheur:
                 actualstate = state
                 selected_lines.append(linedict[state])
         
+        if len(selected_lines) == 0:
+            return "matcheur.find_best_path_in_network.empty_best_path"
         #The road tha algorithm think the user took
         self.network_layer = layerTraductor.from_list_of_dict_to_layer(
                 selected_lines,
@@ -140,6 +142,9 @@ class Matcheur:
 
         polyline = build_polyline(linelayer, pointslayer, 15, 
                                   self.searching_radius, self.sigma)
+        if polyline is None:
+            return ("matcheur.snap_points_along_line.empty_polyline", [])
+        
         self.polyline = polyline
 
         rev_polyline = reverse_line(polyline)
@@ -276,12 +281,14 @@ class Matcheur:
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
-            return (-1,[]) 
+            return ("matcheur.snap_point_to_closest.empty_layer",[]) 
 
         #Construction of the polyline
         polyline = build_polyline(linelayer, pointslayer, 15, 
                                   self.searching_radius, self.sigma)
-
+        if polyline is None:
+            print("The polyline obtained is empty, please check your parameters")
+            return ("matcheur.snap_point_to_closest.empty_polyline", [])
         self.polyline = polyline
 
         too_far_list = []
@@ -314,11 +321,13 @@ class Matcheur:
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
-            return (-1,[]) 
+            return ("matcheur.snap_point_by_distance.empty_layer",[]) 
 
         #Building the polyline
         polyline = build_polyline(linelayer, pointslayer, 15, 
                                   self.searching_radius, self.sigma)
+        if polyline is None:
+            return ("matcheur.snap_point_by_distance.empty_polyline",[])
         self.polyline = polyline
 
         #Stock the distance between every points

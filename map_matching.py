@@ -607,6 +607,9 @@ class MapMatching:
             self.error_handler(
                 "map_matching.on_click_pre_matching." + res)
 
+            if not res.split('.')[-1].startswith("point_out_of_range"):
+                return
+
         path = self.layers.path_layer.layer
 
         #applicate change to the application
@@ -646,6 +649,7 @@ class MapMatching:
 
         #Start the matching after checking the input
         if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching") :
+            #speed matching
             error = self.layers.apply_modification( 
                     "speed_matching",
                     matcheur,
@@ -656,13 +660,17 @@ class MapMatching:
                 self.error_handler(
                     "map_matching.on_click_apply_modification." + error)
 
+                if not error.split('.')[-1].startswith("point_out_of_range"):
+                    return
+
         else:
             
             if settings["combo_algo_matching"] == self.tr("q3m.window.distance_matching") :
                 type_of_matching = "distance_matching"
             else:
                 type_of_matching = "closest_matching"
-
+                
+            #distance and closest matching
             error = self.layers.apply_modification( 
                     type_of_matching,
                     matcheur)
@@ -670,6 +678,9 @@ class MapMatching:
             if error is not None:
                 self.error_handler(
                     "map_matching.on_click_apply_modification." + error)
+
+                if not error.split('.')[-1].startswith("point_out_of_range"):
+                    return
 
         path = self.layers.path_layer.layer
 

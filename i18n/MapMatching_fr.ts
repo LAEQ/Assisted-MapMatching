@@ -410,6 +410,16 @@
     </message>
 
     <message>
+        <source>q3m.error.empty_best_path</source>
+        <translation >Aucun meilleur trajet détecté. Il est conseillé d'augmenter la valeur du paramètre de rayon de recherche </translation>
+    </message>
+
+    <message>
+        <source>q3m.error.empty_polyline</source>
+        <translation >La polyline n'a pas pu être construite. Merci d'augmenter les valeurs renseignées dans les paramètres (le rayon de recherche en particulier)</translation>
+    </message>
+
+    <message>
         <source>q3m.error.distance_matcher</source>
         <translation >Une erreur est survenue à cause de la librairie Leuvenmapmatching</translation>
     </message>

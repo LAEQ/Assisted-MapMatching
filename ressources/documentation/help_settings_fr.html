@@ -1,26 +1,31 @@
-<html lang="en">
+<html lang="fr">
 <head>
-  <title>LAEQ-Cartographic Correlation</title>
+  <title>LAEQ-Corrélation Cartographique</title>
   <meta charset="UTF-8">
 </head>
 <body>
-    <h2>Q3M User Friendly Map matching<br>Settings Tab</h2>
-    <p>Here you can tinker the settings inside our function to obtain the expected result</p>
-    <h3>Limit stop speed: </h3>
-    <p>This slider represent the limit where we will consider every point with a speed value inferior to it at the stop status</p>
-    <h3>Topological tolerance</h3>
-    <h4>Close call :</h4>
-    <p>This slider represent the length at wich we will consider that two point touch each other and need to be merged </p>
-    <h4>Intersection and Dangle Nodes :</h4>
-    <p>This slider represent the length at wich we will consider that two point touch each other and we need to cut the lines </p>
-    <h3>Map-matching tolerance :</h3>
-    <h4>Searching radius</h4>
-    <p>This slider is a parameter in the map matching function that represent the searching radius around every point of the path</p>
-    <h4>Sigma</h4>
-    <p>This slider is a parameter in the map matching function that represent the probabilities that a road have to be taken considering it's distance to the point. (greater = more likely) </p>
+    <h2>LAEQ-Corrélation Cartographique<br>Onglet Paramètre</h2>
+    <p>Vous pouvez ici modifier les paramètres de nos fonctions<br>Les paramètres pré-enregistrés fonctionnent pour une majorité des cas</p>
 
-    <p>Here is a few tips that could be the reason why the plugin doesn't work: <br><br>
-      <dd>- Your map layer isn't complete and the algorithm couldn't find a connection between two part of the path</dd><br>
-      <dd>- The map matching parameter search radius is too low or too high</dd><br>
+    <h4>Limite de vitesse à l'arrêt: </h4>
+    <p>Ce slider représente la limite de vitesse à partir de lequel on va considérer que le point est à l'arrêt.</p>
+
+    <h3>Tolérance topologique</h3>
+    <h4>Point proche:</h4>
+    <p>Ce slider représente la longueur à partir de laquelle on va considérer que deux points du réseau de route se touchent et doivent être fusionnés</p>
+
+    <h4>Intersection and Dangle Nodes :</h4>
+    <p>Ce slider représente la longueur à partir de laquelle on va considérer que deux points du réseau de route se touchent et doivent être fusionnés</p>
+
+    <h3>Tolérance du Map-matching :</h3>
+    <h4>Rayon de recherche</h4>
+    <p>Ce slider représente le rayon de recherche de route qui sera utilisé autour de chaque point. Toute route se trouvant dans ce rayon sera considérée pour le matching</p>
+    
+    <h4>Sigma</h4>
+    <p>Ce slider permet de renseigner l'importance des routes les plus éloignées du point dans le rayon de recherche. Plus ce paramètre est grand, plus les routes éloignées auront de chance d'être sélectionné par l'algorithme</p>
+
+    <p>Voici des raisons pour lesquels l'algorithme ne fait pas ce que vous voulez:<br><br>
+      <dd>- Votre carte n'est pas complète et l'algorithme n'a pas pu trouver de connecxion entre deux parties du trajet. Ajoutez la route manquante au réseau de route ou augmentez le rayon de recherche</dd><br>
+      <dd>- Les paramètres de matching sont trop haut ou trop bas. Nous recommandons 45 pour le rayon et 5 pour le sigma</dd><br>
     </p>
 </body>
