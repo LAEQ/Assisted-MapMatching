@@ -12,23 +12,23 @@
     <h3># Step 1: Input</h3>
     <p>This step prepare the data to facilitate the work of the map-matching algorithms. 
       It correct the topology of the network and verify the validity of the input. <br> 
-      Fill every fields, then reduce and correct the network in order to reach the next step<br>
+      Fill every fields, then reduce and correct the network in order to reach the next step.<br>
       Here is the description of every fields:</p>
 
       <h4>Network layer: </h4>
     <p>&emsp; This dropDown list show all layers of type <strong>LineString</strong> that are active on QGIS.
       Select the layer on wich you want to adjust your GPS track<br>
-    The type <stron>MultilineString</stron> isn't supported. You can convert your <strong>MultiLineString</strong> layer to a <strong>LineString</strong> layer with the tool "Multipart to SingleParts" of QGIS</p>
+    The type <stron>MultilineString</stron> isn't supported. You can convert your <strong>MultiLineString</strong> layer to a <strong>LineString</strong> layer with the tool "Multipart to SingleParts" of QGIS.</p>
 	  
       <h4>GPS trace layer: </h4>
-    <p>&emsp; This dropDown list show all layers of type <strong>Point</strong> that are active on QGIS
-      Select the layer that you want to match to a network</p>
+    <p>&emsp; This dropDown list show all layers of type <strong>Point</strong> that are active on QGIS.
+      Select the layer that you want to match to a network.</p>
     
       <h4>OID (Object identifier) :</h4>
     <p>&emsp; This dropDown list show all the attributes of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected GPS trace. This field must be an unique identifier of every points and is used to order them. A point present earlier on the trace must have a smaller number than another present later.</p>
     
       <h4>Buffer range: </h4>
-    <p>&emsp; This slider represent the maximum distance to find line on the selected network for each trajectory point. The bigget this value is, the longest the computing time</p>
+    <p>&emsp; This slider represent the maximum distance to find line on the selected network for each trajectory point. The bigger this value is, the longest the computing time</p>
 
     <h3># Step 2: Matching</h3>
     <p>This step match the points of the GPS trace on the network (already prepared for this). If the map-matching algorithm made a mistake, the user can correct by selecting the path used manually and applicate the changes. (that will restart the map-matching algorithm on the new selection)<br> 
