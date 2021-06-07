@@ -4,6 +4,8 @@ from shapely.geometry import shape
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
 
 
+# @comment: simple method suffice. No need for a class
+# PEP8: class name start with Upper:
 class layerTraductor:
 
     @staticmethod
@@ -24,34 +26,29 @@ class layerTraductor:
             ]
         """
 
-        # @move this code outside: why entering the method if the params are not valid ?
-        # Best to fail early
+        # @comment: best to fail early by moving if condition outside the method
         if not isinstance(layer, QgsVectorLayer):
             return "layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer"
 
         final_list = []
         temp = layer.fields().names()
 
+        # @comment: is geometry always a valid ? asJson(). Any exception to handle ?
+        # @comment: json.loads => specify the encoding
         for f in layer.getFeatures():
             temporary_dictionary = {}
 
             for attr in temp:
-
                 temporary_dictionary[attr] = f[attr]
-            
+
             tempa = f.geometry().asJson()
-
-            temporary_dictionary["geometry"] = shape(json.loads(tempa))
-
+            temporary_dictionary["geometry"] = shape(json.loads(tempa, encoding="utf-8"))
             final_list.append(temporary_dictionary)
 
         return final_list
 
-
     @staticmethod
-    def from_list_of_dict_to_layer(feat_list,
-                                   layer_patern,type_layer = "Linestring",
-                                   name = "new layer"):
+    def from_list_of_dict_to_layer(feat_list, layer_patern, type_layer="Linestring", name="new layer"):
         """Transform a list into a QgsVectorLayer (memory) 
            based on the layer patern model.
 
@@ -63,18 +60,18 @@ class layerTraductor:
         mem_layer -- A QgsVectorLayer filled with the elements in feat_list
 
         """
-
+        # @comment: fail early
         if not isinstance(layer_patern, QgsVectorLayer):
             return "layer_traductor.from_list_of_dict_to_layer.not_a_layer"
-             
-        if not isinstance(feat_list, list) :
+
+        if not isinstance(feat_list, list):
             return "layer_traductor.from_list_of_dict_to_layer.not_a_list"
 
         epsg = layer_patern.crs().postgisSrid()
 
-        typ = type_layer+"?crs=EPSG:"+ str(epsg)
+        typ = type_layer + "?crs=EPSG:" + str(epsg)
 
-        mem_layer = QgsVectorLayer(typ,name,"memory")
+        mem_layer = QgsVectorLayer(typ, name, "memory")
         mem_layer.setProviderEncoding("UTF-8")
 
         pr = mem_layer.dataProvider()
@@ -84,7 +81,7 @@ class layerTraductor:
         mem_layer.updateFields()
 
         for obj in feat_list:
-            f= QgsFeature()
+            f = QgsFeature()
             try:
                 geom = QgsGeometry().fromWkt(obj["geometry"].wkt)
             except Exception as err:
@@ -106,14 +103,15 @@ class layerTraductor:
         return mem_layer
 
     @staticmethod
-    def order_list_of_dict(feat_list,column_name = "OID"):
+    def order_list_of_dict(feat_list, column_name="OID"):
         """Sort a list according to it's OID column."""
 
-        if( not isinstance(feat_list,list) or
-            feat_list == [] ):
+        # @comment: why feat_list would not be a list ?
+        # @comment: Sorting an empty list should not return an error. it should return itself.
+        if not isinstance(feat_list, list) or feat_list == []:
             return "layer_traductor.order_list_of_dict.error_feat_list"
 
         if not column_name in feat_list[0]:
             return "layer_traductor.order_list_of_dict.wrong_oid_column"
 
-        return sorted(feat_list,key= lambda obj: obj[column_name])
+        return sorted(feat_list, key=lambda obj: obj[column_name])

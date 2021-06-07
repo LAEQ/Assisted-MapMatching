@@ -2,11 +2,12 @@ import itertools
 
 import shapely
 
-#Import Own Class
+# Import Own Class
 from .utils.geometry import *
 
+
 # @comment: digits = 3
-def simplify_coordinates(linelayer, digits) : 
+def simplify_coordinates(linelayer, digits):
     """ Simplify all the features coordinates to a digits.
 
     Input: 
@@ -20,18 +21,17 @@ def simplify_coordinates(linelayer, digits) :
 
     # @comment list is unecessary. It is reassign to the feature 2 lines later"
     # feat["geometry"] = truncate_coords(feat["geometry"],digits)
-    new_geometries = [truncate_coords(feat["geometry"],digits) for feat in linelayer]
+    new_geometries = [truncate_coords(feat["geometry"], digits) for feat in linelayer]
 
-    i=0
+    i = 0
     for feat in linelayer:
         feat["geometry"] = new_geometries[i]
-        i+=1
+        i += 1
 
     return (linelayer)
 
 
-
-def deal_with_danglenodes(linelayer, tolerance = 0.01) : 
+def deal_with_danglenodes(line_layer, tolerance=0.01):
     """ Cut every lines which are touched by the extremity of another line in two.
     
     Input:      
@@ -43,51 +43,52 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
     new_features:  -- A list of dict containing at least a field [geometry] of type 
                       shapely.geometry.LineString
     """
-    
+
     # Step 1 : Extract every extremities of the lines
-    pts = [get_extremites(feat["geometry"]) for feat in linelayer]
+    pts = [get_extremites(feat["geometry"]) for feat in line_layer]
     pts = list(itertools.chain.from_iterable(pts))
-    
+
     # Step 2 : check for every line the presence of dangle nodes
     # If one is found: cut the line at the intersection
     sp_index = build_sp_index(pts)
     new_features = []
-    
-    for feat in linelayer : 
+
+    for feat in line_layer:
         line = feat["geometry"]
         cut_points = []
 
         buff = line.buffer(tolerance)
 
+        # @bug: what if sp_index is None ?
         candidates = sp_index.intersect(buff.bounds)
 
-        ok_candidates = [candidate for candidate in candidates if candidate.distance(line)<tolerance]
+        ok_candidates = [candidate for candidate in candidates if candidate.distance(line) < tolerance]
 
-        start,end = get_extremites(line)
-        for candidate in ok_candidates : 
-            if (candidate.distance(start) > tolerance and 
-                    candidate.distance(end) > tolerance): 
+        # @bug: what if end is None
+        start, end = get_extremites(line)
+        for candidate in ok_candidates:
+            if (candidate.distance(start) > tolerance and
+                    candidate.distance(end) > tolerance):
 
-                for pt in cut_points : 
-                    if candidate.distance(pt) > 0 :
+                for pt in cut_points:
+                    if candidate.distance(pt) > 0:
                         cut_points.append(candidate)
 
+        if len(cut_points) > 0:
 
-        if len(cut_points) > 0 : 
-
-            new_lines = cut_line(line,cut_points)
-            for new_line in new_lines : 
-
+            new_lines = cut_line(line, cut_points)
+            # @bug: 'NoneType' object is not iterable
+            for new_line in new_lines:
                 dupp = feat.copy()
                 dupp["geometry"] = new_line
                 new_features.append(dupp)
-        else : 
+        else:
 
             new_features.append(feat)
     return new_features
 
 
-def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) :
+def deal_with_intersections(line_layer, tolerance=0.01, digits=3):
     """ Cut every lines which are intersected by another line in two
     
     Input:      
@@ -100,44 +101,45 @@ def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) :
     new_features:  -- A list of dict containing at least a field [geometry] of type 
                       shapely.geometry.LineString
     """
-    
-    all_geoms = [feat["geometry"] for feat in linelayer]
+
+    all_geoms = [feat["geometry"] for feat in line_layer]
     sp_index = build_sp_index(all_geoms)
     new_features = []
 
-    for feat in linelayer :
+    for feat in line_layer:
         inter_points = []
         line = feat["geometry"]
 
         candidates = sp_index.intersect(line.bounds)
-        for candidate in candidates : 
+        for candidate in candidates:
 
-            if candidate.equals(line) == False : 
+            if not candidate.equals(line):
 
                 inter = candidate.intersection(line)
-                if inter.geom_type == "Point" : 
+                if inter.geom_type == "Point":
                     inter_points.append(inter)
-                elif inter.geom_type == "MultiPoint" : 
-                    inter_points+=list(inter.geoms)
-        
+                elif inter.geom_type == "MultiPoint":
+                    inter_points += list(inter.geoms)
 
-        start,end = get_extremites(line)
-        ok_inter = [truncate_coords_pts(pt,digits) for pt in inter_points if 
-                    pt.distance(start)>tolerance and pt.distance(end)>tolerance]
+        start, end = get_extremites(line)
+        ok_inter = [truncate_coords_pts(pt, digits) for pt in inter_points if
+                    pt.distance(start) > tolerance and pt.distance(end) > tolerance]
 
-        if len(ok_inter) == 0 : 
+        if len(ok_inter) == 0:
             new_features.append(feat)
-        else : 
-            segments = cut_line(line,ok_inter)
-            for segment in segments : 
+        else:
+            segments = cut_line(line, ok_inter)
+
+            # @bug: 'NoneType' object is not iterable
+            for segment in segments:
                 dupp = feat.copy()
                 dupp["geometry"] = segment
                 new_features.append(dupp)
-    return new_features
-                
-                
 
-def deal_with_closecall(linelayer, tolerance = 0.3, digits = 3) :
+    return new_features
+
+
+def deal_with_closecall(linelayer, tolerance=0.3, digits=3):
     """ Join every lines that are close to each other
     
     Input:      
@@ -153,37 +155,35 @@ def deal_with_closecall(linelayer, tolerance = 0.3, digits = 3) :
 
     pts = [get_extremites(feat["geometry"]) for feat in linelayer]
     pts = list(itertools.chain.from_iterable(pts))
-    
+
     conso_points = consolidate(pts, tolerance)
-    
+
     sp_index = build_sp_index(conso_points)
-    
+
     newfeatures = []
-    for feat in  linelayer: 
+    for feat in linelayer:
         pts = [shapely.geometry.Point(xy) for xy in list(feat["geometry"].coords)]
         start = pts.pop(0)
         end = pts.pop(-1)
-       
 
-        newstart = nearest_geometry(start,sp_index,tolerance*15)
+        newstart = nearest_geometry(start, sp_index, tolerance * 15)
         if isinstance(newstart, str):
             return "topology.deal_with_closecall." + newstart
-        
-        newend = nearest_geometry(end,sp_index,tolerance*15)
+
+        newend = nearest_geometry(end, sp_index, tolerance * 15)
         if isinstance(newend, str):
             return "topology.deal_with_closecall." + newend
-        
 
         dupp = feat.copy()
-        new_line =  shapely.geometry.LineString([newstart]+pts+[newend])
+        new_line = shapely.geometry.LineString([newstart] + pts + [newend])
         dupp["geometry"] = new_line
-        
+
         newfeatures.append(dupp)
-    
+
     return newfeatures
 
 
-def cut_loops(linelayer) : 
+def cut_loops(linelayer):
     """ Cut every loops in two
     
     Input:      
@@ -194,17 +194,16 @@ def cut_loops(linelayer) :
     new_features:  -- A list of dict containing at least a field [geometry] of type 
                       shapely.geometry.LineString
     """
-    
+
     new_features = []
 
     for feat in linelayer:
 
         geoms = SplitLoop(feat["geometry"])
-            
-        for geom in geoms : 
 
+        for geom in geoms:
             dupp = feat.copy()
             dupp["geometry"] = geom
             new_features.append(dupp)
-            
+
     return new_features

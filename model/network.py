@@ -2,59 +2,58 @@ from qgis import processing
 from qgis.core import QgsVectorLayer, QgsFeatureRequest, QgsField
 from qgis.PyQt.QtCore import QVariant
 
-#Import own class
+# Import own class
 from .utils.layerTraductor import *
 from .topology import *
 from .matcheur import *
 
 
 class NetworkLayer:
-
-
-    def __init__(self, _layer):
+    """
+        :param _layer: ...
+    """
+    def __init__(self, _layer: QgsVectorLayer):
         self.initial_layer = _layer
         self.layer = self.initial_layer
 
-
     def select_intersection_trajectory(self, buffer: QgsVectorLayer):
-        """Reduce the network layer features by only keeping the line 
-           intersecting the buffer.
-
-        Input:
-        buffer -- A buffer of type QgsVectorLayer
-
         """
 
+        :param buffer:
+        :return:
+        """
         # Security: we start with no selection
         self.initial_layer.removeSelection()
 
-        #Select on initial layer every road that intersect buffer
+        # Select on initial layer every road that intersect buffer
+        # @comment: I would prefer to let the exception bubble to a higher level
         try:
+            # @comment: unused variable
             test = processing.run("qgis:selectbylocation",
-                                 {'INPUT': self.initial_layer, 
-                                 'PREDICATE': 0, 'INTERSECT': buffer, 
-                                 'METHOD': 0})
+                                  {'INPUT': self.initial_layer,
+                                   'PREDICATE': 0, 'INTERSECT': buffer,
+                                   'METHOD': 0})
         except:
+            # @comment: remove debug code
             print("Error processing in select_intersection_trajectory (Network.py)")
             return "network.select_intersection_trajectory.processing"
 
-        #Create a QgsVectorLayer from a selection
+        # Create a QgsVectorLayer from a selection
         reduced_layer = self.initial_layer.materialize(
             QgsFeatureRequest().setFilterFids(self.initial_layer.selectedFeatureIds()))
-        
+
         self.initial_layer.removeSelection()
         reduced_layer.setProviderEncoding("UTF-8")
         reduced_layer.setName("Reduced network")
         self.layer = reduced_layer
 
-        #Success
+        # @comment: it's the default behavior. You can remove it
         return None
-
 
     def correct_topology(self, close_call_tol: float, inter_dangle_tol: float):
         """Correct the topology of the layer."""
 
-        #Conversion to shapely dict
+        # Conversion to shapely dict
         shapely_dict = layerTraductor.from_vector_layer_to_list_of_dict(self.layer)
 
         if isinstance(shapely_dict, str):
@@ -74,18 +73,17 @@ class NetworkLayer:
         # We connect roads wich extremities are close to each other
         corrected_list = deal_with_closecall(corrected_list, close_call_tol)
 
-        #Conversion to QgsVectorLayer
-        self.layer = layerTraductor.from_list_of_dict_to_layer(corrected_list, 
-                                                               self.layer, 
-                                                               "LineString", 
+        # Conversion to QgsVectorLayer
+        self.layer = layerTraductor.from_list_of_dict_to_layer(corrected_list,
+                                                               self.layer,
+                                                               "LineString",
                                                                "corrected layer")
-        
+
         if isinstance(self.layer, str):
             return "network.correct_topology." + self.layer
-        
-        #Success
-        return None
 
+        # Success
+        return None
 
     def add_attribute_to_layers(self, attribute_name: str = 'joID'):
         """ Create a new column to the network_layer indexed from 0 
@@ -95,82 +93,80 @@ class NetworkLayer:
         attribute_name : -- A string that represent the name of the new column
         """
 
-        #Verify input validity
+        # Verify input validity
         if attribute_name == "" or attribute_name == None:
             return "network.add_attribute_to_layers.empty_attribute_name"
 
-        #add a new field to the layer
+        # add a new field to the layer
         provider = self.layer.dataProvider()
-        provider.addAttributes([QgsField(attribute_name,QVariant.Int)])
+        provider.addAttributes([QgsField(attribute_name, QVariant.Int)])
         self.layer.updateFields()
 
-        length = len(self.layer.fields().names())-1
+        length = len(self.layer.fields().names()) - 1
 
-        #Complete the field for every features
+        # Complete the field for every features
         self.layer.startEditing()
-        i=0
+        i = 0
         for f in self.layer.getFeatures():
             tesid = f.id()
-            attr_value={length:i}
-            provider.changeAttributeValues({tesid:attr_value})
-            i+=1
+            attr_value = {length: i}
+            provider.changeAttributeValues({tesid: attr_value})
+            i += 1
         self.layer.commitChanges()
 
-        #Success
+        # Success
         return None
 
-
-    def find_path(self, matcheur: Matcheur): 
+    def find_path(self, matcheur: Matcheur):
         """Find a possible route 
         
         Input: 
         matcheur :  -- An object of class Matcheur 
         """
-        
+
         result = matcheur.find_best_path_in_network()
 
         if isinstance(result, str):
-            return "network.find_path."+result
+            return "network.find_path." + result
 
         self.possible_path = matcheur.tag_id
 
         self.select_possible_path()
 
-        #Success
+        # Success
         return None
 
-    
     def select_possible_path(self):
         """ Select in the network_layer the path recorded at the last matching."""
 
-        if(self.possible_path) == None:
+        if (self.possible_path) == None:
             return "network.select_possible_path.no_path_registered"
         try:
             self.layer.selectByExpression('"joID" in (' +
-                                          ','.join(self.possible_path)+ ')' )
+                                          ','.join(self.possible_path) + ')')
         except:
             print("Seems like the network has been deleted")
 
-        #Success
+        # Success
         return None
 
     def change_possible_path(self):
         """ Change the possible trajectory recorded """
-        
-        if self.layer.selectedFeatureCount() <=0:
+
+        if self.layer.selectedFeatureCount() <= 0:
             return "network.change_possible_path.no_selection"
 
         self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
 
-        #Success
+        # Success
         return None
 
     def create_vector_from_path(self) -> QgsVectorLayer:
         """Create a QgsVectorLayer from the selected features """
 
         layer = processing.run(
-                "native:saveselectedfeatures", 
-                {'INPUT': self.layer, 'OUTPUT': 'memory:'})['OUTPUT']
+            "native:saveselectedfeatures",
+            {'INPUT': self.layer, 'OUTPUT': 'memory:'})['OUTPUT']
         layer.setName("path for matching")
 
         return layer
