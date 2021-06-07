@@ -26,22 +26,17 @@
 
     <message>
         <source>q3m.window.title</source>
-        <translation>LAEQ-CorrélationCartographique</translation>
+        <translation>Assisted MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.toolbar.title</source>
-        <translation>CorrélationCartographique</translation>
-    </message>
-
-    <message>
-        <source>q3m.window.label.subtitle</source>
-        <translation >Laeq Map-Matching</translation>
+        <translation>Assisted MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.import.test.set</source>
-        <translation >Jeux de démonstration</translation>
+        <translation >Données de démonstration</translation>
     </message>
 
     <message>
@@ -70,17 +65,17 @@
 
     <message>
         <source>q3m.window.label.network</source>
-        <translation >Couche réseau</translation>
+        <translation >Couche pour le réseau</translation>
     </message>
 
     <message>
         <source>q3m.window.label.path</source>
-        <translation >Couche Trace GPS</translation>
+        <translation >Couche pour la Trace GPS</translation>
     </message>
 
     <message>
         <source>q3m.window.label.oid</source>
-        <translation >OID</translation>
+        <translation >Champ pour ordonner les points</translation>
     </message>
 
     <message>
@@ -100,7 +95,7 @@
 
     <message>
         <source>q3m.window.btn.reduce.network</source>
-        <translation >Réduire la carte</translation>
+        <translation >Réduire le réseau</translation>
     </message>
 
     <message>
@@ -114,37 +109,37 @@
 
     <message>
         <source>q3m.window.group.matching</source>
-        <translation >Etape 2 : Matching</translation>
+        <translation >Etape 2 : Appariement spatiale</translation>
     </message>
 
     <message>
         <source>q3m.window.distance_matching</source>
-        <translation >Matcher par la distance</translation>
+        <translation >Appareiller par distance</translation>
     </message>
 
     <message>
         <source>q3m.window.speed_matching</source>
-        <translation >Matcher par vitesse</translation>
+        <translation >Appareiller par vitesse</translation>
     </message>
     
     <message>
         <source>q3m.window.closest_matching</source>
-        <translation >Matcher au plus près</translation>
+        <translation >Appareiller au plus près</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.map.matching</source>
-        <translation >Pre-Matching</translation>
+        <translation >Pré-appariement</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.reselect.path</source>
-        <translation >Re selectionner la route</translation>
+        <translation >Re-sélectionner la route</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.apply.path.change</source>
-        <translation >Appliquer les modification</translation>
+        <translation >Appliquer les modifications</translation>
     </message>
 
 
@@ -153,12 +148,12 @@
 
     <message>
         <source>q3m.window.group.export</source>
-        <translation >Etape 3 : Export</translation>
+        <translation >Etape 3 : Exportation</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.export.matched.track</source>
-        <translation >Exporter la trace Matchée</translation>
+        <translation >Exporter la trace appareillée</translation>
     </message>
 
     <message>
@@ -196,7 +191,7 @@
 
     <message>
         <source>q3m.window.label.close_call</source>
-        <translation >Points proche</translation>
+        <translation >Seuil de distance pour la proximité entre les points</translation>
     </message>
 
     <message>
@@ -210,7 +205,7 @@
 
     <message>
         <source>q3m.window.group.matching.settings</source>
-        <translation >Tolérance de matching</translation>
+        <translation >Tolérance pour le processus d'appariement spatiale</translation>
     </message>
 
     <message>
@@ -239,7 +234,7 @@
 
     <message>
         <source>q3m.window.check.initial.path</source>
-        <translation >Trace GPS initial</translation>
+        <translation >Trace GPS initiale</translation>
     </message>
 
     <message>
@@ -254,7 +249,7 @@
 
     <message>
         <source>q3m.window.check.matched.path</source>
-        <translation >Trace GPS matchée</translation>
+        <translation >Trace GPS appareillée</translation>
     </message>
 
 
@@ -315,7 +310,7 @@
 
     <message>
         <source>q3m.error.no_layer</source>
-        <translation >La classe mère du plugin: Layers n'a pas été instancié. Pour corriger ce problème: relancer le plugin et réduire la carte</translation>
+        <translation >La classe mère du plugin: Layers n'a pas été instancié. Pour corriger ce problème: relancer le plugin et réduire le réseau</translation>
     </message>
 
 
@@ -324,7 +319,7 @@
 
     <message>
         <source>q3m.error.no_matched_layer</source>
-        <translation >Aucune couche matchée détecté. Une couche devrait automatiquement apparaître après avoir lancé le pré-matching</translation>
+        <translation >Aucune couche matchée détecté. Une couche devrait automatiquement apparaître après avoir lancé le pré-appariement</translation>
     </message>
 
     <message>
@@ -334,7 +329,7 @@
 
     <message>
         <source>q3m.error.nothing_to_export</source>
-        <translation >Rien a exporter. Merci de cocher au moins une case dans les paramètres d'exportation présents dans le second onglet </translation>
+        <translation >Rien à exporter. Merci de cocher au moins une case dans les paramètres d'exportations présents dans le second onglet </translation>
     </message>
 
 
@@ -382,7 +377,7 @@
 
     <message>
         <source>q3m.error.snap_points_along_line</source>
-        <translation >Une erreur est survenue lors du matching par vitesse</translation>
+        <translation >Une erreur est survenue lors de l'appariement par vitesse</translation>
     </message>
 
     <message>
@@ -450,7 +445,7 @@
 
     <message>
         <source>q3m.error.wrong_oid_column</source>
-        <translation >La valeur de la colonne OID est introuvable dans la couche de route </translation>
+        <translation >La valeur de la colonne "Champ pour ordonner les points" est introuvable dans la couche de route </translation>
     </message>
 
 
