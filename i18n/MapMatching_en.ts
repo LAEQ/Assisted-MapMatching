@@ -35,11 +35,6 @@
     </message>
 
     <message>
-        <source>q3m.window.label.subtitle</source>
-        <translation >LAEQ Map Matching</translation>
-    </message>
-
-    <message>
         <source>q3m.window.btn.import.test.set</source>
         <translation >Test set</translation>
     </message>

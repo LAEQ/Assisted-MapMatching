@@ -13,34 +13,6 @@
   <property name="windowTitle">
    <string>first</string>
   </property>
-  <widget class="QLabel" name="label_subtitle">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>10</y>
-     <width>681</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="layoutDirection">
-    <enum>Qt::LeftToRight</enum>
-   </property>
-   <property name="lineWidth">
-    <number>2</number>
-   </property>
-   <property name="text">
-    <string>Q3M</string>
-   </property>
-   <property name="textFormat">
-    <enum>Qt::PlainText</enum>
-   </property>
-   <property name="scaledContents">
-    <bool>false</bool>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
@@ -741,9 +713,9 @@
   <widget class="QPushButton" name="btn_import_test_set">
    <property name="geometry">
     <rect>
-     <x>594</x>
+     <x>534</x>
      <y>20</y>
-     <width>111</width>
+     <width>171</width>
      <height>23</height>
     </rect>
    </property>
@@ -751,9 +723,6 @@
     <string>test_set_import</string>
    </property>
   </widget>
-  <zorder>tabWidget</zorder>
-  <zorder>label_subtitle</zorder>
-  <zorder>btn_import_test_set</zorder>
  </widget>
  <resources/>
  <connections/>
