@@ -8,12 +8,12 @@ from .utils.layerTraductor import *
 
 
 class Layers:
-
-
+    """
+    @comment: provide a short description (what does it do, params expected, what can go wrong, ...)
+    """
     def __init__(self, path_layer: PathLayer, network_layer: NetworkLayer):
         self.path_layer = path_layer
         self.network_layer = network_layer
-
 
     def reduce_network_layer(self, range: int) -> None:
         """Makes a spatial selection on the network layer."""
@@ -26,11 +26,10 @@ class Layers:
 
         # Spatial selection
         error = self.network_layer.select_intersection_trajectory(buffer)
-        if error != None:
-            return "layer.reduce_network_layer." + error
 
+        if error is None:
+            return "layer.reduce_network_layer.{}".format(error)
 
-        
     def correct_network_layer_topology( self, close_call_tol: float, 
                                         inter_dangle_tol: float):
         """Correct the topology to prevent futures error. """

@@ -61,6 +61,7 @@ class NetworkLayer:
             return "network.correct_topology." + shapely_dict
 
         # We truncate all the points value
+        # @comment: If precision is hardcoded why pass it as a parameter ?
         corrected_list = simplify_coordinates(shapely_dict, 3)
 
         # We split the loops  (i.e: roundabouts)

@@ -5,7 +5,7 @@ import shapely
 #Import Own Class
 from .utils.geometry import *
 
-
+# @comment: digits = 3
 def simplify_coordinates(linelayer, digits) : 
     """ Simplify all the features coordinates to a digits.
 
@@ -18,13 +18,16 @@ def simplify_coordinates(linelayer, digits) :
     linelayer   --The same list of dict with the geometries simplified
     """
 
+    # @comment list is unecessary. It is reassign to the feature 2 lines later"
+    # feat["geometry"] = truncate_coords(feat["geometry"],digits)
     new_geometries = [truncate_coords(feat["geometry"],digits) for feat in linelayer]
 
     i=0
     for feat in linelayer:
         feat["geometry"] = new_geometries[i]
         i+=1
-    return(linelayer)
+
+    return (linelayer)
 
 
 
@@ -194,7 +197,7 @@ def cut_loops(linelayer) :
     
     new_features = []
 
-    for feat in linelayer : 
+    for feat in linelayer:
 
         geoms = SplitLoop(feat["geometry"])
             

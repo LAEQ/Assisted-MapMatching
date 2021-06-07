@@ -93,10 +93,14 @@ def mean_point(points : list, digit : int) :
 ##Fonctions simples de manipulation de geometries
 #############################################################################
 
+# @comment: Bug -> return str (line 107) or float (line 109)
+#
 def truncate(f, n):
     """Truncates/pads a float f to n decimal places without rounding."""
 
-    if n <0:
+    # @comment: convoluted.
+    # round(f, n) ??
+    if n < 0:
         n = 0
 
     s = '{}'.format(f)
@@ -105,14 +109,16 @@ def truncate(f, n):
     i, p, d = s.partition('.')
     return float('.'.join([i, (d+'0'*n)[:n]]))
 
-
-def truncate_coords(line,digit) : 
+# comment: digit => precision (It's the term use in the comment :)
+def truncate_coords(line, digit) :
     """Truncates a shapely.geometry.LineString with a precision of digit."""
 
+    # @comment: again why entering a method with the wrong parameter. Best to fail early
     if not isinstance(line, shapely.geometry.linestring.LineString):
         #print("Can't truncate " + str(type(line)) + " with truncate_coords")
         return line
 
+    # @comment: Math.min(0, digit) - Cyclomatic complexity-- + one unit test less to write.
     if digit <0:
         digit = 0
 
@@ -124,10 +130,12 @@ def truncate_coords(line,digit) :
 def truncate_coords_pts(point,digit) : 
     """Truncate a shapely.geometry.Point with a precision of digit"""
 
+    # @comment: fail early
     if not isinstance(point, shapely.geometry.point.Point ):
         #print("Can't truncate " + str(type(point)) + " with truncate_coords_pts")
         return point
 
+    # @comment: see line 116
     if digit <0:
         digit = 0
 

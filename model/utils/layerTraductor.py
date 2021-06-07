@@ -6,7 +6,6 @@ from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry
 
 class layerTraductor:
 
-
     @staticmethod
     def from_vector_layer_to_list_of_dict(layer):
         """Transform the input layer into a format readable for shapely.
@@ -25,6 +24,8 @@ class layerTraductor:
             ]
         """
 
+        # @move this code outside: why entering the method if the params are not valid ?
+        # Best to fail early
         if not isinstance(layer, QgsVectorLayer):
             return "layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer"
 
