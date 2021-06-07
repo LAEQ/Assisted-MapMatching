@@ -34,7 +34,7 @@ Jordy Gelb: Laboratoire d’Équité Environnemental INRS (CANADA), Email: jordy
 ## Contributors
 Phillipe Apparicio, Laboratoire d’Équité Environnemental INRS (CANADA): Email: philippe.apparicio@ucs.inrs.ca<br>
 Jeremy Gelb, Laboratoire d’Équité Environnemental INRS (CANADA), Email: jeremy.gelb@ucs.inrs.ca <br>
-David Maignan, Laboratoire d’Équité Environnemental INRS (CANADA), Email: **To define**
+David Maignan, Laboratoire d’Équité Environnemental INRS (CANADA), Email: davidmaignan@gmail.com
 
 ## About the plugin
 
