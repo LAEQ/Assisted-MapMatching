@@ -16,15 +16,6 @@ class LayerManager:
         self.speed = None
 
 
-    def save(self, path: string, network : string, OID : string, speed : string) -> None:
-        """Store values for later restoration or uses"""
-
-        self.selected_path = path
-        self.selected_network = network
-        self.OID = OID
-        self.speed = speed
-
-
     def set_layers(self, layers: List[QgsVectorLayer]) -> None:
         self.layers = layers
 
@@ -36,12 +27,13 @@ class LayerManager:
 
     def remove_layer(self, _from: int) -> None:
         try:
-            del self.layers[_from]
-        except Exception:
-            pass
+            self.layers.pop(_from)
+        except:
+            #index out of range
+            return 
 
 
-    def remove_layer(self, name: string) ->None:
+    def remove_layer_from_name(self, name: string) ->None:
         """Delete a layer on Qgis and in the programm that has the same name"""
         try:
             for layer in self.layers:
@@ -50,9 +42,11 @@ class LayerManager:
                     self.layers.remove(layer)
                     return
         except Exception:
-            print("Couldn't delete this vector")
+            #print("Couldn't delete this vector")
+            return
+            
 
-        print("Didn't found the layer in the list")
+        #print("Didn't found the layer in the list")
             
 
     def deselect_layer(self, name: string) ->None: #modif
@@ -64,21 +58,15 @@ class LayerManager:
 
 
     def get_matched_layers(self) -> List[QgsVectorLayer]:
-        for layer in self.layers:
-            print(layer.sourceName())
+
         return [layer for layer in self.layers if   LayerManager.is_path_layer(layer) and 
-                                                    (layer.sourceName() == "matched point by distance" or
-                                                    layer.sourceName() == "matched point by speed" or
-                                                    layer.sourceName() == "matched point to closest")]
+                                                    (layer.sourceName().split('_')[0] == "matched point by distance" or
+                                                    layer.sourceName().split('_')[0] == "matched point by speed" or
+                                                    layer.sourceName().split('_')[0] == "matched point to closest")]
 
 
     def get_network_layers(self) -> List[QgsVectorLayer]:
         return [layer for layer in self.layers if LayerManager.is_network_layer(layer)]
-
-
-    def load_layer(self, path: str) -> None:
-        layer = QgsVectorLayer(path, os.path.basename(path), "ogr")
-        self.layers.append(layer)
 
 
     def get_path_attributes(self, index: int) -> List[QgsField]:
@@ -87,12 +75,26 @@ class LayerManager:
         except Exception:
             return []
 
+    
+    def load_layer(self, path: str) -> None:
+        layer = QgsVectorLayer(path, os.path.basename(path), "ogr")
+        self.layers.append(layer)
+
 
     def find_layer(self, name: string) -> QgsVectorLayer:
         for layer in self.layers:
             if layer.name() == name:
                 return layer
         return None
+
+    def save(self, path: string, network : string, OID : string, speed : string) -> None:
+        """Store values for later restoration or uses"""
+
+        self.selected_path = path
+        self.selected_network = network
+        self.OID = OID
+        self.speed = speed
+
 
 
     @classmethod

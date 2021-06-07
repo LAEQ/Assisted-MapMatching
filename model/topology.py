@@ -1,26 +1,17 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Apr 21 09:21:19 2021
-
-@author: gelbj
-"""
+import itertools
 
 import shapely
-from shapely.geometry import Point
-import itertools
+
+#Import Own Class
 from .utils.geometry import *
 
 
-#############################################################################
-## Corrections des erreurs topologiques
-#############################################################################
-
-
 def simplify_coordinates(linelayer, digits) : 
-    """ Simplify all the features coordinates to a digits
+    """ Simplify all the features coordinates to a digits.
 
     Input: 
-    linelayer   -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    linelayer   -- A list of dict containing at least a field [geometry] of type 
+                   shapely.geometry.LineString
     digits:     -- An int to specify where to truncate the number
     
     Output:
@@ -28,7 +19,7 @@ def simplify_coordinates(linelayer, digits) :
     """
 
     new_geometries = [truncate_coords(feat["geometry"],digits) for feat in linelayer]
-    #print(new_geometries)
+
     i=0
     for feat in linelayer:
         feat["geometry"] = new_geometries[i]
@@ -38,14 +29,16 @@ def simplify_coordinates(linelayer, digits) :
 
 
 def deal_with_danglenodes(linelayer, tolerance = 0.01) : 
-    """ Cut every lines which are touched by the extremity of another line in two
+    """ Cut every lines which are touched by the extremity of another line in two.
     
     Input:      
-    linelayer:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    linelayer:  -- A list of dict containing at least a field [geometry] of type 
+                   shapely.geometry.LineString
     tolerance:  -- A double 
 
     Output:
-    new_features:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    new_features:  -- A list of dict containing at least a field [geometry] of type 
+                      shapely.geometry.LineString
     """
     
     # Step 1 : Extract every extremities of the lines
@@ -69,8 +62,8 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
 
         start,end = get_extremites(line)
         for candidate in ok_candidates : 
-            if candidate.distance(start) > tolerance and candidate.distance(end) > tolerance : 
-
+            if (candidate.distance(start) > tolerance and 
+                    candidate.distance(end) > tolerance): 
 
                 for pt in cut_points : 
                     if candidate.distance(pt) > 0 :
@@ -91,19 +84,20 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
     return new_features
 
 
-def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) : #meme
+def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) :
     """ Cut every lines which are intersected by another line in two
     
     Input:      
-    linelayer:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    linelayer:  -- A list of dict containing at least a field [geometry] of type 
+                   shapely.geometry.LineString
     tolerance:  -- A double 
     digits:     -- A double to controll the truncation
 
     Output:
-    new_features:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    new_features:  -- A list of dict containing at least a field [geometry] of type 
+                      shapely.geometry.LineString
     """
     
-
     all_geoms = [feat["geometry"] for feat in linelayer]
     sp_index = build_sp_index(all_geoms)
     new_features = []
@@ -139,26 +133,25 @@ def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) : #meme
     return new_features
                 
                 
-## fonction 3 : gerer les close call
-## le cas ou les extremites de deux lignes sont tres proches (tolerance)
-## mais ne se rejoignent pas...
-## NB : on est ici sur du pseudo-code
-def deal_with_closecall(linelayer, progression = None, tolerance = 0.3, digits = 3) : #!=
+
+def deal_with_closecall(linelayer, tolerance = 0.3, digits = 3) :
     """ Join every lines that are close to each other
     
     Input:      
-    linelayer:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    linelayer:  -- A list of dict containing at least a field [geometry] of type 
+                   shapely.geometry.LineString
     tolerance:  -- A double 
     digits:     -- A double to controll the truncation
 
     Output:
-    new_features:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    new_features:  -- A list of dict containing at least a field [geometry] of type 
+                      shapely.geometry.LineString
     """
 
     pts = [get_extremites(feat["geometry"]) for feat in linelayer]
     pts = list(itertools.chain.from_iterable(pts))
     
-    conso_points = consolidate(pts, tolerance, progression)
+    conso_points = consolidate(pts, tolerance)
     
     sp_index = build_sp_index(conso_points)
     
@@ -169,11 +162,15 @@ def deal_with_closecall(linelayer, progression = None, tolerance = 0.3, digits =
         end = pts.pop(-1)
        
 
-        newstart = NearestGeometry(start,sp_index,tolerance*15)
+        newstart = nearest_geometry(start,sp_index,tolerance*15)
+        if isinstance(newstart, str):
+            return "topology.deal_with_closecall." + newstart
+        
+        newend = nearest_geometry(end,sp_index,tolerance*15)
+        if isinstance(newend, str):
+            return "topology.deal_with_closecall." + newend
+        
 
-        
-        newend = NearestGeometry(end,sp_index,tolerance*15)
-        
         dupp = feat.copy()
         new_line =  shapely.geometry.LineString([newstart]+pts+[newend])
         dupp["geometry"] = new_line
@@ -187,10 +184,12 @@ def cut_loops(linelayer) :
     """ Cut every loops in two
     
     Input:      
-    linelayer:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    linelayer:  -- A list of dict containing at least a field [geometry] of type 
+                   shapely.geometry.LineString
 
     Output:
-    new_features:  -- A list of dict containing at least a field [geometry] of type shapely.geometry.LineString
+    new_features:  -- A list of dict containing at least a field [geometry] of type 
+                      shapely.geometry.LineString
     """
     
     new_features = []

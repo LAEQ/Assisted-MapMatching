@@ -508,6 +508,9 @@
         <height>22</height>
        </rect>
       </property>
+      <property name="minimum">
+       <double>0.010000000000000</double>
+      </property>
       <property name="maximum">
        <double>9999.989999999999782</double>
       </property>
@@ -735,8 +738,22 @@
     </widget>
    </widget>
   </widget>
+  <widget class="QPushButton" name="btn_import_test_set">
+   <property name="geometry">
+    <rect>
+     <x>594</x>
+     <y>20</y>
+     <width>111</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>test_set_import</string>
+   </property>
+  </widget>
   <zorder>tabWidget</zorder>
   <zorder>label_subtitle</zorder>
+  <zorder>btn_import_test_set</zorder>
  </widget>
  <resources/>
  <connections/>

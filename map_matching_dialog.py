@@ -25,14 +25,15 @@
 import os
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtWidgets import QLabel, QPushButton, QComboBox, QTabWidget, QGroupBox, QCheckBox
-from qgis.core import QgsVectorLayer, QgsFields
-from typing import List
-from .model.ui.button_manager import Button_manager
+from qgis.PyQt.QtWidgets import QLabel, QPushButton, QTabWidget, QGroupBox, QCheckBox
+
+try:
+    from .model.ui.button_manager import Button_manager
+except:
+    print("Import unittest")
+    from model.ui.button_manager import Button_manager
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
-# from model.layer_manager import LayerManager
-# from .model.layer_manager import LayerManager
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'map_matching_dialog_base.ui'))
@@ -51,7 +52,6 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.manager = None
         self.buttonManager = Button_manager(self)
-        self.fill_fixed_box()
 
         """Listeners"""
         self.combo_path.currentIndexChanged.connect(self.update_attributes_box)
@@ -85,14 +85,16 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         """
 
         if self.check_speed.isChecked():
-            self.combo_algo_matching.addItem("Matching with Speed")
-            index = self.combo_algo_matching.findText("Matching with Speed")
+            self.combo_speed.setEnabled(True)
+            self.combo_algo_matching.addItem(self.algo_traduction[0])
+            index = self.combo_algo_matching.findText(self.algo_traduction[0])
             self.combo_algo_matching.setCurrentIndex(index)
         else:
-            index = self.combo_algo_matching.findText("Matching with Speed")
+            self.combo_speed.setEnabled(False)
+            index = self.combo_algo_matching.findText(self.algo_traduction[0])
             self.combo_algo_matching.removeItem(index)
 
-            index = self.combo_algo_matching.findText("Matching by distance")
+            index = self.combo_algo_matching.findText(self.algo_traduction[1])
             self.combo_algo_matching.setCurrentIndex(index)
     
 
@@ -150,14 +152,14 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
                 2 = Correcting phase
                 3 = Matching phase
                 4 = Modification phase
-                5 = Import phase
         """
 
         if self.buttonManager == None:
             print("Error: no button manager created")
             return -1
 
-
+        if state == 0:
+            self.buttonManager.set_bug_state_buttons()
         if state == 1:
             self.buttonManager.set_input_state_buttons()
         elif state == 2:
@@ -167,7 +169,7 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         elif state == 4:
             self.buttonManager.set_modification_state_buttons()
         elif state == 5:
-            self.buttonManager.set_import_state()
+            self.buttonManager.set_export_buttons()
 
 
     def save_state(self) -> None:
@@ -185,7 +187,7 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
 
         if  self.manager.selected_path != "" and self.manager.selected_path != self.combo_path.currentText():
             self.combo_path.setCurrentIndex(self.combo_path.findText(self.manager.selected_path))
-        if  self.manager.selected_path != "" and self.manager.selected_network != self.combo_network.currentText():
+        if  self.manager.selected_network != "" and self.manager.selected_network != self.combo_network.currentText():
             self.combo_network.setCurrentIndex(self.combo_network.findText(self.manager.selected_network))
         if  self.manager.OID != "" and self.manager.OID != self.combo_oid.currentText():
             self.combo_oid.setCurrentIndex(self.combo_oid.findText(self.manager.OID))
@@ -202,12 +204,12 @@ class MapMatchingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.combo_speed.clear()
 
 
-    def fill_fixed_box(self) -> None:
+    def fill_fixed_box(self, traduction : list) -> None:
         """Fill boxes with values that won't be changed during the whole process"""
+        self.algo_traduction = traduction
+        for trad in traduction:
+            self.combo_algo_matching.addItem(trad)
 
-        self.combo_algo_matching.addItem("Matching with Speed")
-        self.combo_algo_matching.addItem("Matching closest")
-        self.combo_algo_matching.addItem("Matching by distance")
         self.combo_format.addItem("GPKG")
         self.combo_format.addItem("ESRI Shapefile")
 
