@@ -219,7 +219,7 @@ class PathLayer:
 
         layer, error = matcheur.snap_point_to_closest()
         if isinstance(layer, str):
-            return "path.speed_point_matching." + layer
+            return "path.closest_point_matching." + layer
 
 
         self.layer = layer
@@ -246,7 +246,7 @@ class PathLayer:
         layer, error = matcheur.snap_point_by_distance()
 
         if isinstance(layer, str):
-            return "path.closest_point_matching." + layer
+            return "path.distance_point_matching." + layer
 
         self.layer = layer
 

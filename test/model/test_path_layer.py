@@ -155,17 +155,17 @@ class TestPathLayer(unittest.TestCase):
 
     def test_closest_point_matching(self):
         matcheur = Matcheur(None,None,None)
-        matcheur.snap_point_to_closest = MagicMock(return_value = (-1,[]))
+        matcheur.snap_point_to_closest = MagicMock(return_value = ("test",[]))
         result = self.path_layer.closest_point_matching(matcheur)
-        self.assertEqual("path.closest_point_matching.matcheur.snap_point_to_closest.empty_layer", 
+        self.assertEqual("path.closest_point_matching.test", 
                         result)
 
 
     def distance_point_matching(self):
         matcheur = Matcheur(None,None,None)
-        matcheur.snap_point_by_distance = MagicMock(return_value = -1)
+        matcheur.snap_point_by_distance = MagicMock(return_value = ("test", []))
         result = self.path_layer.distance_point_matching(matcheur)
-        self.assertEqual("distance.matching", result)
+        self.assertEqual("path.distance_point_matching.test", result)
 
 
 if __name__ == "__main__":

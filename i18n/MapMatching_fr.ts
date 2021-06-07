@@ -40,6 +40,11 @@
     </message>
 
     <message>
+        <source>q3m.window.btn.import.test.set</source>
+        <translation >Jeux de démonstration</translation>
+    </message>
+
+    <message>
         <source>q3m.window.tab.main</source>
         <translation >Matcheur</translation>
     </message>

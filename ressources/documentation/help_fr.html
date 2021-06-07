@@ -5,41 +5,56 @@
 </head>
 <body>
     <h2>LAEQ-Corrélation Cartographique<br>Onglet Principal </h2>
-    <p>Ce plugin a pour objectif d'ajuster une trace GPS sur un réseau (map-matching) de façon semi-automatique<br>Il est recommandé de lire la documentation du plugin avant de l'utiliser: <a href="https://www.google.com/">  Lien</a></p> 
+    <p>Ce plugin a pour objectif d'ajuster une trace GPS sur un réseau (map-matching) de façon semi-automatique<br>
+      Il est recommandé de lire la documentation du plugin avant de l'utiliser: <a href="https://github.com/LAEQ/q3m">  Lien</a></p> 
     <h3>Description rapide du processus de map-matching</h3>
     <p>Le processus de map-matching passe par trois étapes successive:</p>
 
     <h3>Etape 1: Entrée</h3>
-    <p>Cette étape prépare les données pour faciliter le travail des algorithmes de map-matching. Elle s'assure notamment de la topologie du réseau et de la validité des données en entrée.<br> 
-      Remplissez tous les champs, puis réduisez et corrigez le réseau de route afin d'atteindre l'étape suivante<br>Les champs à remplir sont les suivants :</p>
+    <p>Cette étape prépare les données pour faciliter le travail des algorithmes de map-matching. 
+      Elle s'assure notamment de la topologie du réseau et de la validité des données en entrée.<br> 
+      Remplissez tous les champs, puis réduisez et corrigez le réseau de route afin d'atteindre l'étape suivante<br>
+      Les champs à remplir sont les suivants :</p>
     
       <h4>Couche réseau: </h4>
     <p>&emsp; Cette liste déroulante présente toute les couches dont la géométrie est de type 
       <strong>LineString</strong> actuellement actives dans votre projet QGIS. Sélectionnez la couche de route sur laquelle vous souhaitez ajuster votre trace GPS <br>
-	  Notez ici que les <strong>MultiLineString</strong> ne sont pas supportées. Il est possible de convertir une couche de <strong>MultiLineString</strong> en une couche de <strong>LineString</strong> avec l'outil "De morceaux multiples à morceaux uniques" de Qgis.</p>
+	  Notez ici que les <strong>MultiLineString</strong> ne sont pas supportées. 
+    Il est possible de convertir une couche de <strong>MultiLineString</strong> en une couche de <strong>LineString</strong> avec l'outil "De morceaux multiples à morceaux uniques" de Qgis.</p>
     
       <h4>Couche Trace GPS: </h4>
     <p>&emsp; Cette liste déroulante présente toute les couches dont la géométrie est de type
       <strong>Point</strong> actuellement actives dans votre projet QGIS. Sélectionnez la couche de points que vous voulez matcher à un réseau de routes</p>
     
       <h4>OID (identifiant original) :</h4>
-    <p>&emsp; Cette liste déroulante présente tous les attributs de la couche Trace GPS sélectionnée de type <strong>"Integer/Integer64/int/int8"</strong>. Ce champ doit être un identifiant unique de tous les points et est utilisé pour ordonner les points de la couche. Un point présent plus tôt dans la trace doit avoir un indice plus petit qu'un point présent plus tard.</p>
+    <p>&emsp; Cette liste déroulante présente tous les attributs de la couche Trace GPS sélectionnée de type <strong>"Integer/Integer64/int/int8"</strong>. 
+      Ce champ doit être un identifiant unique de tous les points et est utilisé pour ordonner les points de la couche. 
+      Un point présent plus tôt dans la trace doit avoir un indice plus petit qu'un point présent plus tard.</p>
     
       <h4>Taille du tampon: </h4>
-    <p>&emsp; Ce slider représente la distance maximale à utiliser pour tracer un buffer autour des points de la trace GPS. Seules les lignes intersectant ce buffer seront considérées pendant le map-matching. Plus cette valeur est grande, plus le temps de calcul sera long par la suite.</p>
+    <p>&emsp; Ce slider représente la distance maximale à utiliser pour tracer un buffer autour des points de la trace GPS. 
+      Seules les lignes intersectant ce buffer seront considérées pendant le map-matching. Plus cette valeur est grande, plus le temps de calcul sera long par la suite.</p>
 
     <h3>Etape 2: Matching</h3>
-    <p>Cette étape consiste à map-matcher les points de la trace GPS sur le réseau de route pré-traitée de façon automatique. En cas d'erreur de la part de l'algorithme de map-matching, l'utilisateur peut modifier le trajet manuellement en sélectionnant les lignes réellement empruntées par la trace GPS et relancer l'algorithme sur cette nouvelle sélection.<br> 
+    <p>Cette étape consiste à map-matcher les points de la trace GPS sur le réseau de route pré-traitée de façon automatique. 
+      En cas d'erreur de la part de l'algorithme de map-matching, l'utilisateur peut modifier le trajet manuellement en sélectionnant les lignes 
+      réellement empruntées par la trace GPS et relancer l'algorithme sur cette nouvelle sélection.<br> 
       Deux champs peuvent être renseignés : </p>
     
       <h4>Vitesse :</h4>
-    <p>&emsp; Cette liste déroulante présente tous les attributs de la couche Trace GPS sélectionnée de type <strong>"Real/double"</strong>. Elle représente la vitesse de déplacement à chaque point de la trace. Il n'est pas nécessaire de renseigner ce champ qui si la méthode "matching par vitesse" est sélectionnée. </p>
+    <p>&emsp; Cette liste déroulante présente tous les attributs de la couche Trace GPS sélectionnée de type <strong>"Real/double"</strong>. 
+      Elle représente la vitesse de déplacement à chaque point de la trace. Il n'est pas nécessaire de renseigner ce champ qui si la méthode "matching par vitesse" est sélectionnée. </p>
     
       <h4>Boite algorithme de matching</h4>
     <p>&emsp; Cette liste déroulante permet de choisir le types de matching à effectuer. Trois options sont disponibles.</p>
 	 <ul>
-	 	 <li>Matching par vitesse : Considérant la vitesse de déplacement, la trace GPS est découpée en sections en mouvement ou à l'arrêt. Tous les points d'une section à l'arrêt sont agrégés à leur localisation moyenne et snappés à leur localisation la plus proche sur la ligne sélectionnée sur le réseau. Les sections en mouvement sont ensuite ajustées entre les tronçons délimités par les sections à l'arrêt. Plus spécifiquement, les points sont ajustés le long du chemin parcouru en calculant le ratio entre la distance originale entre les points de la trace GPS d'une section et la longueur de cette section sur le réseau. L'objectif est ainsi de préserver l'écart naturel enregistré originalement entre les points.</li>
-	 	 <li>Matching par distance : Cette approche propose d'ajuster les points le long du chemin sélectionné en calculant le ratio entre la longueur totale de la trace GPS et du chemin. Les points sont ensuite alignés successivement sur le chemin en reportant leurs distances successives originales multipliées par ce ratio.</li>
+	 	 <li>Matching par vitesse : Considérant la vitesse de déplacement, la trace GPS est découpée en sections en mouvement ou à l'arrêt. 
+        Tous les points d'une section à l'arrêt sont agrégés à leur localisation moyenne et snappés à leur localisation la plus proche sur la ligne sélectionnée sur le réseau. 
+        Les sections en mouvement sont ensuite ajustées entre les tronçons délimités par les sections à l'arrêt. 
+        Plus spécifiquement, les points sont ajustés le long du chemin parcouru en calculant le ratio entre la distance originale entre les points de la trace GPS d'une section et la longueur de cette section sur le réseau. 
+        L'objectif est ainsi de préserver l'écart naturel enregistré originalement entre les points.</li>
+	 	 <li>Matching par distance : Cette approche propose d'ajuster les points le long du chemin sélectionné en calculant le ratio entre la longueur totale de la trace GPS et du chemin. 
+        Les points sont ensuite alignés successivement sur le chemin en reportant leurs distances successives originales multipliées par ce ratio.</li>
 	 	 <li>Matching au plus proche : Cette approche propose simplement de projeter chaque point à sa ligne la plus proche sur le chemin sélectionné.</li>
 	 </ul> 
 
@@ -55,16 +70,5 @@
 
     <h4>Exporter le projet</h4>
     <p>&emsp; Cette option vous permet d'exporter tous les éléments cochés dans les paramètres dans un seul fichier (attention, il y a un bug avec l'export multiple sous shapefile).</p>
-
-    <h3>Problèmes potentiellement rencontrés avec le plugin</h3>
-
-    <h4>Voici quelques conseils pour régler une partie des erreurs fréquemment rencontrées: </h4>
-      <p>Les couches ne sont pas conformes aux standards du plugin ou n'apparaissent pas.</p>
-      <dd>- Vérifier que les deux couches sont active (apparaissent bien dans le rendu)</dd><br>
-      <dd>- Vérifier que les types de géométrie des couches sont bien Point et LineString (voir le menu propriété des couches). Il peut être nécessaire d'exporter une couche de lignes au format GPKG pour la forcer à être de type LineString</dd><br>
-      <dd>- Vérifier que les deux couches sont dans le même système de projection (SCR) cartésien (en mètre)</dd><br>
-      <dd>- Vérifier que la trace GPS possède un attribut OID de type integer</dd><br>
-      <dd>- Appuyer sur RELOAD pour afficher les couches ajoutées après le démarrage du plugin</dd><br>
-      <dd>- Ne supprimez surtout pas de couche au cours des étapes au risque de devoir recommencer à 0</dd><br>
 
 </body>

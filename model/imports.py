@@ -8,7 +8,8 @@ def check_imports():
                 not check_if_lower_version(shapely.__version__)):
             return False
          
-         #processing
+        from qgis import processing
+        
     except:
         result = False
         

@@ -19,6 +19,7 @@ class TestNetworkLayer(unittest.TestCase):
     
 
     def test_add_attribute_to_layers(self):
+
         self.network_layer.layer = self.fixtures.network_1()
         result = self.network_layer.add_attribute_to_layers(None)
         self.assertEqual("network.add_attribute_to_layers.empty_attribute_name", 
@@ -26,7 +27,9 @@ class TestNetworkLayer(unittest.TestCase):
 
 
         result = self.network_layer.add_attribute_to_layers("test")
-        index = self.network_layer.layer.fields().indexFromName("test") == -1
+
+        index = self.network_layer.layer.fields().indexFromName("test")
+
         self.assertNotEqual(-1,index)
 
         i =0

@@ -56,13 +56,13 @@ class TestLayerManager(unittest.TestCase):
 
         #Empty layers
         self.manager.set_layers([])
-        self.manager.remove_layer_from_name("points_2.gpkg")
+        self.manager.remove_layer_from_name("points_2.geojson")
         self.assertEqual(0, len(self.manager.layers))
 
         self.manager.set_layers(layers)
 
         #present value
-        self.manager.remove_layer_from_name("points_2.gpkg")
+        self.manager.remove_layer_from_name("points_2.geojson")
         self.assertEqual(3, len(self.manager.layers))
 
         #non present value
@@ -117,9 +117,9 @@ class TestLayerManager(unittest.TestCase):
         self.manager.set_layers(layers)
 
         fields = self.manager.get_path_attributes(0)
-        self.assertEqual(26, len(fields))
+        self.assertEqual(2, len(fields))
         fields = self.manager.get_path_attributes(1)
-        self.assertEqual(6, len(fields))
+        self.assertEqual(5, len(fields))
 
 
     def test_get_path_attributes_index_out_range(self):
@@ -128,7 +128,7 @@ class TestLayerManager(unittest.TestCase):
 
 
     def test_load_file_points_file(self):
-        path = os.path.join(self.cur_dir, os.pardir, "fixtures", "points.gpkg")
+        path = os.path.join(self.cur_dir, os.pardir, "fixtures", "points_2.geojson")
         self.manager.load_layer(path)
         self.assertEqual(1, len(self.manager.layers))
 
@@ -210,8 +210,8 @@ class TestLayerManager(unittest.TestCase):
         self.manager.set_layers(layers)
 
         #test on existing value
-        layer = self.manager.find_layer("points_1.gpkg")
-        self.assertEqual("points_1.gpkg",layer.name())
+        layer = self.manager.find_layer("points_1")
+        self.assertEqual("points_1",layer.name())
 
         #test on non existing value
         layer = self.manager.find_layer("test")

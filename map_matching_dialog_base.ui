@@ -738,7 +738,7 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QPushButton" name="dev_tool_import">
+  <widget class="QPushButton" name="btn_import_test_set">
    <property name="geometry">
     <rect>
      <x>594</x>
@@ -748,12 +748,12 @@
     </rect>
    </property>
    <property name="text">
-    <string>dev_tool_import</string>
+    <string>test_set_import</string>
    </property>
   </widget>
   <zorder>tabWidget</zorder>
   <zorder>label_subtitle</zorder>
-  <zorder>dev_tool_import</zorder>
+  <zorder>btn_import_test_set</zorder>
  </widget>
  <resources/>
  <connections/>

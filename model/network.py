@@ -105,10 +105,11 @@ class NetworkLayer:
 
         length = len(self.layer.fields().names())-1
 
+        features = self.layer.getFeatures()
         #Complete the field for every features
         self.layer.startEditing()
         i=0
-        for f in self.layer.getFeatures():
+        for f in features:
             tesid = f.id()
             attr_value={length:i}
             provider.changeAttributeValues({tesid:attr_value})

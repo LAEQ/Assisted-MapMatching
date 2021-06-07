@@ -5,7 +5,7 @@
 </head>
 <body>
     <h2>LAEQ-Cartographic Correlation<br>Matching Tab</h2>
-    <p>This plugin aims to adjust a GPS track on a network (map-matching) semi-automatically<br>We recommend that you read the plugin documentation before using it: <a href="https://www.google.com/">link</a></p>
+    <p>This plugin aims to adjust a GPS track on a network (map-matching) semi-automatically<br>We recommend that you read the plugin documentation before using it: <a href="https://github.com/LAEQ/q3m">link</a></p>
     <h3>Quick description of the matching process</h3>
     <p>The map-matching process has 3 successive steps</p>
 
@@ -47,9 +47,9 @@
 
    <h3># Step 3: Export</h3>
     <p>This step allow you to export your datas to the selected format. You can also do it manually from QGIS<br> 
-      Three options are available to you</p>
+      Three options are available to you:</p>
 
-    <h4>Exporter matched trace</h4>
+    <h4>Export matched trace</h4>
     <p>&emsp; This option allow you to export the selected matched track present in the dropDown list next to it under the format specified in the settings.</p>
 
     <h4>Export the polyline</h4>
@@ -57,16 +57,5 @@
 
     <h4>Export project</h4>
     <p>&emsp; This option allow you to export every elements coched in the settings inside a single file (Warning: There is a problem with the multiple export to shapefile format).</p>
-
-   <h3>The plugin isn't working: </h3>
-
-    <h4>Here is a few tips to correct some error that might happen during the process: </h4>
-      <p>Your layers aren't conform to the plugin standards:</p>
-      <dd>- Check that your two layers are active (checked) or they won't be detected</dd><br>
-      <dd>- Check your two layers geometry's type are LineString for one and Point for the other.</dd><br>
-      <dd>- Check that your two layers are in the same projection system (SCR) and that they are both in meter (cartesian)</dd><br>
-      <dd>- Check that your GPS trace layer has an OID conform to the documentation standards (unique, integer...)</dd><br>
-      <dd>- Try reloading if you corrected the precedent error and nothing appeared</dd><br>
-      <dd>- Never delete a layer on QGIS during the process or the plugin will force you to reset the whole process</dd><br>
 
 </body>

@@ -290,9 +290,7 @@ class MapMatching:
 
             self.dlg.btn_reset.clicked.connect(self.reset)
 
-            #Temporary=====================================
-            self.dlg.dev_tool_import.clicked.connect(self.load)
-            #==============================================
+            self.dlg.btn_import_test_set.clicked.connect(self.load)
 
             # Prepare the interface buttons
             if not self.import_working:

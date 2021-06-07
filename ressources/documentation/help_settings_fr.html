@@ -15,7 +15,9 @@
     <p>Ce slider représente la longueur à partir de laquelle on va considérer que deux points du réseau de route se touchent et doivent être fusionnés</p>
 
     <h4>Intersection and Dangle Nodes :</h4>
-    <p>Ce slider représente la longueur à partir de laquelle on va considérer que deux points du réseau de route se touchent et doivent être fusionnés</p>
+    <p>Les algorithmes s'occupant de la topologie tronquent la position géographique des points afin de faciliter les comparaisons. Une tolérance est donc nécessaire afin de déterminer si deux éléments sont effectivement en contact.
+    La valeur recommandé pour cette option est 0.01
+    </p>
 
     <h3>Tolérance du Map-matching :</h3>
     <h4>Rayon de recherche</h4>
@@ -24,8 +26,4 @@
     <h4>Sigma</h4>
     <p>Ce slider permet de renseigner l'importance des routes les plus éloignées du point dans le rayon de recherche. Plus ce paramètre est grand, plus les routes éloignées auront de chance d'être sélectionné par l'algorithme</p>
 
-    <p>Voici des raisons pour lesquels l'algorithme ne fait pas ce que vous voulez:<br><br>
-      <dd>- Votre carte n'est pas complète et l'algorithme n'a pas pu trouver de connecxion entre deux parties du trajet. Ajoutez la route manquante au réseau de route ou augmentez le rayon de recherche</dd><br>
-      <dd>- Les paramètres de matching sont trop haut ou trop bas. Nous recommandons 45 pour le rayon et 5 pour le sigma</dd><br>
-    </p>
 </body>
