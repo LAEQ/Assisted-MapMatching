@@ -106,8 +106,8 @@ class layerTraductor:
     def order_list_of_dict(feat_list, column_name="OID"):
         """Sort a list according to it's OID column."""
 
-        # @comment: why feat_list would not be a list ?
-        # @comment: Sorting an empty list should not return an error. it should return itself.
+        # @comment: why testing if it's not a list ?
+        # @comment: Sorting an empty list should not return an error.
         if not isinstance(feat_list, list) or feat_list == []:
             return "layer_traductor.order_list_of_dict.error_feat_list"
 

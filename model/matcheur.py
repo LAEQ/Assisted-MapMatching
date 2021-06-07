@@ -46,14 +46,14 @@ class Matcheur:
         return True
 
     """
-    @comment: This method should be split. It's doing to much stuff. 
+    @comment: This method should be split. It's doing way too much stuff. 
      1. Create one method to prepare the data
      2. Create one method to run the matcher algo.
-     3. finally this method calls the two new method methods and handle the different success/failure scenarios.
+     3. finally this method should call the new methods and manage the scenarios success/failure.
      
-     To handle exceptions scenarios: 
-     a: create one or multiple custom Exception LayerToDictionnaryError, SortingError, ....
-     b: use try/except to catch the multiple exceptions and display correct error message
+     For exceptions scenarios: 
+     a: create one or more Exception LayerToDictionnaryError, SortingError, ....
+     b: wrap the code with try/except to manage the logic and to display error message
             
     @pseudo-code
     try: 
