@@ -413,7 +413,7 @@ def SplitLoop(line) :
         n = round(len(pts)/2)
         if n == 1:
             return [line]
-        pts1 = pts[0:n]
+        pts1 = pts[0:n+1] #bug correction
         pts2 = pts[n:len(pts)]
 
         segments =[shapely.geometry.LineString(pts1),shapely.geometry.LineString(pts2)]

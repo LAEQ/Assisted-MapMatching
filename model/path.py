@@ -28,7 +28,6 @@ class PathLayer:
                     {'INPUT': self.initial_layer, 
                     'OUTPUT': 'memory:'})['OUTPUT']
 
-            self.layer.setName("Points Matché")
             self.initial_layer.removeSelection()
         except:
             return "path.dupplicate_initial_layer.processing"
@@ -70,7 +69,7 @@ class PathLayer:
 
         return mem_layer
 
-
+    #not used
     def merge_stationary_point(
             self,speed_column_name: string, 
             speed_limit: float = 0.1):
@@ -177,6 +176,8 @@ class PathLayer:
         if self.layer.fields().indexFromName(speed_column_name) == -1:
             return "path.wrong_speed_column"
 
+        self.layer.setName("matched point by speed")
+
         #Start snapping points
         try:
             newpts ,error = matcheur.snap_points_along_line(
@@ -203,8 +204,6 @@ class PathLayer:
                 str(error[-1]) + " point were matched out of the searching radius ")
             return ("path.speed_point_matching.point_out_of_range-" + 
                     str(len(error)-1) + "-" + str(error[-1]))
-
-        self.layer.setName("matched point by speed")
 
         #Success
         return None
@@ -267,5 +266,4 @@ class PathLayer:
         self.layer = processing.run("native:saveselectedfeatures", 
                                     {'INPUT': self.initial_layer, 
                                     'OUTPUT': 'memory:'})['OUTPUT']
-        self.layer.setName("Points Matché 2")
         self.initial_layer.removeSelection()

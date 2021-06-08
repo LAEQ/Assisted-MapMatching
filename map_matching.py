@@ -22,10 +22,11 @@
  ***************************************************************************/
 """
 import os.path
+import os
 from random import random
 import string
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QDir
 from qgis.core import Qgis, QgsProject, QgsVectorFileWriter
 from qgis.PyQt.QtGui import QIcon, QTextCursor
 from qgis.PyQt.QtWidgets import QAction , QFileDialog
@@ -811,16 +812,31 @@ class MapMatching:
             print("Error : nothing to export. See the export settings and check the boxes that interest you")
             return
 
-        #bug to correct
-        if len(exported_layers)>1 and settings["combo_format"] == "ESRI Shapefile":
-            print("There is a problem with exporting the project as shapefile")
-            return
-
         #Get the path to the export folder
         name = QFileDialog.getSaveFileName(
-            self.dlg,"export : " + self.dlg.combo_matched_track.currentText())
+            self.dlg,"export project: ")
 
-        #Export
+        #Export to Shapefile : create a dir and store everything in
+        if settings["combo_format"] == "ESRI Shapefile":
+            dir = os.path.join(name[0])
+
+            if not os.path.exists(dir):
+                os.mkdir(dir)
+            
+            try:
+                for lay in exported_layers:
+                    QgsVectorFileWriter.writeAsVectorFormat(
+                            lay,
+                            name[0]+"/" + lay.name(),
+                            "utf-8", poly.crs(),
+                            "ESRI Shapefile")
+            except:
+                self.error_handler(
+                    "map_matching.on_click_export_polyline.can't_export")
+
+            return
+
+        #Other format : GPKG, Export
         try:
             #setup the export
             options = QgsVectorFileWriter.SaveVectorOptions()

@@ -197,7 +197,7 @@ def cut_loops(linelayer) :
     for feat in linelayer : 
 
         geoms = SplitLoop(feat["geometry"])
-            
+
         for geom in geoms : 
 
             dupp = feat.copy()

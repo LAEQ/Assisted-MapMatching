@@ -40,7 +40,8 @@ class Layers:
 
         if error != None:
             return "layer.correct_network_layer_topology." + error
-
+    
+    #not used
     def reduce_path_layer(self,speed_column_name: str,speed_limit: float):
         """Merge stationnary point. """
 
@@ -59,9 +60,9 @@ class Layers:
                     speed_lim: float) -> None:
         """ Start the matching algorithm based on speed """
 
-        error = self.reduce_path_layer(speed_column_name, speed_lim)
+        """error = self.reduce_path_layer(speed_column_name, speed_lim)
         if error != None:
-            return error
+            return error"""
 
         error = self.network_layer.find_path(matcheur)
         if error != None:
@@ -139,9 +140,9 @@ class Layers:
         if (type_of_matching == "speed_matching" and 
             speed_column_name != None):
             #Speed matching
-            error = self.reduce_path_layer(speed_column_name, speed_limit)
+            """error = self.reduce_path_layer(speed_column_name, speed_limit)
             if error != None:
-                return "layer.apply_modification." + error
+                return "layer.apply_modification." + error"""
             
             error = self.path_layer.speed_point_matching(matcheur,
                                                          speed_column_name,
@@ -174,8 +175,8 @@ class Layers:
         temp = [{"geometry": self.polyline}]
 
         #create a layer from a line
-        mem_layer = layerTraductor.from_list_of_dict_to_layer(temp,mem_layer)
+        mem_layer = layerTraductor.from_list_of_dict_to_layer(temp,mem_layer, name = "Polyline")
         if isinstance(mem_layer, str):
             return "layer.get_polyline." + mem_layer
-
+        
         return mem_layer
