@@ -82,9 +82,13 @@ class LayerManager:
 
 
     def find_layer(self, name: string) -> QgsVectorLayer:
-        for layer in self.layers:
-            if layer.name() == name:
-                return layer
+
+        try:
+            for layer in self.layers:
+                if layer.name() == name:
+                    return layer
+        except:
+            print("Error while searching for the layer " + name)
         return None
 
     def save(self, path: string, network : string, OID : string, speed : string) -> None:

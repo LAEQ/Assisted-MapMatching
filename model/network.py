@@ -68,6 +68,9 @@ class NetworkLayer:
 
         # We take care of the intersection
         corrected_list = deal_with_danglenodes(corrected_list, inter_dangle_tol)
+        if corrected_list == None:
+            return 
+        
         corrected_list = deal_with_intersections(corrected_list, inter_dangle_tol)
 
         # We connect roads wich extremities are close to each other

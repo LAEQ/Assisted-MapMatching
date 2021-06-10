@@ -26,17 +26,17 @@ import os
 from random import random
 import string
 
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QDir
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.core import Qgis, QgsProject, QgsVectorFileWriter
 from qgis.PyQt.QtGui import QIcon, QTextCursor
-from qgis.PyQt.QtWidgets import QAction , QFileDialog
+from qgis.PyQt.QtWidgets import QAction, QFileDialog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .map_matching_dialog import MapMatchingDialog
 
-#Import own class
+# Import own class
 from .model import imports
 from .model.ui.layer_manager import LayerManager
 from .model.ui.settings import Settings
@@ -87,9 +87,8 @@ class MapMatching:
         self.layers = None
         self.is_algo_removing = False
 
-        #Test Import:
+        # Test Import:
         self.import_working = imports.check_imports()
-
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -106,7 +105,6 @@ class MapMatching:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
 
         return QCoreApplication.translate('MapMatching', message)
-
 
     def add_action(
             self,
@@ -221,29 +219,29 @@ class MapMatching:
                 widget.setText(self.tr(label))
 
             for label, widget in self.dlg.buttons():
-                label = label.replace("_", ".").replace("btn", 
+                label = label.replace("_", ".").replace("btn",
                                                         "q3m.window.btn")
                 widget.setText(self.tr(label))
 
             for name, tab in self.dlg.tab():
                 label = tab.tabText(0)
-                label = label.replace("_", ".").replace("tab", 
+                label = label.replace("_", ".").replace("tab",
                                                         "q3m.window.tab")
-                tab.setTabText(0,self.tr(label))
+                tab.setTabText(0, self.tr(label))
 
                 label = tab.tabText(1)
-                label = label.replace("_", ".").replace("tab", 
+                label = label.replace("_", ".").replace("tab",
                                                         "q3m.window.tab")
-                tab.setTabText(1,self.tr(label))
+                tab.setTabText(1, self.tr(label))
 
             for label, widget in self.dlg.groupBox():
-                label = label.replace("_", ".").replace("group", 
+                label = label.replace("_", ".").replace("group",
                                                         "q3m.window.group")
                 widget.setTitle(self.tr(label))
 
             for label, widget in self.dlg.checkBox():
                 if label != "check_speed":
-                    label = label.replace("_", ".").replace("check", 
+                    label = label.replace("_", ".").replace("check",
                                                             "q3m.window.check")
                     widget.setText(self.tr(label))
 
@@ -253,14 +251,14 @@ class MapMatching:
             fixed_elements.append(self.tr("q3m.window.closest_matching"))
             self.dlg.fill_fixed_box(fixed_elements)
 
-            #documentation loading
+            # documentation loading
             dir = os.path.dirname(__file__)
 
             help_name = self.tr("q3m.window.help_file")
             help_settings = self.tr("q3m.window.help_settings_file")
 
             file = os.path.abspath(os.path.join(dir, './ressources/documentation/', help_name))
-            file2 = os.path.abspath(os.path.join(dir,'./ressources/documentation/', help_settings))
+            file2 = os.path.abspath(os.path.join(dir, './ressources/documentation/', help_settings))
             if os.path.exists(file):
                 with open(file2) as help2:
                     help = help2.read()
@@ -275,13 +273,13 @@ class MapMatching:
 
             # Listeners
             self.dlg.btn_reload_layers.clicked.connect(self.on_click_reloads)
-            
+
             self.dlg.btn_reduce_network.clicked.connect(self.on_click_reduce_network)
             self.dlg.btn_correct_topology.clicked.connect(self.on_click_correct_topology)
-            
+
             self.dlg.check_speed.clicked.connect(self.dlg.update_matching_box)
             self.dlg.btn_map_matching.clicked.connect(self.on_click_pre_matching)
-            
+
             self.dlg.btn_reselect_path.clicked.connect(self.on_click_reSelect_path)
             self.dlg.btn_apply_path_change.clicked.connect(self.on_click_apply_modification)
 
@@ -295,22 +293,21 @@ class MapMatching:
 
             # Prepare the interface buttons
             if not self.import_working:
-                #block the interface
+                # block the interface
                 self.error_handler("map_matching.init_ui.import",
-                                    level= Qgis.Critical)
+                                   level=Qgis.Critical)
                 self.dlg.change_button_state(0)
             else:
-                #Prepare step 1
+                # Prepare step 1
                 self.dlg.change_button_state(1)
 
             # Add listener for layer deletion / dragging, ...
             # QgsProject.instance().layerTreeRoot().willRemoveChildren.connect(self.will_removed)
             QgsProject.instance().layerTreeRoot().removedChildren.connect(self.has_removed)
-            
-        #Setting layer manager and preparing the combobox
+
+        # Setting layer manager and preparing the combobox
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update_layer_box()
-
 
     def run(self):
         """Run method that performs all the real work"""
@@ -321,15 +318,12 @@ class MapMatching:
         self.dlg.show()
         self.dlg.exec_()
 
-
     #def will_removed(self, node, _from, _to) -> None:
         #pass
-
 
     #=============================================================================#
     #=========================Interface interaction part==========================#
     #=============================================================================#
-
 
     def has_removed(self, node, _from: int, _to: int) -> None:
         """Activate after layer supression, block the plugin to avoid crash."""
@@ -339,13 +333,13 @@ class MapMatching:
 
         if self.layers is None:
             self.error_handler(
-                    "map_matching.has_removed.pre_algo_layer_deletion",
-                    10, Qgis.Info, "Info")
+                "map_matching.has_removed.pre_algo_layer_deletion",
+                10, Qgis.Info, "Info")
             print("Please reload your comboBox to remove inexistant values")
         else:
             self.error_handler(
-                    "map_matching.has_removed.post_algo_layer_deletion",
-                    level=Qgis.Critical)
+                "map_matching.has_removed.post_algo_layer_deletion",
+                level=Qgis.Critical)
             self.dlg.change_button_state(0)
             """if self.dlg.combo_matched_track.count() == 0:
     
@@ -354,14 +348,12 @@ class MapMatching:
                 self.dlg.change_button_state(5)
             """
 
-
     def on_click_reloads(self):
         """Updates combobox values."""
 
         self.dlg.clear_combo()
         self.manager.set_layers(self.iface.mapCanvas().layers())
         self.dlg.update_layer_box()
-
 
     def load(self):
         """Load sample datas. Usefull for dev-tools."""
@@ -372,18 +364,18 @@ class MapMatching:
         self.is_algo_removing = False
 
         pts_pth = os.path.join(
-            self.plugin_dir, "ressources", 
+            self.plugin_dir, "ressources",
             "datas", "points.gpkg")
 
         layer = self.iface.addVectorLayer(
-            pts_pth, 
-            "trace_{:.5f}".format(random()), 
+            pts_pth,
+            "trace_{:.5f}".format(random()),
             "ogr")
 
         self.manager.add_layer(layer)
 
         network_path = os.path.join(
-            self.plugin_dir, "ressources", 
+            self.plugin_dir, "ressources",
             "datas", "reseau.gpkg")
         
         layer = self.iface.addVectorLayer(
@@ -395,14 +387,13 @@ class MapMatching:
 
         self.dlg.update_layer_box()
 
-
     def reset(self):
         """Put back the plugin at the first step."""
         if not self.import_working:
             self.import_working = imports.check_imports()
             if not self.import_working:
                 self.error_handler("map_matching.reset.import",
-                                    level=Qgis.Critical)
+                                   level=Qgis.Critical)
                 return
 
         self.layers = None
@@ -410,32 +401,30 @@ class MapMatching:
         self.on_click_reloads()
         self.iface.messageBar().clearWidgets()
 
-
     #=============================================================================#
     #============================Error handling part==============================#
     #=============================================================================#
 
-
     def create_message_error(
             self,
-            level : Qgis.MessageLevel,
-            message : string,
-            pre_message : string = "Error", 
-            duration = 10):
+            level: Qgis.MessageLevel,
+            message: string,
+            pre_message: string = "Error",
+            duration=10):
         """Create and push a message to QGIS message bar."""
 
         if duration is None:
-            self.iface.messageBar().pushMessage(pre_message,message, level)
+            self.iface.messageBar().pushMessage(pre_message, message, level)
         else:
             self.iface.messageBar().pushMessage(
-                                    pre_message,message, 
-                                    level, duration)
+                pre_message,message,
+                level, duration)
         
 
     def error_handler(
-            self, message: string, 
-            duration: int = None, 
-            level: Qgis.MessageLevel = Qgis.Warning, 
+            self, message: string,
+            duration: int = None,
+            level: Qgis.MessageLevel = Qgis.Warning,
             pre_message: string = "Error"):
         """Traduce an error and send it to the user.
         
@@ -446,24 +435,24 @@ class MapMatching:
         message_list = message.split('.')
         error_message = message_list[-1].split('-')
 
-        #Traduction of the error
+        # Traduction of the error
         if error_message[0] == "point_out_of_range":
-            #extra information in the output message
+            # extra information in the output message
             pre_message = "Warning"
             trad = self.tr("q3m.error." + error_message[0])
-            pourcentage =  round((int(error_message[1])*100)/int(error_message[2]))
-            trad += " " + str(error_message[1]) + " ("+ str(pourcentage) + " %) "
+            pourcentage = round((int(error_message[1]) * 100) / int(error_message[2]))
+            trad += " " + str(error_message[1]) + " (" + str(pourcentage) + " %) "
         else:
-            #normal case
+            # normal case
             trad = self.tr("q3m.error." + message_list[-1])
-        
-        #creation of the path to the error
+
+        # creation of the path to the error
         path = " --------------> Path to error: "
-        for i in range(len(message_list)-1):
-            if i%2 == 0:
+        for i in range(len(message_list) - 1):
+            if i % 2 == 0:
                 path += message_list[i] + ".py -> "
             else:
-                if i == len(message_list)-2:
+                if i == len(message_list) - 2:
                     path += message_list[i]
                 else:
                     path += message_list[i] + " , "
@@ -471,53 +460,48 @@ class MapMatching:
         trad += path
         self.create_message_error(level, trad, pre_message,duration)
 
-
     #=============================================================================#
     #==============================Processing part================================#
     #=============================================================================#
     
-
     def on_click_reduce_network(self) -> None:
         """ Create the object Layers, reduce the network, 
             add the result layer to QGIS."""
 
         val = self.settings.get_settings()
 
-        #Check input validity
+        # Check input validity
         if val["combo_network"] == "" or val["combo_path"] == "":
-            self.error_handler(
-                    "map_matching.on_click_reduce_network.missing_input")
+            self.error_handler("map_matching.on_click_reduce_network.missing_input")
             return
 
-        try:
-            network_layer = self.manager.find_layer(val["combo_network"])
-            path_layer = self.manager.find_layer(val["combo_path"])
-        except:
-            self.error_handler(
-                    "map_matching.on_click_reduce_network.can't_find_layer")
-            print("Couldn't find the layer in the combo Box in the list. Please reload the comboBox to remove unexisting layer")
+
+        network_layer = self.manager.find_layer(val["combo_network"])
+        path_layer = self.manager.find_layer(val["combo_path"])
+
+        if network_layer is None or path_layer is None:
+            self.error_handler("map_matching.on_click_reduce_network.can't_find_layer")
             return
         
         buffer = val["spin_buffer_range"]
 
         if not LayerManager.are_valid(path_layer, network_layer):
-            self.error_handler(
-                    "map_matching.on_click_reduce_network.invalid_layer")
+            self.error_handler("map_matching.on_click_reduce_network.invalid_layer")
             return
 
-        #create the core class
+        # create the core class
         network_layer = NetworkLayer(network_layer)
         path_layer = PathLayer(path_layer)
         error = path_layer.dupplicate_initial_layer()
 
         if error is not None:
-            #Handle error
+            # Handle error
             self.error_handler("map_matching.on_click_reduce_network." + error)
             return
         
         self.layers = Layers(path_layer, network_layer)
 
-        #Start the reducing 
+        # Start the reducing 
         error = self.layers.reduce_network_layer(buffer)
 
         if error is not None:
@@ -526,18 +510,17 @@ class MapMatching:
 
         network = self.layers.network_layer.layer
 
-        #applicate change to the application
+        # applicate change to the application
         self.manager.add_layer(network)
 
         self.manager.deselect_layer(val["combo_network"])
 
         self.dlg.change_button_state(2)
 
-
     def on_click_correct_topology(self) -> None:
         """Correct the topology of the reduced network then replace it on QGIS."""
 
-        #Check data validity
+        # Check data validity
         if self.layers is None:
             self.error_handler(
                 "map_matching.on_click_correct_topology.no_layer")
@@ -545,35 +528,34 @@ class MapMatching:
 
         val = self.settings.get_settings()
 
-        #Start the topological correction
+        # Start the topological correction
         error = self.layers.correct_network_layer_topology( 
-            val["spin_close_call"], 
+            val["spin_close_call"],
             val["spin_intersection"])
 
         if error is not None:
             self.error_handler(
-                "map_matching.on_click_correct_topology." + error) 
+                "map_matching.on_click_correct_topology." + error)
             return
 
         network = self.layers.network_layer.layer
 
-        #applicate change to the application
+        # applicate change to the application
         self.manager.add_layer(network)
 
-        self.is_algo_removing = True        #To not trigger has_removed()
+        self.is_algo_removing = True # To not trigger has_removed()
         self.manager.remove_layer_from_name("Reduced network")
         
         self.dlg.change_button_state(3)
 
         self.is_algo_removing = False
 
-
     def on_click_pre_matching(self) -> None:
         """Start the process of mapMatching and add the result to QGIS"""
         
         settings = self.settings.get_settings()
 
-        #give a personal ID to every features (some had been duplicated)
+        # give a personal ID to every features (some had been duplicated)
         error = self.layers.network_layer.add_attribute_to_layers()
 
         if error is not None:
@@ -582,26 +564,25 @@ class MapMatching:
             return
 
         #Create the core class that handle the matching and set it up
-        matcheur = Matcheur(self.layers.network_layer.layer, 
-                            self.layers.path_layer.layer, 
-                            _OID = settings["combo_oid"])
+        matcheur = Matcheur(self.layers.network_layer.layer,
+                            self.layers.path_layer.layer,
+                            _OID=settings["combo_oid"])
         
-        matcheur.set_parameters( settings["spin_searching_radius"],
+        matcheur.set_parameters(settings["spin_searching_radius"],
                                 settings["spin_sigma"])
 
-        
         if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching"):
             res = self.layers.match_speed(
-                    matcheur, 
-                    settings["combo_speed"], 
-                    settings["spin_stop_speed"])
+                matcheur,
+                settings["combo_speed"],
+                settings["spin_stop_speed"])
 
         elif settings["combo_algo_matching"] == self.tr("q3m.window.closest_matching"):
             res = self.layers.match_closest(matcheur)
 
         elif settings["combo_algo_matching"] == self.tr("q3m.window.distance_matching"):
             res = self.layers.match_by_distance(matcheur)
-            
+
         if res is not None:
             self.error_handler(
                 "map_matching.on_click_pre_matching." + res)
@@ -611,12 +592,11 @@ class MapMatching:
 
         path = self.layers.path_layer.layer
 
-        #applicate change to the application
+        # applicate change to the application
         self.manager.add_layer(path)
 
         self.dlg.change_button_state(4)
         self.dlg.update_matched_path_box()
-
 
     def on_click_reSelect_path(self) -> None:
         """ Select on the corrected layer the trajectory 
@@ -630,30 +610,29 @@ class MapMatching:
                 "map_matching.on_click_reSelect_path." + error)
             print("Error in map_matching.reSelect_path")
 
-
     def on_click_apply_modification(self) -> None:
         """Create a new matched path layer and add it to QGIS."""
         
         settings = self.settings.get_settings()
 
-        #Create the core class that handle the matching and set it up
+        # Create the core class that handle the matching and set it up
         matcheur = Matcheur(
-                None, 
-                self.layers.path_layer.layer, 
-                _OID = settings["combo_oid"])
+            None,
+            self.layers.path_layer.layer,
+            _OID=settings["combo_oid"])
 
         matcheur.set_parameters( 
-                settings["spin_searching_radius"],
-                settings["spin_sigma"])
+            settings["spin_searching_radius"],
+            settings["spin_sigma"])
 
-        #Start the matching after checking the input
-        if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching") :
-            #speed matching
-            error = self.layers.apply_modification( 
-                    "speed_matching",
-                    matcheur,
-                    speed_column_name= settings["combo_speed"],
-                    speed_limit = settings["spin_stop_speed"])
+        # Start the matching after checking the input
+        if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching"):
+            # speed matching
+            error = self.layers.apply_modification(
+                "speed_matching",
+                matcheur,
+                speed_column_name=settings["combo_speed"],
+                speed_limit=settings["spin_stop_speed"])
 
             if error is not None:
                 self.error_handler(
@@ -663,16 +642,16 @@ class MapMatching:
                     return
 
         else:
-            
+
             if settings["combo_algo_matching"] == self.tr("q3m.window.distance_matching") :
                 type_of_matching = "distance_matching"
             else:
                 type_of_matching = "closest_matching"
                 
-            #distance and closest matching
+            # distance and closest matching
             error = self.layers.apply_modification( 
-                    type_of_matching,
-                    matcheur)
+                type_of_matching,
+                matcheur)
             
             if error is not None:
                 self.error_handler(
@@ -683,16 +662,15 @@ class MapMatching:
 
         path = self.layers.path_layer.layer
 
-
-        #changing name to avoid confusion on QGIS
+        # changing name to avoid confusion on QGIS
         names = []
         for i in range(self.dlg.combo_matched_track.count()):
             names.append(self.dlg.combo_matched_track.itemText(i))
 
-        not_fixed =True
+        not_fixed = True
         i = -1
         path_name = ""
-        while(not_fixed):
+        while (not_fixed):
             
             i += 1
             path_name = path.name()
@@ -709,35 +687,34 @@ class MapMatching:
 
         path.setName(path_name)
 
-        #applicate change to the application
+        # applicate change to the application
         self.manager.add_layer(path)
         self.dlg.update_matched_path_box()
-
 
     def on_click_export_matched_track(self) -> None:
         """Export the Matched path selected in the comboBox."""
 
-        #Check input validity
+        # Check input validity
         if self.dlg.combo_matched_track.currentText() == "":
             self.error_handler(
                 "map_matching.on_click_export_matched_track.no_matched_layer")
             print("Error : no matched layer detected")
             return
 
-        #Get the path to the export folder
+        # Get the path to the export folder
         name = QFileDialog.getSaveFileName(
-                self.dlg,
-                "export : " + self.dlg.combo_matched_track.currentText())
-            
+            self.dlg,
+            "export : " + self.dlg.combo_matched_track.currentText())
+
         layer = self.manager.find_layer(
-                self.dlg.combo_matched_track.currentText())
-        
+            self.dlg.combo_matched_track.currentText())
+
         settings = self.settings.get_settings()
 
-        #Export
+        # Export
         try:
             QgsVectorFileWriter.writeAsVectorFormat(
-                layer,name[0],
+                layer, name[0],
                 "utf-8",
                 layer.crs(),
                 settings["combo_format"])
@@ -745,11 +722,10 @@ class MapMatching:
             self.error_handler(
                 "map_matching.on_click_export_matched_track.can't_export")
 
-    
     def on_click_export_polyline(self) -> None:
         """Export the polyline of the last matching operation."""
 
-        #Retrieve the polyline from the last matching
+        # Retrieve the polyline from the last matching
         poly = self.layers.get_polyline()
         if isinstance(poly, str):
             self.error_handler(
@@ -758,28 +734,27 @@ class MapMatching:
             return
         settings = self.settings.get_settings()
     
-        #Get the path to the export folder
+        # Get the path to the export folder
         name = QFileDialog.getSaveFileName(self.dlg,"Save polyline as: ")
 
-        #Export
+        # Export
         try:
             QgsVectorFileWriter.writeAsVectorFormat(
-                    poly, name[0], 
-                    "utf-8", poly.crs(),
-                    settings["combo_format"])
+                poly, name[0], 
+                "utf-8", poly.crs(),
+                settings["combo_format"])
         except:
             self.error_handler(
                 "map_matching.on_click_export_polyline.can't_export")
-
 
     def on_click_export_project(self) -> None:
         """Export every element of the project checked in settings."""
 
         settings = self.settings.get_settings()
 
-        #verify the checked box in the settings then add the corresponding ones
+        # verify the checked box in the settings then add the corresponding ones
         exported_layers = []
-        
+
         if settings["check_initial_path"]:
             exported_layers.append(
                 self.layers.path_layer.initial_layer)
@@ -805,18 +780,22 @@ class MapMatching:
                 print("Error in export project: No matched layer found")
             for layer in layers:
                 exported_layers.append(layer)
-            
+
         if(len(exported_layers) == 0):
             self.error_handler(
                 "map_matching.on_click_export_project.nothing_to_export")
             print("Error : nothing to export. See the export settings and check the boxes that interest you")
             return
 
-        #Get the path to the export folder
+        # Get the path to the export folder
         name = QFileDialog.getSaveFileName(
             self.dlg,"export project: ")
 
-        #Export to Shapefile : create a dir and store everything in
+        # In case the user cancel
+        if name == ("", ""):
+            return
+
+        # Export to Shapefile : create a dir and store everything in
         if settings["combo_format"] == "ESRI Shapefile":
             dir = os.path.join(name[0])
 
@@ -826,25 +805,24 @@ class MapMatching:
             try:
                 for lay in exported_layers:
                     QgsVectorFileWriter.writeAsVectorFormat(
-                            lay,
-                            name[0]+"/" + lay.name(),
-                            "utf-8", poly.crs(),
-                            "ESRI Shapefile")
+                        lay,
+                        name[0]+"/" + lay.name(),
+                        "utf-8", poly.crs(),
+                        "ESRI Shapefile")
             except:
                 self.error_handler(
                     "map_matching.on_click_export_polyline.can't_export")
-
             return
 
-        #Other format : GPKG, Export
+        # Other format : GPKG, Export
         try:
-            #setup the export
+            # setup the export
             options = QgsVectorFileWriter.SaveVectorOptions()
             options.driverName = settings["combo_format"]
             options.layerName = exported_layers[0].name()
             context = QgsProject.instance().transformContext()
 
-            #create file and write one layer inside
+            # create file and write one layer inside
             QgsVectorFileWriter.writeAsVectorFormatV2(
                 exported_layers[0], name[0],
                 context, options)

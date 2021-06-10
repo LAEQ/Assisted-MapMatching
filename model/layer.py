@@ -69,10 +69,11 @@ class Layers:
             return "layer.match_speed."+ error
 
         error = self.path_layer.speed_point_matching(matcheur,speed_column_name, speed_limit= speed_lim)
+        self.polyline = matcheur.polyline
         if error != None:
             return "layer.match_speed."+ error
 
-        self.polyline = matcheur.polyline
+
 
 
     def match_closest(self,matcheur: Matcheur):
@@ -83,10 +84,10 @@ class Layers:
             return "layer.match_closest."+ error
 
         error = self.path_layer.closest_point_matching(matcheur)
+        self.polyline = matcheur.polyline
         if error is not None:
             return "layer.match_closest." + error
 
-        self.polyline = matcheur.polyline
 
 
     def match_by_distance(self,matcheur: Matcheur):
@@ -97,6 +98,7 @@ class Layers:
             return "layer.match_by_distance."+ error
 
         error = self.path_layer.distance_point_matching(matcheur)
+        self.polyline = matcheur.polyline
         if error is not None:
             return "layer.match_by_distance."+ error
         
@@ -155,10 +157,10 @@ class Layers:
             #Distance Matching
             error = self.path_layer.distance_point_matching(matcheur)
 
+        self.polyline = matcheur.polyline
         if error != None:
                 return "layer.apply_modification." + error
 
-        self.polyline = matcheur.polyline
 
     def get_polyline(self):
         """ Return a QgsVectorLayer created from a single Linestring: 

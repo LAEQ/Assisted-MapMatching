@@ -26,10 +26,6 @@ def build_sp_index(geometries: list) :
     sp_index      -- An object of class pyqtree.Index
     """
 
-    if geometries == []:
-        #print("Error empty input value in build_sp_index")
-        return
-
     maxX = max([geom.bounds[2] for geom in geometries])
     minX = min([geom.bounds[0] for geom in geometries])
     maxY = max([geom.bounds[3] for geom in geometries])
@@ -37,7 +33,6 @@ def build_sp_index(geometries: list) :
 
     sp_index = Index((minX,minY,maxX,maxY))
     
-
     for geom in geometries : 
         sp_index.insert(geom,geom.bounds)
     
@@ -148,14 +143,9 @@ def reverse_line(line) :
     return shapely.geometry.LineString(coords)
 
 
-def get_extremites(line) : 
+def get_extremities(line) : 
     """Return a tuple with the extemities of the line."""
 
-    if( not isinstance(line, shapely.geometry.linestring.LineString) or
-        line == LineString()):
-        #print("Can't reverse " + str(type(line)) + " with reverse_line")
-        return line,None
-    
     coords = list(line.coords)
     p1 = shapely.geometry.Point(coords[0])
     p2 = shapely.geometry.Point(coords[-1]) 
@@ -173,16 +163,10 @@ def cut_line(line, points):
     lines : -- A list of LineString
     """
 
-    if( not isinstance(line, shapely.geometry.linestring.LineString) or 
-        line == LineString() ):
-        #print("Can't reverse " + str(type(line)) + " with reverse_line")
-        return None
-
     if( not isinstance(points, list) or 
         points == [] or
         not isinstance(points[0], shapely.geometry.point.Point) ):
 
-        #print("Problem with the point " + str(points) + " in reverse line")
         return [line]
         
 
@@ -218,7 +202,7 @@ def cut_line(line, points):
 
 
 
-    start,end = get_extremites(line)
+    start,end = get_extremities(line)
     if start.distance(end)<0.0001 : 
         seg = lines.pop(-1)
         pts = [shapely.geometry.Point(xy) for xy in list(seg.coords)]
@@ -314,8 +298,8 @@ def connect_lines(l1,l2) :
         l1 == LineString() ) :
         return None
 
-    s1,e1 = get_extremites(l1)
-    s2,e2 = get_extremites(l2)
+    s1,e1 = get_extremities(l1)
+    s2,e2 = get_extremities(l2)
 
     #Add a little tolerance to avoid truncation issues
     if( s2.distance(e1) != 0 and s2.distance(e1) >= 0.01 and
@@ -406,7 +390,7 @@ def SplitLoop(line) :
         line == LineString() ) :
         return None
 
-    start,end = get_extremites(line)
+    start,end = get_extremities(line)
     if start.distance(end)<0.001 : 
         pts = list(line.coords)
 
@@ -430,8 +414,8 @@ def SplitLoop(line) :
 ####################################################################################
 
 
-def build_polyline( linelayer: list, pointlayer: list, tol : float, 
-                    searching_radius : float, sigma : float ) : 
+def build_polyline(linelayer: list, pointlayer: list, searching_radius : float,
+                   sigma : float, tol : float = 15): 
     """Create a long linestring from a linelayer, points and a tolerance
        
        The tolerance is important to identify possible round-trip. 
@@ -490,7 +474,7 @@ def build_polyline( linelayer: list, pointlayer: list, tol : float,
     lines = selected_lines
     l2 = lines.pop(0)
 
-    s1,e1 = get_extremites(l2)
+    s1,e1 = get_extremities(l2)
     if s1.distance(lines[0])<e1.distance(lines[0]) : 
         c2 = list(l2.coords)
         c2.reverse()
@@ -501,8 +485,8 @@ def build_polyline( linelayer: list, pointlayer: list, tol : float,
             l2 = test
         else: 
             """Debugging tool
-            d1, f1 = get_extremites(l1) 
-            d2, f2 = get_extremites(l2)
+            d1, f1 = get_extremities(l1) 
+            d2, f2 = get_extremities(l2)
             print("-------Error: 2 lines are not connected to each other----------")
             print(d2)
             print(f2)
@@ -538,7 +522,7 @@ def build_graph(linelayer) :
 
     for feat in  linelayer2: 
         line = feat["geometry"]
-        start,end = get_extremites(line)
+        start,end = get_extremities(line)
         p1 = str(truncate(start.x,2))+"_"+str(truncate(start.y,2))
         p2 = str(truncate(end.x,2))+"_"+str(truncate(end.y,2))
         linedict[(p1,p2)]=feat

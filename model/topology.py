@@ -42,12 +42,15 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
     """
     
     # Step 1 : Extract every extremities of the lines
-    pts = [get_extremites(feat["geometry"]) for feat in linelayer]
+    pts = [get_extremities(feat["geometry"]) for feat in linelayer]
     pts = list(itertools.chain.from_iterable(pts))
     
+    if pts == []:
+        return
     # Step 2 : check for every line the presence of dangle nodes
     # If one is found: cut the line at the intersection
     sp_index = build_sp_index(pts)
+
     new_features = []
     
     for feat in linelayer : 
@@ -60,7 +63,7 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
 
         ok_candidates = [candidate for candidate in candidates if candidate.distance(line)<tolerance]
 
-        start,end = get_extremites(line)
+        start,end = get_extremities(line)
         for candidate in ok_candidates : 
             if (candidate.distance(start) > tolerance and 
                     candidate.distance(end) > tolerance): 
@@ -73,6 +76,7 @@ def deal_with_danglenodes(linelayer, tolerance = 0.01) :
         if len(cut_points) > 0 : 
 
             new_lines = cut_line(line,cut_points)
+
             for new_line in new_lines : 
 
                 dupp = feat.copy()
@@ -118,7 +122,7 @@ def deal_with_intersections(linelayer, tolerance = 0.01, digits = 3) :
                     inter_points+=list(inter.geoms)
         
 
-        start,end = get_extremites(line)
+        start,end = get_extremities(line)
         ok_inter = [truncate_coords_pts(pt,digits) for pt in inter_points if 
                     pt.distance(start)>tolerance and pt.distance(end)>tolerance]
 
@@ -148,7 +152,7 @@ def deal_with_closecall(linelayer, tolerance = 0.3, digits = 3) :
                       shapely.geometry.LineString
     """
 
-    pts = [get_extremites(feat["geometry"]) for feat in linelayer]
+    pts = [get_extremities(feat["geometry"]) for feat in linelayer]
     pts = list(itertools.chain.from_iterable(pts))
     
     conso_points = consolidate(pts, tolerance)
