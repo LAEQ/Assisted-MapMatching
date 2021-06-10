@@ -1,8 +1,8 @@
 # LAEQ-Cartographic Correlation
 
-A QGIS plugin to adjust a GPS track on a network (map-matching) semi-automatically.
+A QGIS plugin to semi-automatically adjust a GPS track on a street network (map-matching).
 <br>
-The matching is based on the librairie Leuven.MapMatching.
+The matching is based on the Leuven.MapMatching library.
 
 ## Installation
 
@@ -30,38 +30,38 @@ Dependencies:
 (Already installed on QGIS windows. You need a version lower than 1.5.17 for linux)
 
 ## Authors
-Jordy Gelb: Laboratoire d’Équité Environnemental INRS (CANADA), Email: jordygelb@gmail.com
+Jordy Gelb, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: jordygelb@gmail.com
 ## Contributors
-Phillipe Apparicio, Laboratoire d’Équité Environnemental INRS (CANADA): Email: philippe.apparicio@ucs.inrs.ca<br>
-Jeremy Gelb, Laboratoire d’Équité Environnemental INRS (CANADA), Email: jeremy.gelb@ucs.inrs.ca <br>
-David Maignan, Laboratoire d’Équité Environnemental INRS (CANADA), Email: davidmaignan@gmail.com
+Jeremy Gelb, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: jeremy.gelb@ucs.inrs.ca <br>
+David Maignan, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: davidmaignan@gmail.com
+Philippe Apparicio, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: philippe.apparicio@ucs.inrs.ca<br>
 
 ## About the plugin
 
-Matching a GPS track with a network is currently a laborious work. You need to select manually every points and place it on the correct segment.
+Matching a GPS track with a street network is currently a laborious work. You need to select manually every points and place it on the correct segment.
 This plugin automaticaly match your points on your network layer and then allow you to modify the result manually. <br>
 
-The plugin is divided into 3 parts: <br>
+The plugin is divided into three parts: <br>
 
 - ### **The Input Step or data preparation**. 
 
-This step prepare the data to facilitate the work of the map-matching algorithms. It correct the topology of the network and verify the validity of the input.
-Four fields require to be filed and two action need to be done in order to access to the next step.
+This first step prepares the data to facilitate the work of the map-matching algorithms. It corrects the topology of the street network and verify the validity of the input.
+Four fields require to be filed and two actions need to be done in order to access to the next step.
 The fields are:
 - The dropDown list Network layer. It show every layer of type **LineString** that are active on QGIS. Select the road network on which you want to adjust your GPS track. Check that it's SCR is the same as the Path layer one and that it's unit is meter
 - The dropDown list GPS trace layer. It show every layers of type **Point** that are active on QGIS. Select the GPS track that you want to adjust to a network. Check that it's SCR is the same as the Path layer one and that it's unit is meter
 - The dropDown list OID (Object indentifier). It show every attributes of type "Integer/Integer64/int/int8" present in the selected GPS trace. This field must be an unique identifier of every points and is used to order them. A point present earlier on the trace must have a smaller number than another present later.
 - The slider Buffer range. It represent the maximum distance to find lines on the selected network for each trajectory point. The bigger this value is, the longest the computing time
 
-Two functionnality are obligatory to access the next step:
+Two functionnalities are obligatory to access the next step:
 - Reduce the network : This functionnality reduce the number of lines present in the selected network. It creates a buffer around every point of the selected GPS track and then save every lines intersecting the buffer. Once done a new QGSVectorLayer stocked in memory is created and added to the interface.
 - Correct the topology : This functionnality correct potential the topology of the reduced network to prevent future errors during the map-matching phase. Four case are treated:
-    - The presence of *loop* in the network. A loop is a geometrie with it's two extremities touching each other. We split it in two at it's center.
-    - The presence of *dangle nodes*. A dangle represent the case where an extremity of a line is touching another line. We split the touched line in two part at it's contact point.
-    - The presence of *intersection*. We split the two line intersecting each other in two at their crossing point giving 4 lines in output.
-    - The presence of *close call*. A close call represent the case where 2 extremities of two lines are really close (<= 1cm) but doesn't touch each other. We merge the two point.
+- The presence of *loop* in the network. A loop is a geometrie with it's two extremities touching each other. We split it in two at it's center.
+- The presence of *dangle nodes*. A dangle represent the case where an extremity of a line is touching another line. We split the touched line in two part at it's contact point.
+- The presence of *intersection*. We split the two line intersecting each other in two at their crossing point giving 4 lines in output.
+- The presence of *close call*. A close call represent the case where 2 extremities of two lines are really close (<= 1cm) but doesn't touch each other. We merge the two points.
     
-    The user can modify parameters in the second tab.
+The user can modify parameters in the second tab.
 
 - ### **The Matching step**
 
