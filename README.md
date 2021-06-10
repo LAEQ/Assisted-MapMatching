@@ -33,13 +33,13 @@ Dependencies:
 Jordy Gelb, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: jordygelb@gmail.com
 ## Contributors
 Jeremy Gelb, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: jeremy.gelb@ucs.inrs.ca <br>
-David Maignan, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: davidmaignan@gmail.com
-Philippe Apparicio, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: philippe.apparicio@ucs.inrs.ca<br>
+David Maignan, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: davidmaignan@gmail.com<br>
+Philippe Apparicio, Laboratoire d’équité Environnementale, INRS (Montréal, Canada), Email: philippe.apparicio@ucs.inrs.ca
 
 ## About the plugin
 
-Matching a GPS track with a street network is currently a laborious work. You need to select manually every points and place it on the correct segment.
-This plugin automaticaly match your points on your network layer and then allow you to modify the result manually. <br>
+Matching a GPS track on a street network is currently a laborious work. You need to select manually every points and place it on the correct segment.
+This plugin semi-automatically map-matches your points on your network layer and then allows you to modify the result manually. <br>
 
 The plugin is divided into three parts: <br>
 
