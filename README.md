@@ -1,4 +1,4 @@
-# LAEQ-Cartographic Correlation
+# Assisted-MapMatching
 
 A QGIS plugin to semi-automatically adjust a GPS track on a street network (map-matching).
 <br>
@@ -10,7 +10,7 @@ First of all you need to open the window "Manage and Install Plugins" in the Plu
 
 [//]: # (<img src = "ressources/images/plugin_installation_1.png">) 
 
-Then enter "LAEQ-MapMatching in the searching tab", select the plugin with the same name
+Then enter "Assisted-MapMatching" in the searching tab, select the plugin with the same name
 
 [//]: # (<img src = "ressources/images/plugin_installation_2.png">)
 
@@ -109,7 +109,3 @@ The plugin isn't working? Here is a few tips to correct some error that might ha
 
 ## License
 GNU GENERAL PUBLIC LICENSE, Version 3, 29 June 2007
-
-
-
-
