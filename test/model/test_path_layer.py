@@ -36,7 +36,6 @@ class TestPathLayer(unittest.TestCase):
         result = self.path_layer.create_buffer(10)
         self.assertEqual(type(self.path_layer.initial_layer),type(result))
 
-
     def test_merge_coordinate_points(self):
         
         #attention a ne pas avoir un des fichiers de point ouvert autre part (qgis inclut)
@@ -152,7 +151,6 @@ class TestPathLayer(unittest.TestCase):
             pt = f.geometry().asPoint()
             self.assertEqual([0,0],[pt.x(),pt.y()])
 
-
     def test_closest_point_matching(self):
         matcheur = Matcheur(None,None,None)
         matcheur.snap_point_to_closest = MagicMock(return_value = ("test",[]))
@@ -160,13 +158,11 @@ class TestPathLayer(unittest.TestCase):
         self.assertEqual("path.closest_point_matching.test", 
                         result)
 
-
     def distance_point_matching(self):
         matcheur = Matcheur(None,None,None)
         matcheur.snap_point_by_distance = MagicMock(return_value = ("test", []))
         result = self.path_layer.distance_point_matching(matcheur)
         self.assertEqual("path.distance_point_matching.test", result)
-
 
 if __name__ == "__main__":
     suite = unittest.makeSuite(TestPathLayer)

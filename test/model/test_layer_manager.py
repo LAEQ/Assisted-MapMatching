@@ -15,12 +15,10 @@ class TestLayerManager(unittest.TestCase):
         self.manager = LayerManager()
         self.fixtures = LayerFixtures()
 
-
     def test_set_layers(self):
         layers = self.fixtures.points_and_networks()
         self.manager.set_layers(layers)
         self.assertEqual(4, len(self.manager.layers))
-
 
     def test_add_layers(self):
         layer = self.fixtures.points_1()
@@ -28,7 +26,6 @@ class TestLayerManager(unittest.TestCase):
         layer = self.fixtures.network_1()
         self.manager.add_layer(layer)
         self.assertEqual(2, len(self.manager.layers))
-
 
     def test_remove_layer(self):
         layers = self.fixtures.points_and_networks()
@@ -41,7 +38,6 @@ class TestLayerManager(unittest.TestCase):
         self.manager.remove_layer(0)
         self.assertEqual(2, len(self.manager.layers))
 
-
     def test_remove_layer_index_error(self):
         layers = self.fixtures.points_and_networks()
         self.manager.set_layers(layers)
@@ -49,7 +45,6 @@ class TestLayerManager(unittest.TestCase):
 
         self.manager.remove_layer(4)
         self.assertEqual(4, len(self.manager.layers))
-
 
     def test_remove_layer_from_name(self):
         layers = self.fixtures.points_and_networks()
@@ -75,7 +70,6 @@ class TestLayerManager(unittest.TestCase):
 
         self.assertEqual(2, len(self.manager.get_path_layers()))
         self.assertEqual(2, len(self.manager.get_network_layers()))
-
 
     def test_get_matched_layers(self):
         layers = self.fixtures.points_and_networks()
@@ -111,7 +105,6 @@ class TestLayerManager(unittest.TestCase):
         result = self.manager.get_matched_layers()
         self.assertEqual(3, len(result))
 
-
     def test_get_path_attributes(self):
         layers = self.fixtures.points()
         self.manager.set_layers(layers)
@@ -121,17 +114,14 @@ class TestLayerManager(unittest.TestCase):
         fields = self.manager.get_path_attributes(1)
         self.assertEqual(5, len(fields))
 
-
     def test_get_path_attributes_index_out_range(self):
         fields = self.manager.get_path_attributes(1)
         self.assertEqual(0, len(fields))
-
 
     def test_load_file_points_file(self):
         path = os.path.join(self.cur_dir, os.pardir, "fixtures", "points_2.geojson")
         self.manager.load_layer(path)
         self.assertEqual(1, len(self.manager.layers))
-
 
     def test_is_path_layer(self):
         layer = self.fixtures.points_1()
@@ -150,7 +140,6 @@ class TestLayerManager(unittest.TestCase):
         result = LayerManager.is_path_layer(layer)
         self.assertFalse(result)
 
-
     def test_is_network_layer(self):
         layer = self.fixtures.network_1()
         result = LayerManager.is_network_layer(layer)
@@ -168,7 +157,6 @@ class TestLayerManager(unittest.TestCase):
         result = LayerManager.is_network_layer(layer)
         self.assertFalse(result)
 
-
     def test_is_valid(self):
         layer = self.fixtures.network_1()
         result = LayerManager.is_valid(layer)
@@ -178,7 +166,6 @@ class TestLayerManager(unittest.TestCase):
         result = LayerManager.is_valid(layer)
         self.assertTrue(result)
     
-
     def test_are_valid(self):
         network = self.fixtures.network_1()
         path = self.fixtures.points_1()
@@ -201,10 +188,6 @@ class TestLayerManager(unittest.TestCase):
         result = LayerManager.are_valid(network,path)
         self.assertTrue(result)
 
-
-
-    
-
     def test_find_layer(self):
         layers = self.fixtures.points_and_networks()
         self.manager.set_layers(layers)
@@ -216,10 +199,6 @@ class TestLayerManager(unittest.TestCase):
         #test on non existing value
         layer = self.manager.find_layer("test")
         self.assertEqual(None,layer)
-
-    
-
-        
 
 
 if __name__ == "__main__":
