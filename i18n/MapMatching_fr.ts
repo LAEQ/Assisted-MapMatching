@@ -41,7 +41,7 @@
 
     <message>
         <source>q3m.window.tab.main</source>
-        <translation >Matcheur</translation>
+        <translation >Processus</translation>
     </message>
     
     <message>
@@ -60,7 +60,7 @@
 
     <message>
         <source>q3m.window.group.input</source>
-        <translation >Etape 1 : Entrées</translation>
+        <translation >Etape 1 : Préparation des données</translation>
     </message>
 
     <message>
@@ -80,7 +80,7 @@
 
     <message>
         <source>q3m.window.label.speed</source>
-        <translation >Vitesse</translation>
+        <translation >Champ pour la vitesse</translation>
     </message>
 
     <message>
@@ -90,7 +90,7 @@
 
     <message>
         <source>q3m.window.btn.reload.layers</source>
-        <translation >Reload</translation>
+        <translation >Rechargement</translation>
     </message>
 
     <message>
@@ -148,7 +148,7 @@
 
     <message>
         <source>q3m.window.group.export</source>
-        <translation >Etape 3 : Exportation</translation>
+        <translation >Etape 3 : Exportation des résultats</translation>
     </message>
 
     <message>
@@ -163,7 +163,7 @@
 
     <message>
         <source>q3m.window.btn.export.project</source>
-        <translation >Exporter le projet</translation>
+        <translation >Exporter projet</translation>
     </message>
 
     <message>
@@ -205,7 +205,7 @@
 
     <message>
         <source>q3m.window.group.matching.settings</source>
-        <translation >Tolérance pour le processus d'appariement spatiale</translation>
+        <translation >Tolérance pour le processus d'appariement spatial</translation>
     </message>
 
     <message>
