@@ -90,8 +90,8 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.manager.get_path_attributes = MagicMock(return_value=magic_fields)
         self.dialog.update_layer_box()
         self.dialog.combo_path.setCurrentIndex(1)
-        #2 because points_fields_1 has only 2 fields of type integer /integer48...
-        self.assertEqual(2, self.dialog.combo_oid.count())
+        #1 because points_fields_1 has only 1 field of type integer /integer48...
+        self.assertEqual(1, self.dialog.combo_oid.count())
 
 
     def test_restore_state(self):
@@ -101,20 +101,20 @@ class MapMatchingDialogTest(unittest.TestCase):
         self.manager.get_network_layers = MagicMock(return_value=magic_network)
         self.dialog.update_layer_box()
 
-        self.dialog.manager.selected_path = "points_2.gpkg"
-        self.dialog.manager.selected_network = "network_2.gpkg"
-        self.dialog.manager.OID = "fid"
+        self.dialog.manager.selected_path = "points_2.geojson"
+        self.dialog.manager.selected_network = "network_1.geojson"
+        self.dialog.manager.OID = "OID"
         self.dialog.manager.speed = "Speed"
 
         self.dialog.combo_path.setCurrentText("")
 
         self.dialog.restore_state()
 
-        self.assertEqual("points_2.gpkg", 
+        self.assertEqual("points_2.geojson", 
                          self.dialog.combo_path.currentText())
-        self.assertEqual("network_2.gpkg", 
+        self.assertEqual("network_1.geojson", 
                          self.dialog.combo_network.currentText())
-        self.assertEqual("fid", 
+        self.assertEqual("OID", 
                          self.dialog.combo_oid.currentText())
         self.assertEqual("Speed", 
                          self.dialog.combo_speed.currentText())

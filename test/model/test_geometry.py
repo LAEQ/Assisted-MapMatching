@@ -2,34 +2,28 @@ import os
 import unittest
 
 try:
-    import shapely
     from shapely.geometry import LineString, Point
 except:
     print("Couldn't import shapely.")
 
 from model.utils.geometry import *
-
 from test.utilities import get_qgis_app
-from types import SimpleNamespace
 QGIS_APP = get_qgis_app()
 
 
 class TestGeometry(unittest.TestCase):
     def setUp(self) -> None:
-        
         self.cur_dir = os.path.dirname(__file__)
-
-
 
     def create_test_geometries(self):
         """build geometries, on x and y: min = 0, max = 10"""
 
-        geometries = [  LineString([(0,0),(10,10)]),
-                        LineString([(1,1),(9,9)]),
-                        LineString([(2,2),(8,8)]),
-                        LineString([(3,3),(7,7)]),
-                        LineString([(4,4),(6,6)]),
-                        LineString([(5,5),(5,5)])]
+        geometries = [LineString([(0,0), (10,10)]),
+                      LineString([(1,1), (9,9)]),
+                      LineString([(2,2), (8,8)]),
+                      LineString([(3,3), (7,7)]),
+                      LineString([(4,4), (6,6)]),
+                      LineString([(5,5), (5,5)])]
         return geometries
 
     def create_test_points(self):
@@ -40,20 +34,10 @@ class TestGeometry(unittest.TestCase):
                         Point(2,2),
                         Point(3,3),
                         Point(4,4),
-                        Point(5,5) ]
+                        Point(5,5)]
         return geometries
 
-
     def test_build_sp_index(self):
-
-        #empty geometries
-        geometries = []
-
-        res = build_sp_index(geometries)
-
-        self.assertEqual(None, res)
-
-        
         geometries = self.create_test_geometries()
 
         res = build_sp_index(geometries)
@@ -77,7 +61,6 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual("geometry.nearest_geometry.no_candidate_found", res)
 
         #None values:
-
         res = nearest_geometry(None,index,15)
         self.assertEqual("geometry.nearest_geometry.invalid_input", res)
 
@@ -107,7 +90,6 @@ class TestGeometry(unittest.TestCase):
         res = mean_point([], 1)
         self.assertEqual("geometry.mean_point.empty_list", res)
 
-    
     def test_truncate(self):
         #NB: tester si nombre inexistant?
 
@@ -122,7 +104,6 @@ class TestGeometry(unittest.TestCase):
 
         num = truncate(3.1452,10)
         self.assertEqual(3.1452 ,num)
-
 
     def test_truncate_coords(self):
         #Add test on type : linestring?
@@ -147,9 +128,6 @@ class TestGeometry(unittest.TestCase):
         res = truncate_coords(Point(3,3), 3)
         self.assertEqual(Point(3,3),res)
 
-
-
-
     def test_truncate_coords_pts(self):
         #Add test on type : linestring?
         point = Point(3.14,12.550)
@@ -172,7 +150,6 @@ class TestGeometry(unittest.TestCase):
         res = truncate_coords_pts(LineString([(3,3),(2,2)]), 3)
         self.assertEqual(LineString([(3,3),(2,2)]),res)
 
-        
     def test_reverse_line(self):
         #je test le cas ou line = LineString()?
         #normal case
@@ -186,17 +163,12 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual("geometry.reverse_line.empty_lineString", res)
         """
 
-    def test_get_extremites(self):
+    def test_get_extremities(self):
 
         #normal case
         line = LineString([(0,0),(1,1),(2,2),(3,3)])
-        resA, resB = get_extremites(line)
+        resA, resB = get_extremities(line)
         self.assertEqual( [Point(0,0),Point(3,3)] , [resA, resB] )
-        
-        #Not a lineString in parameter
-        point = Point(2,3)
-        resA, resB = get_extremites(point)
-        self.assertEqual( [Point(2,3),None] , [resA, resB] )
 
     def test_cut_line(self):
 
@@ -213,18 +185,8 @@ class TestGeometry(unittest.TestCase):
         expected_result = [ LineString([(0,0),(1,1)]),
                             LineString([(1,1),(2,2),(3,3),(4,4)]),
                             LineString([(4,4),(5,5)])] 
-
+                            
         self.assertEqual(expected_result,res)
-
-        #wrong input line lineString
-        res = cut_line(LineString(),points)
-        self.assertEqual(None,res)
-
-        res = cut_line(None,points)
-        self.assertEqual(None,res)
-
-        res = cut_line(Point(2,3),points)
-        self.assertEqual(None,res)
 
         #wrong point input
         res = cut_line(line,[])
@@ -236,13 +198,11 @@ class TestGeometry(unittest.TestCase):
         res = cut_line(line,[LineString()])
         self.assertEqual([line],res)
 
-
     def test_cut_line_between(self):
         line = LineString([ (0,0),
                             (2,2),
                             (3,3),
                             (5,5)])
-
         #normal case
         p1 = Point(1,1)
         p2 = Point(4,4)
@@ -271,7 +231,6 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(expected_result, res)
 
         #out of line (projected)
-
         p1 = Point(2,1)
         p2 = Point(3,2)
 
@@ -291,7 +250,6 @@ class TestGeometry(unittest.TestCase):
 
         res = cut_line_between(line,p1,None)
         self.assertEqual([line], res)
-
 
     def test_to_simple_lines(self):
 
@@ -316,7 +274,6 @@ class TestGeometry(unittest.TestCase):
         res = to_simple_lines(LineString())
         self.assertEqual([LineString()], res)
 
-
     def test_connect_lines(self):
         
         #verifier que les deux lignes se touchent
@@ -336,21 +293,17 @@ class TestGeometry(unittest.TestCase):
         l2 = LineString([(2,2),(3,3)])
 
         res = connect_lines(l1,l2)
-
-        
         self.assertEqual(None, res)
-        
-        
+
         #wrong input:
         res = connect_lines(None,l2)
         self.assertEqual(None, res)
 
         res = connect_lines(l1,None)
         self.assertEqual(None, res)
-        
-        
+
     def test_to_lixels(self):
-        
+
         #corriger : supprimer same cote à cote
 
         #Normal case
@@ -380,12 +333,7 @@ class TestGeometry(unittest.TestCase):
 
         self.assertEqual([l1],res)
 
-
-
     def test_consolidate(self):
-        #pbm
-        
-        
         points = [  Point(0,0),
                     Point(0,1),
                     Point(0,0.3),
@@ -395,30 +343,19 @@ class TestGeometry(unittest.TestCase):
 
         res = consolidate(points)
 
-        
-    
     def test_splitLoop(self):
 
         #normal case
         loop = LineString([(0,0),(5,0),(5,5),(0,5),(0,0)])
-
         res = SplitLoop(loop)
 
-        expected_result = [ LineString([(0,0),(5,0)]),
-                            LineString([(5,5),(0,5),(0,0)]) ]
+        expected_result = [LineString([(0,0),(5,0),(5,5)]),
+                           LineString([(5,5),(0,5),(0,0)])]
 
         self.assertEqual(expected_result, res)
-
         #not a splitLoop
         loop = LineString([(0,0),(5,0),(5,5),(0,5)])
-
         res = SplitLoop(loop)
-
         expected_result = [ loop ]
 
         self.assertEqual(expected_result, res)
-
-        #wrong input:
-        res = SplitLoop(None)
-        self.assertEqual(None, res)
-

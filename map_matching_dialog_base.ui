@@ -667,6 +667,9 @@
       <property name="text">
        <string>initial path layer</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QCheckBox" name="check_polyline">
       <property name="geometry">
@@ -679,6 +682,9 @@
       </property>
       <property name="text">
        <string>Polyline</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QCheckBox" name="check_corrected_network">
@@ -693,6 +699,9 @@
       <property name="text">
        <string>Corrected network layer</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
      <widget class="QCheckBox" name="check_matched_path">
       <property name="geometry">
@@ -705,6 +714,9 @@
       </property>
       <property name="text">
        <string>Matched path layer</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>

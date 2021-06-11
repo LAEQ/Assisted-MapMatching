@@ -10,21 +10,18 @@ from test.utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 class TestMatcheur(unittest.TestCase):
+
     def setUp(self) -> None:
         self.cur_dir = os.path.dirname(__file__)
         self.fixtures = LayerFixtures()
         self.matcheur = Matcheur()
 
-
     def test_set_parameters(self):
-
         self.matcheur.set_parameters(12.5, 0.3)
         self.assertEqual(12.5, self.matcheur.searching_radius)
         self.assertEqual(0.3, self.matcheur.sigma)
 
-
     def test_set_layers(self):
-        
         l1 = self.fixtures.network_1()
         l2 = self.fixtures.points_1()
 
@@ -44,7 +41,6 @@ class TestMatcheur(unittest.TestCase):
         self.matcheur.sigma = 10
 
         res = self.matcheur.verify_input()
-
         self.assertEqual(True, res)
 
         #searching radius = 0
@@ -74,32 +70,3 @@ class TestMatcheur(unittest.TestCase):
         self.matcheur.sigma = -10
         res = self.matcheur.verify_input()
         self.assertEqual("matcheur.error_sigma", res)
-
-    def test_find_best_path_in_network(self):
-        #Every test related to verify sigma and searching_radius 
-        #have been made in the precedent test
-
-        #wrong input
-        l1 = None
-        l2 = self.fixtures.points_1()
-
-        self.matcheur = Matcheur(l1, l2, "fid")
-        self.matcheur.set_parameters(45,5)
-
-        layerTraductor.from_vector_layer_to_list_of_dict = MagicMock(return_value = "test")
-
-        res = self.matcheur.find_best_path_in_network()
-        expected_result = "matcheur.find_best_path_in_network.test"
-        self.assertEqual(expected_result, res)
-
-        layerTraductor.from_vector_layer_to_list_of_dict = MagicMock(return_value = [])
-        layerTraductor.order_list_of_dict = MagicMock(return_value = "test2")
-        res = self.matcheur.find_best_path_in_network()
-        expected_result = "matcheur.find_best_path_in_network.test2"
-        self.assertEqual(expected_result, res)
-
-        
-
-    
-
-

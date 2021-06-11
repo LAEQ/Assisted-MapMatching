@@ -11,7 +11,18 @@ from .utils.geometry import *
 
 
 class Matcheur:
+    """This class do the matching between the Network and the Path layer.
+    
+    Parameters:
+    network_layer: An object of type QgsVectorLayer. It represent the corrected layer present on QGIS
+    path_layer: An object of type QgsVectorLayer. Represent the path selected for the process
+    OID: A string representing the name of the column with the unique identifier for every points
+    
+    searching_radius: A float representing the searching radius of the matching algorithm around every points
+    sigma: A float which is a parameter in the map-matching algorithm
 
+    polyline: A long geometry of type LineString representing the path used by the cyclist
+    """
 
     def __init__(self, _network_layer : QgsVectorLayer = None, 
                  _path_layer : QgsVectorLayer = None, _OID = "OID"):
@@ -60,15 +71,15 @@ class Matcheur:
             return res
 
         #Convertion to shapely dict
-        linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
+        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
         if isinstance(linelayer, str):
             return "matcheur.find_best_path_in_network." + linelayer
 
-        pointlayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
+        pointlayer = from_vector_layer_to_list_of_dict(self.path_layer)
         if isinstance(pointlayer,str):
             return "matcheur.find_best_path_in_network." + pointlayer
 
-        pointlayer = layerTraductor.order_list_of_dict(pointlayer,self.OID)
+        pointlayer = order_list_of_dict(pointlayer,self.OID)
         if isinstance(pointlayer,str):
             return "matcheur.find_best_path_in_network." +pointlayer
 
@@ -107,7 +118,7 @@ class Matcheur:
         if len(selected_lines) == 0:
             return "matcheur.find_best_path_in_network.empty_best_path"
         #The road tha algorithm think the user took
-        self.network_layer = layerTraductor.from_list_of_dict_to_layer(
+        self.network_layer = from_list_of_dict_to_layer(
                 selected_lines,
                 self.network_layer)
 
@@ -131,16 +142,22 @@ class Matcheur:
             return res , []
 
         #to dict : No need to check for the outPut result: we controll the input before
-        linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
-        pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
-        pointslayer = layerTraductor.order_list_of_dict(pointslayer,self.OID)
+        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
+        pointslayer = from_vector_layer_to_list_of_dict(self.path_layer)
+        pointslayer = order_list_of_dict(pointslayer,self.OID)
+
+        if isinstance(linelayer, str):
+            return "matcheur.snap_points_along_line." + linelayer
+
+        if isinstance(pointslayer, str):
+            return "matcheur.snap_points_along_line." + pointslayer
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
             return "macheur.snap_points_along_line.empty_layer", []
 
 
-        polyline = build_polyline(linelayer, pointslayer, 15, 
+        polyline = build_polyline(linelayer, pointslayer,
                                   self.searching_radius, self.sigma)
         if polyline is None:
             return ("matcheur.snap_points_along_line.empty_polyline", [])
@@ -273,18 +290,22 @@ class Matcheur:
         """Snap point to the closest location on the polyline."""
         
         #Conversion to shapely dict
-        linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
-        pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
+        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
+        pointslayer = from_vector_layer_to_list_of_dict(self.path_layer)
+        pointslayer = order_list_of_dict(pointslayer,self.OID)
 
-        pointslayer = layerTraductor.order_list_of_dict(pointslayer,self.OID)
+        if isinstance(linelayer, str):
+            return "matcheur.snap_point_to_closest." + linelayer
 
+        if isinstance(pointslayer, str):
+            return "matcheur.snap_point_to_closest." + pointslayer
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
             return ("matcheur.snap_point_to_closest.empty_layer",[]) 
 
         #Construction of the polyline
-        polyline = build_polyline(linelayer, pointslayer, 15, 
+        polyline = build_polyline(linelayer, pointslayer, 
                                   self.searching_radius, self.sigma)
         if polyline is None:
             print("The polyline obtained is empty, please check your parameters")
@@ -305,7 +326,7 @@ class Matcheur:
 
         if len(too_far_list)>0:
             too_far_list.append(len(pointslayer))
-        return layerTraductor.from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point to closest"), too_far_list
+        return from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point to closest"), too_far_list
 
 
     def snap_point_by_distance(self):
@@ -313,18 +334,22 @@ class Matcheur:
            taking into account the distance between every points."""
 
         #Conversion to shapely dict
-        linelayer = layerTraductor.from_vector_layer_to_list_of_dict(self.network_layer)
-        pointslayer = layerTraductor.from_vector_layer_to_list_of_dict(self.path_layer)
-        pointslayer = layerTraductor.order_list_of_dict(pointslayer, self.OID)
+        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
+        pointslayer = from_vector_layer_to_list_of_dict(self.path_layer)
+        pointslayer = order_list_of_dict(pointslayer, self.OID)
 
-        
+        if isinstance(linelayer, str):
+            return "matcheur.snap_point_by_distance." + linelayer
+
+        if isinstance(pointslayer, str):
+            return "matcheur.snap_point_by_distance." + pointslayer
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
             return ("matcheur.snap_point_by_distance.empty_layer",[]) 
 
         #Building the polyline
-        polyline = build_polyline(linelayer, pointslayer, 15, 
+        polyline = build_polyline(linelayer, pointslayer,
                                   self.searching_radius, self.sigma)
         if polyline is None:
             return ("matcheur.snap_point_by_distance.empty_polyline",[])
@@ -362,7 +387,7 @@ class Matcheur:
         
         if len(too_far_list)>0: 
             too_far_list.append(len(pointslayer))
-        return layerTraductor.from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point by distance"), too_far_list
+        return from_list_of_dict_to_layer(pointslayer,self.path_layer,"Point", "matched point by distance"), too_far_list
             
 
 

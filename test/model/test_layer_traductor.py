@@ -4,8 +4,7 @@ import unittest
 from qgis.core import QgsFeature, QgsPointXY
 
 try:
-    import shapely
-    from shapely.geometry import LineString, Point
+    from shapely.geometry import Point
 except:
     print("Couldn't import shapely.")
 
@@ -16,10 +15,10 @@ from test.utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 class TestLayerTraductor(unittest.TestCase):
+
     def setUp(self) -> None:
         self.cur_dir = os.path.dirname(__file__)
         self.fixtures = LayerFixtures()
-
 
     def test_from_vector_layer_to_list_of_dict(self):
 
@@ -36,7 +35,7 @@ class TestLayerTraductor(unittest.TestCase):
 
         layer.dataProvider().addFeatures(features)
 
-        res = layerTraductor.from_vector_layer_to_list_of_dict(layer)
+        res = from_vector_layer_to_list_of_dict(layer)
 
         expected_result = [ 
             {"id" : 0 , "name" : 'TEST', "oid " : 0, "speed": 3.14, "geometry": Point(0,0)},
@@ -49,9 +48,8 @@ class TestLayerTraductor(unittest.TestCase):
 
         #wrong input
 
-        res = layerTraductor.from_vector_layer_to_list_of_dict(None)
+        res = from_vector_layer_to_list_of_dict(None)
         self.assertEqual("layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer", res)
-
 
     def test_from_list_of_dict_to_layer(self):
 
@@ -62,14 +60,12 @@ class TestLayerTraductor(unittest.TestCase):
             {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
             {"id" : 3 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}
             ]
-        
-        
 
-        res = layerTraductor.from_list_of_dict_to_layer(
+        res = from_list_of_dict_to_layer(
                 feat_list, 
                 self.fixtures.generate_vector_path_4_fields(), 
                 "Point")
-        
+
         i = 0
         for feat in res.getFeatures():
             expected_result = [i,'TEST',i,3.14,0,0]
@@ -79,13 +75,10 @@ class TestLayerTraductor(unittest.TestCase):
             liste_result = [feat["id"], feat["name"], 
                             feat["oid "], feat["speed"], 
                             geom.x(), geom.y()]
-            
+
             i+=1
             self.assertEqual(expected_result, liste_result)
 
-
-
-    
     def test_order_list_of_dict(self):
 
         #normal test
@@ -95,7 +88,7 @@ class TestLayerTraductor(unittest.TestCase):
             {"id" : 2 , "name" : 'TEST', "oid " : 2, "speed": 3.14, "geometry": Point(0,0)},
             {"id" : 0 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)}]
         
-        res = layerTraductor.order_list_of_dict(feat_list, "id")
+        res = order_list_of_dict(feat_list, "id")
 
         expected_result = [ 
             {"id" : 0 , "name" : 'TEST', "oid " : 3, "speed": 3.14, "geometry": Point(0,0)},
@@ -107,22 +100,19 @@ class TestLayerTraductor(unittest.TestCase):
         self.assertEqual(expected_result, res)
 
         #already sorted test
-        res = layerTraductor.order_list_of_dict(feat_list, "oid ")
+        res = order_list_of_dict(feat_list, "oid ")
 
         self.assertEqual(feat_list,res)
 
         #wrong input test
-        res = layerTraductor.order_list_of_dict(None, "oid ")
+        res = order_list_of_dict(None, "oid ")
         self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",
                         res)
 
-        res = layerTraductor.order_list_of_dict([], "oid ")
+        res = order_list_of_dict([], "oid ")
         self.assertEqual("layer_traductor.order_list_of_dict.error_feat_list",
                         res)
 
-        res = layerTraductor.order_list_of_dict(feat_list, "ERROR")
+        res = order_list_of_dict(feat_list, "ERROR")
         self.assertEqual("layer_traductor.order_list_of_dict.wrong_oid_column",
                         res)
-
-        
-

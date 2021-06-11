@@ -1,6 +1,6 @@
-
-
 class Button_manager():
+
+    """This class has functions that controll the interface state"""
 
     def __init__(self,_dlg) -> None:
         self.dlg = _dlg
