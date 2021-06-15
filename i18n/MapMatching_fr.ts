@@ -26,12 +26,12 @@
 
     <message>
         <source>q3m.window.title</source>
-        <translation>Assisted MapMatching</translation>
+        <translation>Assisted-MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.toolbar.title</source>
-        <translation>Assisted MapMatching</translation>
+        <translation>Assisted-MapMatching</translation>
     </message>
 
     <message>
@@ -41,7 +41,7 @@
 
     <message>
         <source>q3m.window.tab.main</source>
-        <translation >Matcheur</translation>
+        <translation >Processus</translation>
     </message>
     
     <message>
@@ -60,17 +60,17 @@
 
     <message>
         <source>q3m.window.group.input</source>
-        <translation >Etape 1 : Entrées</translation>
+        <translation >Étape 1 : Préparation des données</translation>
     </message>
 
     <message>
         <source>q3m.window.label.network</source>
-        <translation >Couche pour le réseau</translation>
+        <translation >Couche représentant le réseau</translation>
     </message>
 
     <message>
         <source>q3m.window.label.path</source>
-        <translation >Couche pour la Trace GPS</translation>
+        <translation >Couche représentant la trace GPS</translation>
     </message>
 
     <message>
@@ -80,7 +80,7 @@
 
     <message>
         <source>q3m.window.label.speed</source>
-        <translation >Vitesse</translation>
+        <translation >Champ de vitesse</translation>
     </message>
 
     <message>
@@ -90,7 +90,7 @@
 
     <message>
         <source>q3m.window.btn.reload.layers</source>
-        <translation >Reload</translation>
+        <translation >Rechargement</translation>
     </message>
 
     <message>
@@ -109,22 +109,22 @@
 
     <message>
         <source>q3m.window.group.matching</source>
-        <translation >Etape 2 : Appariement spatiale</translation>
+        <translation >Étape 2 : Appariement spatial</translation>
     </message>
 
     <message>
         <source>q3m.window.distance_matching</source>
-        <translation >Appareiller par distance</translation>
+        <translation >selon la distance</translation>
     </message>
 
     <message>
         <source>q3m.window.speed_matching</source>
-        <translation >Appareiller par vitesse</translation>
+        <translation >selon la vitesse</translation>
     </message>
     
     <message>
         <source>q3m.window.closest_matching</source>
-        <translation >Appareiller au plus près</translation>
+        <translation >au plus près</translation>
     </message>
 
     <message>
@@ -139,7 +139,7 @@
 
     <message>
         <source>q3m.window.btn.apply.path.change</source>
-        <translation >Appliquer les modifications</translation>
+        <translation >Appliquer les modifications aux points</translation>
     </message>
 
 
@@ -148,7 +148,7 @@
 
     <message>
         <source>q3m.window.group.export</source>
-        <translation >Etape 3 : Exportation</translation>
+        <translation >Étape 3 : Exportation des résultats</translation>
     </message>
 
     <message>
@@ -168,7 +168,7 @@
 
     <message>
         <source>q3m.window.btn.reset</source>
-        <translation >Reset</translation>
+        <translation >Réinitialiser</translation>
     </message>
 
 
@@ -177,7 +177,7 @@
 
     <message>
         <source>q3m.window.label.speed_limit</source>
-        <translation >Limite de vitesse à l'arrêt</translation>
+        <translation >Limite de vitesse pour les points à l'arrêt</translation>
     </message>
 
 
@@ -191,12 +191,12 @@
 
     <message>
         <source>q3m.window.label.close_call</source>
-        <translation >Seuil de distance pour la proximité entre les points</translation>
+        <translation >Seuil de tolérance pour la proximité entre les nœuds</translation>
     </message>
 
     <message>
         <source>q3m.window.label.intersection</source>
-        <translation >Intersection et Dangle Nodes</translation>
+        <translation >Seuil de tolérance pour les intersections et nœuds pendants</translation>
     </message>
 
 
@@ -205,7 +205,7 @@
 
     <message>
         <source>q3m.window.group.matching.settings</source>
-        <translation >Tolérance pour le processus d'appariement spatiale</translation>
+        <translation >Tolérance pour le processus d'appariement spatial</translation>
     </message>
 
     <message>
@@ -224,7 +224,7 @@
 
     <message>
         <source>q3m.window.group.export.settings</source>
-        <translation >Configuration de l'exportation</translation>
+        <translation >Configuration des exportations</translation>
     </message>
 
     <message>
@@ -249,7 +249,7 @@
 
     <message>
         <source>q3m.window.check.matched.path</source>
-        <translation >Trace GPS appareillée</translation>
+        <translation >Trace GPS appariée</translation>
     </message>
 
 
@@ -265,7 +265,7 @@
 
     <message>
         <source>q3m.error.import</source>
-        <translation >Il y a un problème avec les imports. Se référer à la documentation pour plus de détail sur l'erreur</translation>
+        <translation >Il y a un problème avec les importations. Se référer à la documentation pour plus de détails sur l'erreur</translation>
     </message>
 
 
@@ -277,12 +277,12 @@
 
     <message>
         <source>q3m.error.pre_algo_layer_deletion</source>
-        <translation >Il est conseillé de cliquer sur RELOAD pour éviter d'avoir des valeurs désormais inexistantes dans les comboBox</translation>
+        <translation >Il est conseillé de cliquer sur le bouton recharger pour refraichir les valeurs dans les combo-box</translation>
     </message>
 
     <message>
         <source>q3m.error.post_algo_layer_deletion</source>
-        <translation >Merci de ne pas supprimer des éléments au milieu du traitement. Appuyer sur RESET pour revenir à 0</translation>
+        <translation >Merci de ne pas supprimer des éléments au milieu du traitement. Appuyer sur le bouton réinitialiser pour reprendre depuis le début</translation>
     </message>
 
 
@@ -291,17 +291,17 @@
 
     <message>
         <source>q3m.error.missing_input</source>
-        <translation >Une des comboBox est vide. Merci de la remplir en important une couche de type point ou LineString</translation>
+        <translation >Une des combo-box est vide. Merci de la remplir en important une couche de type points ou lignes</translation>
     </message>
 
     <message>
         <source>q3m.error.can't_find_layer</source>
-        <translation >Impossible de trouver une des couches renseignés dans une des boites, essayer de cliquer sur reload pour supprimer les choix inexistants</translation>
+        <translation >Impossible de trouver une des couches renseignées dans une des boites, essayer de cliquer sur recharger pour supprimer les choix inexistants</translation>
     </message>
 
     <message>
         <source>q3m.error.invalid_layer</source>
-        <translation >Une de vos couches présente une anomalie: vérifier leur système de projection. Se référer à la documentation pour plus d'explication</translation>
+        <translation >Une de vos couches présente une anomalie : vérifier leur système de projection cartographique. Se référer à la documentation pour plus d'explications</translation>
     </message>
 
 
@@ -310,7 +310,7 @@
 
     <message>
         <source>q3m.error.no_layer</source>
-        <translation >La classe mère du plugin: Layers n'a pas été instancié. Pour corriger ce problème: relancer le plugin et réduire le réseau</translation>
+        <translation >La classe mère du plugin (Layers) n'a pas été instanciée. Pour corriger ce problème, relancer le plugin et réduire le réseau</translation>
     </message>
 
 
@@ -319,7 +319,7 @@
 
     <message>
         <source>q3m.error.no_matched_layer</source>
-        <translation >Aucune couche matchée détecté. Une couche devrait automatiquement apparaître après avoir lancé le pré-appariement</translation>
+        <translation >Aucune couche matchée détectée. Une couche devrait automatiquement apparaître après avoir lancé le pré-appariement</translation>
     </message>
 
     <message>
@@ -329,7 +329,7 @@
 
     <message>
         <source>q3m.error.nothing_to_export</source>
-        <translation >Rien à exporter. Merci de cocher au moins une case dans les paramètres d'exportations présents dans le second onglet </translation>
+        <translation >Rien à exporter. Merci de cocher au moins une case dans les paramètres d'exportation présents dans le second onglet</translation>
     </message>
 
 
@@ -348,7 +348,7 @@
 
     <message>
         <source>q3m.error.no_path_registered</source>
-        <translation >Impossible de sélectionner la route empruntée par l'utilisateur: celle-ci n'a pas été créée</translation>
+        <translation >Impossible de sélectionner la route empruntée. Celle-ci n'a pas été créée</translation>
     </message>
 
     <message>
@@ -367,7 +367,7 @@
 
     <message>
         <source>q3m.error.wrong_speed_column</source>
-        <translation >Impossible de trouver la colonne d'attribut renseigné dans la couche de point </translation>
+        <translation >Impossible de trouver la colonne d'attribut renseignée dans la couche de points</translation>
     </message>
 
     <message>
@@ -387,7 +387,7 @@
 
     <message>
         <source>q3m.error.point_out_of_range</source>
-        <translation >Une partie des points se retrouvent matchés à une distance plus grande que celle renseignée dans les paramètres. Nombre de points : </translation>
+        <translation >Une partie des points se retrouvent appariées à une distance plus grande que celle renseignée dans les paramètres. Nombre de points : </translation>
     </message>
 
 
@@ -411,12 +411,12 @@
 
     <message>
         <source>q3m.error.empty_best_path</source>
-        <translation >Aucun meilleur trajet détecté. Il est conseillé d'augmenter la valeur du paramètre de rayon de recherche </translation>
+        <translation >Aucun meilleur trajet détecté. Il est conseillé d'augmenter la valeur du paramètre de rayon de recherche</translation>
     </message>
 
     <message>
         <source>q3m.error.empty_polyline</source>
-        <translation >La polyline n'a pas pu être construite. Merci d'augmenter les valeurs renseignées dans les paramètres (le rayon de recherche en particulier)</translation>
+        <translation >La polyline n'a pas pu être construite. Merci d'augmenter les valeurs renseignées dans les paramètres (le rayon de recherche en particulier et sigma)</translation>
     </message>
 
     <message>
@@ -454,7 +454,7 @@
 
     <message>
         <source>q3m.error.invalid_input</source>
-        <translation >Un paramètre de la fonction est vide ou possède une valeur compromettante</translation>
+        <translation >Un paramètre de la fonction est vide ou possède une valeur invalide</translation>
     </message>
 
     <message>
@@ -464,7 +464,7 @@
 
     <message>
         <source>q3m.error.empty_list</source>
-        <translation >Un des paramètres de la fonction à produit une erreur: Une liste vide a été détecté </translation>
+        <translation >Un des paramètres de la fonction a produit une erreur: Une liste vide a été détectée </translation>
     </message>
 
 </context>

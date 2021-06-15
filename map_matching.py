@@ -183,7 +183,7 @@ class MapMatching:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/map_matching/icon.png'
+        icon_path = ':/plugins/map_matching/Q3M_logo.png'
         self.add_action(
             icon_path,
             text=self.tr(u'q3m.toolbar.title'),

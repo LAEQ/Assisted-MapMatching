@@ -5,25 +5,25 @@
 </head>
 <body>
     <h2>MapMatching assisté<br>Onglet Paramètre</h2>
-    <p>Vous pouvez ici modifier les paramètres de nos fonctions<br>Les paramètres pré-enregistrés fonctionnent pour une majorité des cas</p>
+    <p>Vous pouvez modifier ici les paramètres des fonctions pour les ajuster à vos données.</p>
 
-    <h4>Limite de vitesse à l'arrêt: </h4>
-    <p>Ce slider représente la limite de vitesse à partir de lequel on va considérer que le point est à l'arrêt.</p>
+    <h4>Limite de vitesse à l'arrêt : </h4>
+    <p>Renseignez le seuil de vitesse en dessous duquel tous les points sont considérés à l'arrêt.</p>
 
     <h3>Tolérance topologique</h3>
-    <h4>Point proche:</h4>
-    <p>Ce slider représente la longueur à partir de laquelle on va considérer que deux points du réseau de route se touchent et doivent être fusionnés</p>
+    <h4>Point proche : </h4>
+    <p>Renseignez la distance en-dessous de laquelle deux nœuds du réseau doivent être connectés.</p>
 
-    <h4>Intersection and Dangle Nodes :</h4>
-    <p>Les algorithmes s'occupant de la topologie tronquent la position géographique des points afin de faciliter les comparaisons. Une tolérance est donc nécessaire afin de déterminer si deux éléments sont effectivement en contact.
-    La valeur recommandé pour cette option est 0.01
+    <h4>Intersection et noeuds pendants :</h4>
+    <p>Les algorithmes s'occupant de la topologie tronquent la position géographique des points afin d'éviter les erreurs d'arrondis. Une tolérance est donc nécessaire afin de déterminer si deux géométries sont effectivement en contact.
+    La valeur recommandée pour cette option est 0,01.
     </p>
 
     <h3>Tolérance du Map-matching :</h3>
-    <h4>Rayon de recherche</h4>
-    <p>Ce slider représente le rayon de recherche de route qui sera utilisé autour de chaque point. Toute route se trouvant dans ce rayon sera considérée pour le matching</p>
+    <h4>Rayon de recherche : </h4>
+    <p>Renseignez le rayon de recherches utilisé autour de chaque point lors de l'appareillement spatial afin de déterminer le trajet emprunté.</p>
     
     <h4>Sigma</h4>
-    <p>Ce slider permet de renseigner l'importance des routes les plus éloignées du point dans le rayon de recherche. Plus ce paramètre est grand, plus les routes éloignées auront de chance d'être sélectionné par l'algorithme</p>
+    <p>Ce paramètre est utilisé dans le calcul de la probabilité qu'un point doivent être ajusté sur une route. Cette probabilité dépend également de la distance entre les deux géométries. Plus la valeur de sigma est élevée, plus la valeur de la probabilité diminue lentement en fonction de la distance.</p>
 
 </body>

@@ -5,57 +5,65 @@
 </head>
 <body>
     <h2>Assisted-MapMatching<br>Matching Tab</h2>
-    <p>This plugin aims to adjust a GPS track on a network (map-matching) semi-automatically<br>We recommend that you read the plugin documentation before using it: <a href="https://github.com/LAEQ/q3m">link</a></p>
-    <h3>Quick description of the matching process</h3>
-    <p>The map-matching process has 3 successive steps</p>
+    <p>This plugin adjusts a GPS track on a street network (map-matching) semi-automatically.<br>Please read the <a href="https://github.com/LAEQ/q3m">plugin documentation</a> before using it.</p>
+    <h3>Short description of the map-matching process</h3>
+    <p>The map-matching process has 3 steps.</p>
 
-    <h3># Step 1: Input</h3>
-    <p>This step prepare the data to facilitate the work of the map-matching algorithms. 
-      It correct the topology of the network and verify the validity of the input. <br> 
-      Fill every fields, then reduce and correct the network in order to reach the next step.<br>
-      Here is the description of every fields:</p>
+    <h3>Step 1: Data preparation</h3>
+    <p>This step prepares the data for the map-matching process. 
+      It corrects the topology of the street network and verifies the validity of the input. <br>
+      The required fields are: </p>
 
-      <h4>Network layer: </h4>
-    <p>&emsp; This dropDown list show all layers of type <strong>LineString</strong> that are active on QGIS.
-      Select the layer on wich you want to adjust your GPS track<br>
-    The type <stron>MultilineString</stron> isn't supported. You can convert your <strong>MultiLineString</strong> layer to a <strong>LineString</strong> layer with the tool "Multipart to SingleParts" of QGIS.</p>
+      <h4>The network layer</h4>
+    <p>&emsp; Select the layer to use to adjust the GPS track.
+      The list is composed of every active layers of type <strong>LineString</strong>.<br>
+    The type <stron>MultilineString</stron> isn't supported. 
+    You can convert a <strong>MultiLineString</strong> layer to a <strong>LineString</strong> using the tool "Multipart to SingleParts".</p>
 	  
-      <h4>GPS trace layer: </h4>
-    <p>&emsp; This dropDown list show all layers of type <strong>Point</strong> that are active on QGIS.
-      Select the layer that you want to match to a network.</p>
+      <h4>The GPS track layer</h4>
+    <p>&emsp; Select the point layerto match on the network.
+       The list shows every active layers of type <strong>Point</strong>.</p>
     
-      <h4>OID (Object identifier) :</h4>
-    <p>&emsp; This dropDown list show all the attributes of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected GPS trace. This field must be an unique identifier of every points and is used to order them. A point present earlier on the trace must have a smaller number than another present later.</p>
+      <h4>The point identifier field</h4>
+    <p>&emsp; Select an unique indentifier for every points giving the order of the features.
+      The list shows every attributes of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected point layer.</p>
     
       <h4>Buffer range: </h4>
-    <p>&emsp; This slider represent the maximum distance to find line on the selected network for each trajectory point. The bigger this value is, the longest the computing time</p>
+    <p>&emsp; Enter the range of the buffer that will be created around every points. 
+      Every line intersecting this buffer will be considered for map-matching. 
+      A bigger value implies a longer computing time</p>
 
-    <h3># Step 2: Matching</h3>
-    <p>This step match the points of the GPS trace on the network (already prepared for this). If the map-matching algorithm made a mistake, the user can correct by selecting the path used manually and applicate the changes. (that will restart the map-matching algorithm on the new selection)<br> 
-      Two field can be completed:  </p>
+    <h3>Step 2: MapMatching</h3>
+    <p>This step matches the points of the GPS track on the street network. After the first iteration, the user can modify the selected lines and match the points again.<br> 
+      Two fields can be specified:  </p>
     
-      <h4>Speed :</h4>
-    <p>&emsp;This dropDown list show all the attributes of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected GPS trace. It represent the speed at which every point has been taken. This field is necessary only if you use the matching method "matching with speed". </p>
+      <h4>The speed field</h4>
+    <p>&emsp; Select the attribute representing the speed of every points.
+      The list shows every attribute of type <strong>"Integer/Integer64/int/int8"</strong> present in the selected point layer. 
+      This field is only necessary to use the matching method "by speed". </p>
     
-      <h4>ComboBox Matching algorithm</h4>
-    <p>&emsp; This dropDown list allow you to choose the type of matching. Three option are available.</p>
+      <h4>The Matching algorithm list</h4>
+    <p>&emsp; Select the type of matching to use. Three options are available.</p>
 	 <ul>
-	 	 <li>Matching with speed : Taking into account the speed, the GPS trace is cutted into mooving or stopped section. Every points of a stopped section are merged at their average location and snapped to their closest location on the selected line on the network. The mooving section are then adjusted between the sections separated by the groups of stopped point. Check the documentation for more detail.</li><br>
-	 	 <li>Matching by distance: This method adjust the points along the path by taking into account the distance between every points and the ratio between the length of the original track (in between each points), and the path selected.</li><br>
-	 	 <li>Matching to closest : This methode simply project every points to the closest road on the selected path.</li>
+	 	 <li>By speed: Taking into account the speed, the GPS track is cut into moving or stopped sections. 
+        Every point of a stopped section are merged at their average location and snapped to their closest line on the network. 
+        The moving sections are then adjusted between the sections of stopped points. 
+        Check the documentation for more details.</li><br>
+	 	 <li>By distance: This method adjusts the points along the path by calculating the ratio between the length of the original track (in between each point), and the selected path (selected lines). This ratio is then applied to the original points to project them along the selected lines to preserve the "natural" distance between two points</li><br>
+	 	 <li>To closest: This method simply projects every point to its closest line on the selected path.</li>
 	 </ul> 
 
    <h3># Step 3: Export</h3>
-    <p>This step allow you to export your datas to the selected format. You can also do it manually from QGIS<br> 
-      Three options are available to you:</p>
+    <p>In this step, the results are exported in the selected format. You can also do it manually from QGIS<br> 
+      Three options are available:</p>
 
     <h4>Export matched trace</h4>
-    <p>&emsp; This option allow you to export the selected matched track present in the dropDown list next to it under the format specified in the settings.</p>
+    <p>&emsp; Select the matched track present in the adjacent dropDown list to export.</p>
 
     <h4>Export the polyline</h4>
-    <p>&emsp; This option allow you to export the polyline representing the path used by the cyclist.</p>
+    <p>&emsp; Check to export the polyline representing the selected path.</p>
 
     <h4>Export project</h4>
-    <p>&emsp; This option allow you to export every elements coched in the settings inside a single file.</p>
+    <p>&emsp; Check to export every elements selected in the settings inside a single file.</p>
 
 </body>
