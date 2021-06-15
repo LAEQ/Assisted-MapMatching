@@ -65,6 +65,23 @@ Two functionnalities are necessary to access the next step:
     - The presence of *dangle nodes*. A dangle node represent the case where an extremity of a line is touching another line. We split the touched line in two part at it's contact point.
     - The presence of *intersection*. We split the two lines intersecting each other in two at their crossing point giving 4 lines in output.
     - The presence of *close call*. A close call represents the case where 2 extremities of two lines are really close (<= 1cm) but doesn't touch each other. We merge the two points.
+
+This first step prepares the data to facilitate the work of the map-matching algorithms. It corrects the topology of the street network and verify the validity of the input.
+Four fields require to be filed and two actions need to be done in order to access to the next step.
+The fields are:
+- The dropDown list Network layer. It show every layer of type **LineString** that are active on QGIS. Select the road network on which you want to adjust your GPS track. Check that it's SCR is the same as the Path layer one and that it's unit is meter
+- The dropDown list GPS trace layer. It show every layers of type **Point** that are active on QGIS. Select the GPS track that you want to adjust to a network. Check that it's SCR is the same as the Path layer one and that it's unit is meter
+- The dropDown list OID (Object indentifier). It show every attributes of type "Integer/Integer64/int/int8" present in the selected GPS trace. This field must be an unique identifier of every points and is used to order them. A point present earlier on the trace must have a smaller number than another present later.
+- The slider Buffer range. It represent the maximum distance to find lines on the selected network for each trajectory point. The bigger this value is, the longest the computing time
+
+Two functionnalities are obligatory to access the next step:
+- Reduce the network : This functionnality reduce the number of lines present in the selected network. It creates a buffer around every point of the selected GPS track and then save every lines intersecting the buffer. Once done a new QGSVectorLayer stocked in memory is created and added to the interface.
+- Correct the topology : This functionnality correct potential the topology of the reduced network to prevent future errors during the map-matching phase. Four case are treated:
+- The presence of *loop* in the network. A loop is a geometrie with it's two extremities touching each other. We split it in two at it's center.
+- The presence of *dangle nodes*. A dangle represent the case where an extremity of a line is touching another line. We split the touched line in two part at it's contact point.
+- The presence of *intersection*. We split the two line intersecting each other in two at their crossing point giving 4 lines in output.
+- The presence of *close call*. A close call represent the case where 2 extremities of two lines are really close (<= 1cm) but doesn't touch each other. We merge the two points.
+
     
 The user can modify parameters in the second tab.
 

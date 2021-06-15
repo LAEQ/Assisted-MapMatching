@@ -80,7 +80,7 @@
 
     <message>
         <source>q3m.window.label.speed</source>
-        <translation >Champ de vitesse</translation>
+        <translation >Champ pour la vitesse</translation>
     </message>
 
     <message>
@@ -153,7 +153,7 @@
 
     <message>
         <source>q3m.window.btn.export.matched.track</source>
-        <translation >Exporter la trace appareillée</translation>
+        <translation >Exporter la trace appariée</translation>
     </message>
 
     <message>
@@ -163,7 +163,7 @@
 
     <message>
         <source>q3m.window.btn.export.project</source>
-        <translation >Exporter le projet</translation>
+        <translation >Exporter projet</translation>
     </message>
 
     <message>
