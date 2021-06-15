@@ -140,9 +140,9 @@
      <widget class="QPushButton" name="btn_reload_layers">
       <property name="geometry">
        <rect>
-        <x>300</x>
+        <x>290</x>
         <y>40</y>
-        <width>71</width>
+        <width>81</width>
         <height>71</height>
        </rect>
       </property>

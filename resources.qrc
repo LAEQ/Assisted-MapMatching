@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/plugins/map_matching" >
-        <file>icon.png</file>
+        <file>Q3M_logo.png</file>
     </qresource>
 </RCC>

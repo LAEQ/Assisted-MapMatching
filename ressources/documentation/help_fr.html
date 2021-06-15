@@ -4,71 +4,70 @@
   <meta charset="UTF-8">
 </head>
 <body>
-    <h2>MapMatching assisté<br>Onglet Principal </h2>
+    <h2>MapMatching assisté<br>Onglet Processus</h2>
     <p>Ce plugin a pour objectif d'ajuster une trace GPS sur un réseau (map-matching) de façon semi-automatique<br>
-      Il est recommandé de lire la documentation du plugin avant de l'utiliser: <a href="https://github.com/LAEQ/q3m">  Lien</a></p> 
-    <h3>Description rapide du processus d'appariement spatiale</h3>
-    <p>Le processus d'appariement spatiale passe par trois étapes successive:</p>
+      Il est recommandé de lire la <a href="https://github.com/LAEQ/q3m">documentation du plugin</a> avant de l'utiliser.</p> 
+    <h3>Description brève du processus d'appariement spatial</h3>
+    <p>Le processus d'appariement spatial est découpé en trois étapes successives : </p>
 
-    <h3>Etape 1: Entrée</h3>
-    <p>Cette étape prépare les données pour faciliter le future travail des algorithmes. 
-      Elle s'assure notamment de la topologie du réseau et de la validité des données en entrée.<br> 
-      Remplissez tous les champs, puis réduisez et corrigez le réseau de route afin d'atteindre l'étape suivante<br>
-      Les champs à remplir sont les suivants :</p>
+    <h3>Étape 1 : Préparation des données</h3>
+    <p>Cette étape prépare les données pour les algorithmes d'appareillement spatial en réduisant le réseau de rues utilisé et en corrigeant sa topologie. <br>
+      Les champs à remplir sont :</p>
     
-      <h4>Couche pour le réseau: </h4>
-    <p>&emsp; Cette liste déroulante présente toute les couches dont la géométrie est de type 
-      <strong>LineString</strong> actuellement actives dans votre projet QGIS. Sélectionnez la couche de route sur laquelle vous souhaitez ajuster votre trace GPS <br>
+      <h4>La couche pour le réseau</h4>
+    <p>&emsp;  Renseignez la couche de rues sur laquelle vous souhaitez ajuster votre trace GPS. 
+      Seules les couches actives de type <strong>LineString</strong> apparaissent dans le champ de selection <br>
 	  Notez ici que les <strong>MultiLineString</strong> ne sont pas supportées. 
-    Il est possible de convertir une couche de <strong>MultiLineString</strong> en une couche de <strong>LineString</strong> avec l'outil "De morceaux multiples à morceaux uniques" de Qgis.</p>
+    Il est possible de convertir une couche <strong>MultiLineString</strong> en une couche <strong>LineString</strong> avec l'outil "De morceaux multiples à morceaux uniques".</p>
     
-      <h4>Couche pour la Trace GPS: </h4>
-    <p>&emsp; Cette liste déroulante présente toute les couches dont la géométrie est de type
-      <strong>Point</strong> actuellement actives dans votre projet QGIS. Sélectionnez la couche de points que vous voulez appareiller à un réseau de routes</p>
+      <h4>La couche pour la trace GPS</h4>
+    <p>&emsp; Sélectionnez la couche de points que vous voulez appareiller à un réseau de routes.
+      Seules les couches actives de type <strong>Point</strong> apparaissent dans le champ de selection</p>
+	  À nouveau, les couches <strong>MultiPoint</strong> ne sont pas supportées.
     
-      <h4>Champ pour ordonner les points :</h4>
-    <p>&emsp; Cette liste déroulante présente tous les attributs de la couche Trace GPS sélectionnée de type <strong>"Integer/Integer64/int/int8"</strong>. 
-      Ce champ doit être un identifiant unique de tous les points et est utilisé pour ordonner les points de la couche. 
-      Un point présent plus tôt dans la trace doit avoir un indice plus petit qu'un point présent plus tard.</p>
+      <h4>Le champ pour ordonner les points</h4>
+    <p>&emsp; Sélectionnez l'attribut de la couche représentant l'identifiant unique et l'ordre d'enregistrement des points. 
+      Seul les attributs de type <strong>"Integer/Integer64/int/int8"</strong> présent dans la trace GPS apparaissent dans la liste.</p>
     
-      <h4>Taille du tampon: </h4>
-    <p>&emsp; Ce slider représente la distance maximale à utiliser pour tracer un buffer autour des points de la trace GPS. 
+      <h4>La taille du tampon spatial</h4>
+    <p>&emsp; Renseignez la taille du tampon spatial à appliquer autour de chaque point de la trace GPS. 
       Seules les lignes intersectant ce buffer seront considérées pendant le processus d'appariement. Plus cette valeur est grande, plus le temps de calcul sera long par la suite.</p>
 
-    <h3>Etape 2: Appariement spatiale</h3>
-    <p>Cette étape consiste à appareiller les points de la trace GPS sur le réseau de routes pré-traitée de façon automatique. 
-      En cas d'erreur de la part de l'algorithme, l'utilisateur peut modifier le trajet manuellement en sélectionnant les lignes 
-      réellement empruntées par la trace GPS et relancer l'algorithme sur cette nouvelle sélection.<br> 
+    <h3>Etape 2 : Appariement spatial</h3>
+    <p>Cette étape consiste à appareiller les points de la trace GPS sur le réseau de routes. 
+      En cas de désaccord avec la solution proposée par l'algorithme, l'utilisateur peut modifier le trajet manuellement en sélectionnant les lignes 
+      réellement empruntées par la trace GPS et réajuster les points sur cette nouvelle sélection.<br> 
       Deux champs peuvent être renseignés : </p>
     
-      <h4>Vitesse :</h4>
-    <p>&emsp; Cette liste déroulante présente tous les attributs de la couche Trace GPS sélectionnée de type <strong>"Real/double"</strong>. 
-      Elle représente la vitesse de déplacement à chaque point de la trace. Il n'est pas nécessaire de renseigner ce champ qui si la méthode "Appariement par vitesse" est sélectionnée. </p>
+      <h4>La vitesse</h4>
+    <p>&emsp; Sélectionnez l'attribut de la couche de point représentant la vitesse de déplacement de chaque points de la trace.
+      Seul les attributs de type <strong>"Real/double"</strong> apparaissent dans la liste. 
+      Ce champ est nécéssaire pour utiliser la méthode d'appariement "selon la vitesse".</p>
     
-      <h4>Boite algorithme d'appariement  spatiale</h4>
-    <p>&emsp; Cette liste déroulante permet de choisir le types d'appariement à effectuer. Trois options sont disponibles.</p>
+      <h4>Choix du type d'appariement spatial</h4>
+    <p>&emsp; Trois type d'appariement spatial sont proposés.</p>
 	 <ul>
-	 	 <li>Appariement par vitesse : Considérant la vitesse de déplacement, la trace GPS est découpée en sections en mouvement ou à l'arrêt. 
-        Tous les points d'une section à l'arrêt sont agrégés à leur localisation moyenne et snappés à leur localisation la plus proche sur la ligne sélectionnée sur le réseau. 
+	 	 <li>Appariement selon la vitesse : Considérant la vitesse de déplacement, la trace GPS est découpée en sections en mouvement ou à l'arrêt. 
+        Tous les points d'une section à l'arrêt sont agrégés à leur localisation moyenne et projetés à leur localisation la plus proche sur la ligne sélectionnée sur le réseau. 
         Les sections en mouvement sont ensuite ajustées entre les tronçons délimités par les sections à l'arrêt. 
         Plus spécifiquement, les points sont ajustés le long du chemin parcouru en calculant le ratio entre la distance originale entre les points de la trace GPS d'une section et la longueur de cette section sur le réseau. 
-        L'objectif est ainsi de préserver l'écart naturel enregistré originalement entre les points.</li>
-	 	 <li>Appariement par distance : Cette approche propose d'ajuster les points le long du chemin sélectionné en calculant le ratio entre la longueur totale de la trace GPS et du chemin. 
+        L'objectif est ainsi de préserver l'écart "naturel" enregistré originalement entre les points.</li>
+	 	 <li>Appariement selon la distance : Cette approche propose d'ajuster les points le long du chemin sélectionné en calculant le ratio entre la longueur totale de la trace GPS et du chemin. 
         Les points sont ensuite alignés successivement sur le chemin en reportant leurs distances successives originales multipliées par ce ratio.</li>
-	 	 <li>Appariement au plus proche : Cette approche propose simplement de projeter chaque point à sa ligne la plus proche sur le chemin sélectionné.</li>
+	 	 <li>Appariement au plus près : Cette approche propose simplement de projeter chaque point à sa ligne la plus proche sur le chemin sélectionné.</li>
 	 </ul> 
 
-   <h3>Etape 3: Exportation</h3>
-    <p>Cette étape vous permet d'exporter vos données sous le format de votre choix. Vous pouvez également le faire manuellement depuis la fenêtre QGIS<br> 
-      Trois options vous sont proposées</p>
+   <h3>Étape 3 : Exportation des résultats</h3>
+    <p>Cette étape permet d'exporter les résultats dans le format de votre choix. Vous pouvez également le faire manuellement depuis la fenêtre QGIS<br> 
+      Trois options sont proposées.</p>
 
-    <h4>Exporter la trace appareillée</h4>
-    <p>&emsp; Cette option vous permet d'exporter uniquement la trace appareillée renseigné dans la liste déroulante adjacente sous le format indiqué dans les paramètres.</p>
+    <h4>Exporter la trace appariée :</h4>
+    <p>&emsp; Cette option permet d'exporter uniquement la trace appariée renseignée dans la liste déroulante adjacente.</p>
 
     <h4>Exporter la polyline</h4>
-    <p>&emsp; Cette option vous permet d'exporter uniquement une longue ligne représentant le trajet emprunté par le cycliste.</p>
+    <p>&emsp; Cette option permet d'exporter uniquement une longue ligne représentant le trajet effectué.</p>
 
     <h4>Exporter le projet</h4>
-    <p>&emsp; Cette option vous permet d'exporter tous les éléments cochés dans les paramètres dans un seul fichier.</p>
+    <p>&emsp; Cette option permet d'exporter tous les éléments cochés dans les paramètres.</p>
 
 </body>

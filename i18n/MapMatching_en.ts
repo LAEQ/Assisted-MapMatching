@@ -26,22 +26,22 @@
 
     <message>
         <source>q3m.window.title</source>
-        <translation>LAEQ-MapMatching</translation>
+        <translation>Assisted-MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.toolbar.title</source>
-        <translation>MapMatching</translation>
+        <translation>Assisted-MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.import.test.set</source>
-        <translation >Test set</translation>
+        <translation >Demo dataset</translation>
     </message>
 
     <message>
         <source>q3m.window.tab.main</source>
-        <translation >Matching</translation>
+        <translation >Process</translation>
     </message>
 
     <message>
@@ -60,32 +60,32 @@
 
     <message>
         <source>q3m.window.group.input</source>
-        <translation >Step 1 : Input</translation>
+        <translation >Step 1: Data preparation</translation>
     </message>
 
     <message>
         <source>q3m.window.label.network</source>
-        <translation >Network layer</translation>
+        <translation >Street network layer</translation>
     </message>
 
     <message>
         <source>q3m.window.label.path</source>
-        <translation >GPS Trace layer</translation>
+        <translation >GPS trace layer</translation>
     </message>
 
     <message>
         <source>q3m.window.label.oid</source>
-        <translation >OID</translation>
+        <translation >Point identifier field</translation>
     </message>
 
     <message>
         <source>q3m.window.label.speed</source>
-        <translation >Speed</translation>
+        <translation >Speed field</translation>
     </message>
 
     <message>
         <source>q3m.window.label.buffer_range</source>
-        <translation >Buffer range [m]</translation>
+        <translation >Buffer size [m]</translation>
     </message>
 
     <message>
@@ -95,12 +95,12 @@
 
     <message>
         <source>q3m.window.btn.reduce.network</source>
-        <translation >Reduce the network</translation>
+        <translation >Reduce network</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.correct.topology</source>
-        <translation >Correct the topology</translation>
+        <translation >Correct Topology</translation>
     </message>
 
 
@@ -109,37 +109,37 @@
 
     <message>
         <source>q3m.window.group.matching</source>
-        <translation >Step 2 : Matching</translation>
+        <translation >Step 2: MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.window.distance_matching</source>
-        <translation >Matching by distance</translation>
+        <translation >by distance</translation>
     </message>
 
     <message>
         <source>q3m.window.speed_matching</source>
-        <translation >Matching with speed</translation>
+        <translation >by speed</translation>
     </message>
     
     <message>
         <source>q3m.window.closest_matching</source>
-        <translation >Matching to closest</translation>
+        <translation >to closest</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.map.matching</source>
-        <translation >PreMatching</translation>
+        <translation >Pre-MapMatching</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.reselect.path</source>
-        <translation >Reselect path</translation>
+        <translation >Reselect the path</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.apply.path.change</source>
-        <translation >Apply modification to path</translation>
+        <translation >Apply modifications to matched points</translation>
     </message>
 
 
@@ -148,22 +148,22 @@
 
     <message>
         <source>q3m.window.group.export</source>
-        <translation >Step 3 : Export</translation>
+        <translation >Step 3: Export</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.export.matched.track</source>
-        <translation >Export matched trace</translation>
+        <translation >Export the results</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.export.polyline</source>
-        <translation >Export polyline</translation>
+        <translation >Export the polyline</translation>
     </message>
 
     <message>
         <source>q3m.window.btn.export.project</source>
-        <translation >Export project</translation>
+        <translation >Export the project</translation>
     </message>
 
     <message>
@@ -177,7 +177,7 @@
 
     <message>
         <source>q3m.window.label.speed_limit</source>
-        <translation >Speed stop limit</translation>
+        <translation >Stop speed threshold</translation>
     </message>
 
 
@@ -186,17 +186,17 @@
 
     <message>
         <source>q3m.window.group.topology.settings</source>
-        <translation >Topological tolerance</translation>
+        <translation >Topological tolerance</translation>  
     </message>
 
     <message>
         <source>q3m.window.label.close_call</source>
-        <translation >Close call</translation>
+        <translation >Close call tolerance</translation> <!--A retirer: une histoire de threshold ici de mémoire-->
     </message>
 
     <message>
         <source>q3m.window.label.intersection</source>
-        <translation >Intersection and Dangle Nodes</translation>
+        <translation >Intersections and Dangle Nodes tolerance</translation> <!--A retirer: une histoire de threshold ici de mémoire-->
     </message>
 
 
@@ -205,12 +205,12 @@
 
     <message>
         <source>q3m.window.group.matching.settings</source>
-        <translation >Matching tolerance</translation>
+        <translation >MapMatching tolerance</translation>
     </message>
 
     <message>
         <source>q3m.window.label.searching_radius</source>
-        <translation >Searching radius</translation>
+        <translation >Searching distance</translation>
     </message>
 
     <message>
@@ -224,7 +224,7 @@
 
     <message>
         <source>q3m.window.group.export.settings</source>
-        <translation >Export config</translation>
+        <translation >Configuration for the export</translation>
     </message>
 
     <message>
@@ -234,7 +234,7 @@
 
     <message>
         <source>q3m.window.check.initial.path</source>
-        <translation >Initial GPS trace</translation>
+        <translation >Original GPS trace</translation>
     </message>
 
     <message>
@@ -244,12 +244,12 @@
 
     <message>
         <source>q3m.window.check.corrected.network</source>
-        <translation >Corrected network</translation>
+        <translation >Corrected street network</translation>
     </message>
 
     <message>
         <source>q3m.window.check.matched.path</source>
-        <translation >Matched trace</translation>
+        <translation >Matched GPS track</translation>
     </message>
 
 
@@ -265,7 +265,7 @@
 
     <message>
         <source>q3m.error.import</source>
-        <translation >Il y a un problème avec les imports. Se référer à la documentation pour plus de détail sur l'erreur</translation>
+        <translation >There is an error with the import of librairies shapely or processing. Please check the documentation for further informations.</translation>
     </message>
 
 
@@ -277,12 +277,12 @@
 
     <message>
         <source>q3m.error.pre_algo_layer_deletion</source>
-        <translation >Please click on RELOAD to avoid non existing values inside of the comboBox</translation>
+        <translation >Please refresh the layers to avoid errors</translation>
     </message>
 
     <message>
         <source>q3m.error.post_algo_layer_deletion</source>
-        <translation >Don't delete layers in the middle of the process, it will cause crash Please start again by pressing RESET.</translation>
+        <translation >Don't delete layers during the process. Please reset the plugin for a fresh start.</translation>
     </message>
 
 
@@ -291,12 +291,12 @@
 
     <message>
         <source>q3m.error.missing_input</source>
-        <translation >One of the comboBox is empty. Please fill it by importing a layer of type Point or LineString</translation>
+        <translation >One of the fields is empty. Please import a layer of type Point or LineString</translation>
     </message>
 
     <message>
         <source>q3m.error.can't_find_layer</source>
-        <translation >Couldn't find one of the layer inside the boxes. Please click on RELOAD to remove unexisting layer and start again</translation>
+        <translation >Couldn't find one of the layers. Please reload the combobox and try again</translation>
     </message>
 
     <message>
@@ -319,17 +319,17 @@
 
     <message>
         <source>q3m.error.no_matched_layer</source>
-        <translation >No layer detected. One should appear automaticaly after the prematching process</translation>
+        <translation >No layer detected. One should appear automatically after the pre-matching process</translation>
     </message>
 
     <message>
         <source>q3m.error.can't_export</source>
-        <translation >A bug occured during the exportation of the layer</translation>
+        <translation >A bug occurred during the exportation of the layer</translation>
     </message>
 
     <message>
         <source>q3m.error.nothing_to_export</source>
-        <translation >There is nothing to export. Please check at least one of the exportation parameters present in the second tab</translation>
+        <translation >There is nothing to export. Please check at least one of the exportation parameters in the second tab</translation>
     </message>
 
 
@@ -348,7 +348,7 @@
 
     <message>
         <source>q3m.error.no_path_registered</source>
-        <translation >Can't select in QGIS the path taken by the user: it hasn't been calculated yet</translation>
+        <translation >Can't select the path on the network: it hasn't been created yet</translation>
     </message>
 
     <message>
@@ -372,12 +372,12 @@
 
     <message>
         <source>q3m.error.negative_speed_limit</source>
-        <translation >The speed limit given in the parameter can't be lower than 0</translation>
+        <translation >The parameter speed limit can't be lower than 0</translation>
     </message>
 
     <message>
         <source>q3m.error.snap_points_along_line</source>
-        <translation >A bug happened during the speed matching</translation>
+        <translation >A bug happened during the matching by speed</translation>
     </message>
 
     <message>
@@ -387,7 +387,7 @@
 
     <message>
         <source>q3m.error.point_out_of_range</source>
-        <translation >A part of the points have been matched out of the range given in the parameters. Number of points :</translation>
+        <translation >Parts of the points have been matched out of the range given in the parameters. Number of points: </translation>
     </message>
 
 
@@ -401,7 +401,7 @@
 
     <message>
         <source>q3m.error.error_sigma</source>
-        <translation >The sigma given in parameter is too small</translation>
+        <translation >The sigma given in the parameters is too small</translation>
     </message>
 
     <message>
@@ -411,17 +411,17 @@
 
     <message>
         <source>q3m.error.empty_best_path</source>
-        <translation >Couldn't find the best path. Please increase the searching radius </translation>
+        <translation >Couldn't find the best path. Please increase the searching radius or sigma</translation>
     </message>
 
     <message>
         <source>q3m.error.empty_polyline</source>
-        <translation >Couldn't build the polyline. Please increase the searching radius</translation>
+        <translation >Couldn't build the polyline. Please increase the searching radius or sigma</translation>
     </message>
 
     <message>
         <source>q3m.error.distance_matcher</source>
-        <translation >An error happened because of the librairy Leuvenmapmatching</translation>
+        <translation >An error happened because of the library Leuvenmapmatching</translation>
     </message>
 
 
@@ -430,12 +430,12 @@
     
     <message>
         <source>q3m.error.not_a_layer</source>
-        <translation >The parameter of this function isn't a QgsVectorLayer</translation>
+        <translation >The parameter passed to this function isn't a QgsVectorLayer</translation>
     </message>
     
     <message>
         <source>q3m.error.not_a_list</source>
-        <translation >The parameter of this function isn't a list</translation>
+        <translation >The parameter passed to this function isn't a list</translation>
     </message>
 
     <message>
@@ -459,12 +459,12 @@
 
     <message>
         <source>q3m.error.no_candidate_found</source>
-        <translation >No entity found in the radius given</translation>
+        <translation >No entity found in the given radius</translation>
     </message>
 
     <message>
         <source>q3m.error.empty_list</source>
-        <translation >One of the parameters of the function made an error: A list is empty</translation>
+        <translation >One of the parameters of the function is invalid: A list is empty</translation>
     </message>
 
 </context>
