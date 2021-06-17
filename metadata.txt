@@ -8,8 +8,8 @@ email=Philippe.Apparicio@UCS.INRS.Ca
 
 about= This plugin doesn't need any librarie on windows. You need to install the latest version (1.7.1+) of shapely on mac and linux (pip install shapely) : https://pypi.org/project/Shapely/. The plugin has been created using The Plugin Builder tool.
 
-tracker=https://github.com/LAEQ/q3m/issues
-repository=https://github.com/LAEQ/q3m
+tracker=https://github.com/LAEQ/Assisted-MapMatching/issues
+repository=https://github.com/LAEQ/Assisted-MapMatching
 # End of mandatory metadata
 
 # Recommended items:
@@ -20,7 +20,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=mapmatching, Leuven MapMatching, GPS track
 
-homepage=https://github.com/LAEQ/q3m/blob/main
+homepage=https://github.com/LAEQ/Assisted-MapMatching
 category=Vector
 icon=Q3M_logo.png
 # experimental flag
