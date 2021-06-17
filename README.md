@@ -8,17 +8,11 @@ The matching is based on the Leuven.MapMatching library.
 
 First of all you need to open the window "Manage and Install Plugins" in the Plugins option. <br>
 
-[//]: # (<img src = "ressources/images/plugin_installation_1.png">) 
-
 Then enter "Assisted-MapMatching" in the searching tab, select the plugin with the same name.
-
-[//]: # (<img src = "ressources/images/plugin_installation_2.png">)
 
 Click on install plugin (bottom-right).
 
 Once it's installed, you can start it by clicking on the icon that appeared in the QGIS plugin tab.
-
-[//]: # (<img src = "ressources/images/plugin_installation_3.png">)
 
 ## Version and Dependencies
 

@@ -1,16 +1,12 @@
-# This file contains metadata for your plugin.
-
-# This file should be included when you package your plugin.# Mandatory items:
-
 [general]
-name=LAEQ-MapMatching
+name=Assisted-MapMatching
 qgisMinimumVersion=3.0
-description= This QGIS plugin match a trajectory on a network using leuvenMapMatching and allow the user to modify the result
-version=0.1
+description= This QGIS plugin match a GPS track on a network using leuvenMapMatching and allow the user to modify the result.
+version=1.0
 author=LAEQ
 email=Philippe.Apparicio@UCS.INRS.Ca
 
-about= This plugin doesn't need any librarie on windows. You need to install the latest version (1.7.1+) of shapely on mac and linux (pip install shapely) : https://pypi.org/project/Shapely/ , 
+about= This plugin doesn't need any librarie on windows. You need to install the latest version (1.7.1+) of shapely on mac and linux (pip install shapely) : https://pypi.org/project/Shapely/. The plugin has been created using The Plugin Builder tool.
 
 tracker=https://github.com/LAEQ/q3m/issues
 repository=https://github.com/LAEQ/q3m
@@ -22,11 +18,11 @@ hasProcessingProvider=no
 
 
 # Tags are comma separated with spaces allowed
-tags=mapmatching trajectory, Leuven MapMatching,
+tags=mapmatching, Leuven MapMatching, GPS track
 
-homepage=https://github.com/LAEQ/q3m/blob/main/README.md
+homepage=https://github.com/LAEQ/q3m/blob/main
 category=Vector
-icon=icon.png
+icon=Q3M_logo.png
 # experimental flag
 experimental=False
 
