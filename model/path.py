@@ -42,9 +42,6 @@ class PathLayer:
         range       -- The radius of the buffer around a point
         """
 
-        if range <= 0:
-            return "path.create_buffer.buffer_range"
-
         # Create a list of points
         feats = [feat for feat in self.layer.getFeatures()]
 
@@ -162,13 +159,6 @@ class PathLayer:
                                in the selected layer
         """
 
-        # Check input validity
-        if speed_limit < 0:
-            return "path.negative_speed_limit"
-
-        if self.layer.fields().indexFromName(speed_column_name) == -1:
-            return "path.wrong_speed_column"
-
         self.layer.setName("matched point by speed")
 
         # Start snapping points
@@ -197,9 +187,6 @@ class PathLayer:
                   str(error[-1]) + " point were matched out of the searching radius ")
             return ("path.speed_point_matching.point_out_of_range-" + 
                     str(len(error) - 1) + "-" + str(error[-1]))
-
-        # Success
-        return None
 
     def closest_point_matching(self, matcheur: Matcheur):
         """ Match the point in the path layer to the closest point on a line.

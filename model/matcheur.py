@@ -25,76 +25,56 @@ class Matcheur:
     """
 
     def __init__(self, _network_layer : QgsVectorLayer = None, 
-                 _path_layer : QgsVectorLayer = None, _OID = "OID"):
+                 _path_layer : QgsVectorLayer = None, _oid = "OID"):
 
         self.network_layer = _network_layer
         self.path_layer = _path_layer
 
-        self.OID = _OID
+        self.OID = _oid
         self.searching_radius = None
         self.sigma = None
 
         self.polyline = None
 
-
     def set_parameters(self, _searching_radius : float, _sigma : float):
         self.searching_radius = _searching_radius
         self.sigma = _sigma
     
-
     def set_layers(self,network : QgsVectorLayer,path : QgsVectorLayer):
         self.network_layer = network
-        self.path_layer = path
+        self.path_layer = path    
 
+    def prepare_datas(self):
+        #Convertion to shapely dict
+        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
+        pointlayer = from_vector_layer_to_list_of_dict(self.path_layer)
+        if pointlayer == []:
+            return "matcheur.prepare_datas.error_feat_list", None
+        pointlayer = order_list_of_dict(pointlayer,self.OID)
 
-    def verify_input(self):
-        """Check for parameters problem."""
- 
-        if( self.searching_radius is None or
-            self.searching_radius < 0 ) :
-            return "matcheur.error_searching_radius"
-
-        if (self.sigma is None or 
-            self.sigma <=0):
-            return "matcheur.error_sigma"
-
-        return True
-             
+        return linelayer,pointlayer
 
     def find_best_path_in_network(self):
         """ Find the path in the network that 
             has been the most likely taken by the cyclist."""
 
-        #Check parameters validity
-        res = self.verify_input()
-        if not res:
-            return res
-
-        #Convertion to shapely dict
-        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
-        if isinstance(linelayer, str):
+        #Convert to shapely dict
+        linelayer,pointlayer = self.prepare_datas()
+        if pointlayer is None:
             return "matcheur.find_best_path_in_network." + linelayer
-
-        pointlayer = from_vector_layer_to_list_of_dict(self.path_layer)
-        if isinstance(pointlayer,str):
-            return "matcheur.find_best_path_in_network." + pointlayer
-
-        pointlayer = order_list_of_dict(pointlayer,self.OID)
-        if isinstance(pointlayer,str):
-            return "matcheur.find_best_path_in_network." +pointlayer
 
         try:
             graph,linedict = build_graph(linelayer)
         except:
             return "matcheur.find_best_path_in_network.geometry.build_graph.error_build_graph"
 
-        #Leveun-mapMatching object
-        mymap = InMemMap("mymap", graph=graph, use_latlon=False)
-        
-        ##Building the path
+        #Building the path
         pts = []
         for pt in pointlayer:
             pts.append([pt["geometry"].x,pt["geometry"].y])
+
+        #Leveun-mapMatching object
+        mymap = InMemMap("mymap", graph=graph, use_latlon=False)
 
         dist = self.searching_radius
         sigma = self.sigma
@@ -117,45 +97,27 @@ class Matcheur:
         
         if len(selected_lines) == 0:
             return "matcheur.find_best_path_in_network.empty_best_path"
-        #The road tha algorithm think the user took
+        #The road that the algorithm think the user took
         self.network_layer = from_list_of_dict_to_layer(
                 selected_lines,
                 self.network_layer)
 
-        if isinstance(self.network_layer,str):
-            return "matcheur.find_best_path_in_network." + self.network_layer
-
         #Saving the result
         self.tag_id = [str(feat['joID']) for feat in self.network_layer.getFeatures()]
-
-        #Success
-        return None
-
     
     def snap_points_along_line( self, speedField : string, speedlim : float =1.5 ,
                                 minpts : int = 5 , maxpts = float("inf")) : 
         """Snap features along a path using the speed."""
 
+        linelayer, pointslayer = self.prepare_datas()
 
-        res = self.verify_input()
-        if not res:
-            return res , []
-
-        #to dict : No need to check for the outPut result: we controll the input before
-        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
-        pointslayer = from_vector_layer_to_list_of_dict(self.path_layer)
-        pointslayer = order_list_of_dict(pointslayer,self.OID)
-
-        if isinstance(linelayer, str):
+        if pointslayer == None:
             return "matcheur.snap_points_along_line." + linelayer
 
-        if isinstance(pointslayer, str):
-            return "matcheur.snap_points_along_line." + pointslayer
 
         if len(linelayer) == 0:
-            print("Can't match on empty line: don't forget to select the layer")
+            #print("Can't match on empty line: don't forget to select the layer")
             return "macheur.snap_points_along_line.empty_layer", []
-
 
         polyline = build_polyline(linelayer, pointslayer,
                                   self.searching_radius, self.sigma)
@@ -290,15 +252,9 @@ class Matcheur:
         """Snap point to the closest location on the polyline."""
         
         #Conversion to shapely dict
-        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
-        pointslayer = from_vector_layer_to_list_of_dict(self.path_layer)
-        pointslayer = order_list_of_dict(pointslayer,self.OID)
-
-        if isinstance(linelayer, str):
+        linelayer, pointslayer = self.prepare_datas()
+        if pointslayer is None:
             return "matcheur.snap_point_to_closest." + linelayer
-
-        if isinstance(pointslayer, str):
-            return "matcheur.snap_point_to_closest." + pointslayer
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")
@@ -334,15 +290,10 @@ class Matcheur:
            taking into account the distance between every points."""
 
         #Conversion to shapely dict
-        linelayer = from_vector_layer_to_list_of_dict(self.network_layer)
-        pointslayer = from_vector_layer_to_list_of_dict(self.path_layer)
-        pointslayer = order_list_of_dict(pointslayer, self.OID)
+        linelayer, pointslayer = self.prepare_datas()
 
-        if isinstance(linelayer, str):
-            return "matcheur.snap_point_by_distance." + linelayer
-
-        if isinstance(pointslayer, str):
-            return "matcheur.snap_point_by_distance." + pointslayer
+        if pointslayer is None:
+            return "matcheur.snap_point_by_distance" + linelayer
 
         if len(linelayer) == 0:
             print("Can't match on empty line: don't forget to select the layer")

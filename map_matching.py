@@ -475,7 +475,6 @@ class MapMatching:
             self.error_handler("map_matching.on_click_reduce_network.missing_input")
             return
 
-
         network_layer = self.manager.find_layer(val["combo_network"])
         path_layer = self.manager.find_layer(val["combo_path"])
 
@@ -484,6 +483,9 @@ class MapMatching:
             return
         
         buffer = val["spin_buffer_range"]
+
+        if buffer <= 0:
+            return "map_matching.on_click_reduce_network.buffer_range"
 
         if not LayerManager.are_valid(path_layer, network_layer):
             self.error_handler("map_matching.on_click_reduce_network.invalid_layer")
@@ -495,7 +497,6 @@ class MapMatching:
         error = path_layer.dupplicate_initial_layer()
 
         if error is not None:
-            # Handle error
             self.error_handler("map_matching.on_click_reduce_network." + error)
             return
         
@@ -556,22 +557,23 @@ class MapMatching:
         settings = self.settings.get_settings()
 
         # give a personal ID to every features (some had been duplicated)
-        error = self.layers.network_layer.add_attribute_to_layers()
-
-        if error is not None:
-            self.error_handler(
-                "map_matching.on_click_pre_matching." + error)
-            return
+        self.layers.network_layer.add_attribute_to_layers()
 
         #Create the core class that handle the matching and set it up
         matcheur = Matcheur(self.layers.network_layer.layer,
                             self.layers.path_layer.layer,
-                            _OID=settings["combo_oid"])
+                            _oid=settings["combo_oid"])
         
-        matcheur.set_parameters(settings["spin_searching_radius"],
-                                settings["spin_sigma"])
+        #Check input validity
+        searching_rad = settings["spin_searching_radius"]
+
+        if searching_rad <= 0:
+            return "map_matching.on_click_pre_matching.error_searching_radius"
+
+        matcheur.set_parameters(searching_rad, settings["spin_sigma"])
 
         if settings["combo_algo_matching"] == self.tr("q3m.window.speed_matching"):
+
             res = self.layers.match_speed(
                 matcheur,
                 settings["combo_speed"],
@@ -619,7 +621,7 @@ class MapMatching:
         matcheur = Matcheur(
             None,
             self.layers.path_layer.layer,
-            _OID=settings["combo_oid"])
+            _oid=settings["combo_oid"])
 
         matcheur.set_parameters( 
             settings["spin_searching_radius"],

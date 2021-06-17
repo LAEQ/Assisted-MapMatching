@@ -22,9 +22,6 @@ def from_vector_layer_to_list_of_dict(layer):
         ]
     """
 
-    if not isinstance(layer, QgsVectorLayer):
-        return "layer_traductor.from_vector_layer_to_list_of_dict.not_a_layer"
-
     final_list = []
     temp = layer.fields().names()
 
@@ -52,12 +49,6 @@ def from_list_of_dict_to_layer(feat_list, layer_patern,type_layer="Linestring", 
     mem_layer -- A QgsVectorLayer filled with the elements in feat_list
 
     """
-
-    if not isinstance(layer_patern, QgsVectorLayer):
-        return "layer_traductor.from_list_of_dict_to_layer.not_a_layer"
-
-    if not isinstance(feat_list, list) :
-        return "layer_traductor.from_list_of_dict_to_layer.not_a_list"
 
     epsg = layer_patern.crs().postgisSrid()
 
@@ -96,11 +87,5 @@ def from_list_of_dict_to_layer(feat_list, layer_patern,type_layer="Linestring", 
 
 def order_list_of_dict(feat_list,column_name = "OID"):
     """Sort a list according to it's OID column."""
-
-    if not isinstance(feat_list,list) or feat_list == []:
-        return "layer_traductor.order_list_of_dict.error_feat_list"
-
-    if not column_name in feat_list[0]:
-        return "layer_traductor.order_list_of_dict.wrong_oid_column"
 
     return sorted(feat_list, key=lambda obj: obj[column_name])

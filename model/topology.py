@@ -7,7 +7,7 @@ from .utils.geometry import *
 
 """This file store every functions that has to do with topological correction."""
 
-def simplify_coordinates(linelayer, digits): 
+def simplify_coordinates(linelayer, digits=3): 
     """ Simplify all the features coordinates to a digits.
 
     Input: 

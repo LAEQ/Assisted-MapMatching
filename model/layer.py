@@ -27,13 +27,12 @@ class Layers:
         # Buffer's creation
         buffer = self.path_layer.create_buffer(range)
 
-        if isinstance(buffer, str):
-            return "layer.reduce_network_layer." + buffer
-
         # Spatial selection
-        error = self.network_layer.select_intersection_trajectory(buffer)
-        if error != None:
-            return "layer.reduce_network_layer." + error
+        try:
+            self.network_layer.select_intersection_trajectory(buffer)
+        except:
+            return "layer.reduce_network_layer.network.select_intersection_trajectory.processing"
+
    
     def correct_network_layer_topology(self, close_call_tol: float,
                                        inter_dangle_tol: float):

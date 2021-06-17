@@ -33,14 +33,11 @@ class NetworkLayer:
         self.initial_layer.removeSelection()
 
         # Select on initial layer every road that intersect buffer
-        try:
-            test = processing.run("qgis:selectbylocation",
-                                 {'INPUT': self.initial_layer, 
-                                 'PREDICATE': 0, 'INTERSECT': buffer, 
-                                 'METHOD': 0})
-        except:
-            # print("Error processing in select_intersection_trajectory (Network.py)")
-            return "network.select_intersection_trajectory.processing"
+
+        test = processing.run("qgis:selectbylocation",
+                             {'INPUT': self.initial_layer, 
+                             'PREDICATE': 0, 'INTERSECT': buffer, 
+                             'METHOD': 0})
 
         # Create a QgsVectorLayer from a selection
         reduced_layer = self.initial_layer.materialize(
@@ -51,8 +48,6 @@ class NetworkLayer:
         reduced_layer.setName("Reduced network")
         self.layer = reduced_layer
 
-        # Success
-        return None
 
     def correct_topology(self, close_call_tol: float, inter_dangle_tol: float):
         """Correct the topology of the layer."""
@@ -60,11 +55,8 @@ class NetworkLayer:
         # Conversion to shapely dict
         shapely_dict = from_vector_layer_to_list_of_dict(self.layer)
 
-        if isinstance(shapely_dict, str):
-            return "network.correct_topology." + shapely_dict
-
         # We truncate all the points value
-        corrected_list = simplify_coordinates(shapely_dict, 3)
+        corrected_list = simplify_coordinates(shapely_dict)
 
         # We split the loops  (i.e: roundabouts)
         corrected_list = cut_loops(corrected_list)
@@ -88,9 +80,6 @@ class NetworkLayer:
         if isinstance(self.layer, str):
             return "network.correct_topology." + self.layer
 
-        # Success
-        return None
-
     def add_attribute_to_layers(self, attribute_name: str = 'joID'):
         """ Create a new column to the network_layer indexed from 0 
             to the number of feature in the layer.
@@ -98,10 +87,6 @@ class NetworkLayer:
         Input:
         attribute_name : -- A string that represent the name of the new column
         """
-
-        # Verify input validity
-        if attribute_name == "" or attribute_name == None:
-            return "network.add_attribute_to_layers.empty_attribute_name"
 
         # add a new field to the layer
         provider = self.layer.dataProvider()
@@ -121,9 +106,6 @@ class NetworkLayer:
             i += 1
         self.layer.commitChanges()
 
-        # Success
-        return None
-
     def find_path(self, matcheur: Matcheur): 
         """Find a possible route 
         
@@ -140,9 +122,6 @@ class NetworkLayer:
 
         self.select_possible_path()
 
-        # Success
-        return None
-
     def select_possible_path(self):
         """ Select in the network_layer the path recorded at the last matching."""
 
@@ -154,9 +133,6 @@ class NetworkLayer:
         except:
             print("Seems like the network has been deleted")
 
-        # Success
-        return None
-
     def change_possible_path(self):
         """ Change the possible trajectory recorded """
         
@@ -165,8 +141,6 @@ class NetworkLayer:
 
         self.possible_path = [str(feat['joID']) for feat in self.layer.getSelectedFeatures()]
 
-        # Success
-        return None
 
     def create_vector_from_path(self) -> QgsVectorLayer:
         """Create a QgsVectorLayer from the selected features """
