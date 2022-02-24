@@ -35,7 +35,7 @@ def from_vector_layer_to_list_of_dict(layer):
             temporary_dictionary[attr] = f[attr]
 
         tempa = f.geometry().asJson()
-        temporary_dictionary["geometry"] = shape(json.loads(tempa, encoding="utf-8"))
+        temporary_dictionary["geometry"] = shape(json.loads(tempa))
         final_list.append(temporary_dictionary)
 
     return final_list
