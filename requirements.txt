@@ -1,0 +1,8 @@
+dtaidistance
+gpxpy
+nvector
+osmread
+pykalman
+rtree
+smopy
+tqdm
